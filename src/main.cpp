@@ -3,6 +3,7 @@
 #define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
 #include <Arduino.h>
 #include <WiFi.h>
+#include "qrcode.h"
 #include <SD.h>
 #include "SPIFFS.h"
 #include <SPI.h>
@@ -19,6 +20,8 @@
 #include <HTTPBodyParser.hpp>
 #include <HTTPMultipartBodyParser.hpp>
 #include <HTTPURLEncodedBodyParser.hpp>
+#include "MjpegClass.h"
+
 
 using namespace httpsserver;
 
@@ -62,7 +65,6 @@ void handleJS(HTTPRequest * req, HTTPResponse * res);
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC_A0, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 1 /* rotation */, false /* IPS */);
 
-#include "MjpegClass.h"
 static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
 
@@ -71,6 +73,9 @@ static unsigned long start_ms, curr_ms, next_frame_ms;
 static int skipped_frames, next_frame;
 
 bool playVideo = false;
+
+String wifiQR;
+bool printedSecondQR = false;
 
 // pixel drawing callback
 static int drawMCU(JPEGDRAW *pDraw)
@@ -394,6 +399,8 @@ void setupServer(){
   // }
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
+  wifiQR = "";
+  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
 
   // For every resource available on the server, we need to create a ResourceNode
   // The ResourceNode links URL and HTTP method to a handler function
@@ -430,12 +437,60 @@ void setup()
   setupLCD();
   setupSD();
   setupServer();
+  String wifiQR = "";
+  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
+
+  drawQRCode(wifiQR);
 }
+
+
+void drawQRCode(String inputString, String stepString){
+  QRCode qrcode;
+  uint8_t qrcodeData[qrcode_getBufferSize(3)];
+  char Buf[inputString.length()];
+  inputString.toCharArray(Buf, inputString.length());
+  qrcode_initText(&qrcode, qrcodeData, 3, 0, Buf);
+
+  
+
+  int QRxBegin = 100;
+  int QRyBegin = 70;
+  int QRmoduleSize = 4;
+
+
+  // Draw QR code
+  for (uint8_t y = 0; y < qrcode.size; y++) {
+    // Each horizontal module
+    for (uint8_t x = 0; x < qrcode.size; x++) {
+      if(qrcode_getModule(&qrcode, x, y)){
+        gfx->fillRect(QRxBegin+ x*QRmoduleSize, QRyBegin + y*QRmoduleSize, QRmoduleSize, QRmoduleSize, gfx->color565(0,0,0));
+      }
+    }
+  }
+
+  gfx->setCursor(130, 10);
+  gfx->setTextSize(2);
+  gfx->setTextColor(BLACK);
+  gfx->println(stepString);
+
+
+  gfx->setCursor(130, 30);
+  gfx->setTextSize(3);
+  gfx->setTextColor(BLACK);
+  gfx->println("SCAN");
+}
+
+
 
 void loop()
 {
   // This call will let the server do its work
   secureServer->loop();
+  if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
+    Serial.println("printing QR");
+    drawQRCode(wifiQR ,"Step 2");
+  }
+
   if(playVideo){
     videoLoop();
   }
