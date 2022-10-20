@@ -63,7 +63,7 @@ void handleJS(HTTPRequest * req, HTTPResponse * res);
 #define LCD_CS 5
 
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC_A0, LCD_CS, SCK, MOSI, MISO);
-Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 1 /* rotation */, false /* IPS */);
+Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
 static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
@@ -89,7 +89,7 @@ static int drawMCU(JPEGDRAW *pDraw)
 void setupLCD(){
   Serial.println(("Setting up LCD"));
   gfx->begin();
-  gfx->fillScreen(BLACK);
+  gfx->fillScreen(WHITE);
 
   ledcAttachPin(TFT_BL, 1);     // assign TFT_BL pin to channel 1
   ledcSetup(1, 12000, 8);       // 12 kHz PWM, 8-bit resolution
@@ -429,22 +429,8 @@ void setupServer(){
   }
 }
 
-
-
-void setup()
-{
-  Serial.begin(115200);
-  setupLCD();
-  setupSD();
-  setupServer();
-  String wifiQR = "";
-  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
-
-  drawQRCode(wifiQR);
-}
-
-
 void drawQRCode(String inputString, String stepString){
+  gfx->fillScreen(WHITE);
   QRCode qrcode;
   uint8_t qrcodeData[qrcode_getBufferSize(3)];
   char Buf[inputString.length()];
@@ -482,6 +468,20 @@ void drawQRCode(String inputString, String stepString){
 
 
 
+void setup()
+{
+  Serial.begin(115200);
+  setupLCD();
+  setupSD();
+  setupServer();
+
+  String wifiQR = "";
+  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
+  drawQRCode(wifiQR, "Step 1");
+}
+
+
+
 void loop()
 {
   // This call will let the server do its work
@@ -489,6 +489,7 @@ void loop()
   if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
     Serial.println("printing QR");
     drawQRCode(wifiQR ,"Step 2");
+    printedSecondQR = true;
   }
 
   if(playVideo){
