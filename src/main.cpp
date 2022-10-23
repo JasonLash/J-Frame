@@ -11,6 +11,7 @@
 #include <JPEGDEC.h>
 #include <Arduino_GFX_Library.h>
 #include <Adafruit_I2CDevice.h>
+#include <XPT2046_Touchscreen.h>
 
 #include <SSLCert.hpp>
 #include <HTTPRequest.hpp>
@@ -62,6 +63,8 @@ void handleJS(HTTPRequest * req, HTTPResponse * res);
 #define LCD_RESET 33
 #define LCD_CS 5
 
+#define TOUCH_CS  21
+
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC_A0, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
@@ -69,13 +72,15 @@ static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
 
 /* variables */
-static unsigned long start_ms, curr_ms, next_frame_ms;
+static unsigned long start_ms, curr_ms, next_frame_ms, touch_start_ms, touch_current_ms;
 static int skipped_frames, next_frame;
 
 bool playVideo = false;
 
 String wifiQR;
 bool printedSecondQR = false;
+
+XPT2046_Touchscreen ts(TOUCH_CS);
 
 // pixel drawing callback
 static int drawMCU(JPEGDRAW *pDraw)
@@ -144,9 +149,78 @@ void videoLoop(){
   curr_ms = start_ms;
   next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
 
+  
   while (vFile.available() && mjpeg.readMjpegBuf()) // Read video
   {
     curr_ms = millis();
+    // if (ts.touched()) {
+    //   //TS_Point p = ts.getPoint();
+    //   // Serial.print("Pressure = ");
+    //   // Serial.print(p.z);
+    //   // Serial.print(", x = ");
+    //   // Serial.print(p.x);
+    //   // Serial.print(", y = ");
+    //   // Serial.print(p.y);
+    //   Serial.println(millis() - touch_current_ms);
+    //   if(millis() - touch_current_ms < 25){
+    //     touch_current_ms = millis();
+    //   } else {
+    //     touch_start_ms = millis();
+    //   }
+
+
+
+    //   if(millis() - touch_start_ms > 1000){
+    //     touch_current_ms = millis();
+    //     touch_start_ms = millis();
+    //     Serial.println("3 sec touch");
+    //   }
+
+    //   if(millis() - touch_current_ms > 2000){
+    //     touch_current_ms = millis();
+    //     touch_start_ms = millis();
+    //   }
+
+      
+    //   //Serial.println();
+      
+    // }
+
+      //check if touched
+  if (ts.touched()) {
+    //Serial.println(millis() - touch_current_ms);
+    // Serial.println("=======================");
+    // Serial.print("Current Ms ");
+    // Serial.println(millis());
+    // Serial.print("Current touch ms ");
+    // Serial.println(millis() - touch_current_ms);
+    // Serial.print("Start touch ms ");
+    // Serial.println(millis() - touch_start_ms);
+    // Serial.println("=======================");
+    //check if touch intverl less then x amount
+    //if it is, set it to current 
+    //if not then set touch start to current
+    if(millis() - touch_current_ms < 100){
+      touch_current_ms = millis();
+    } else {
+      touch_start_ms = millis();
+    }
+
+    //if current and touch start more then 1000, then touched 3 second
+    if(millis() - touch_start_ms > 1000){
+      touch_current_ms = millis();
+      touch_start_ms = millis();
+      Serial.println("3 sec touch");
+    }
+
+    if(millis() - touch_current_ms > 2000){
+      touch_current_ms = millis();
+      touch_start_ms = millis();
+    }
+    
+  }
+
+
 
     if (millis() < next_frame_ms) // check show frame or skip frame
     {
@@ -156,12 +230,22 @@ void videoLoop(){
     else
     {
       ++skipped_frames;
-      Serial.println(F("Skip frame"));
+      //Serial.println(F("Skip frame"));
     }
     curr_ms = millis();
 
     while (millis() < next_frame_ms)
     {
+        // if (ts.touched()) {
+        //   TS_Point p = ts.getPoint();
+        //   Serial.print("Pressure = ");
+        //   Serial.print(p.z);
+        //   Serial.print(", x = ");
+        //   Serial.print(p.x);
+        //   Serial.print(", y = ");
+        //   Serial.print(p.y);
+        //   Serial.println();
+        // }
       vTaskDelay(1);
     }
 
@@ -439,8 +523,8 @@ void drawQRCode(String inputString, String stepString){
 
   
 
-  int QRxBegin = 100;
-  int QRyBegin = 70;
+  int QRxBegin = 60;
+  int QRyBegin = 100;
   int QRmoduleSize = 4;
 
 
@@ -454,13 +538,13 @@ void drawQRCode(String inputString, String stepString){
     }
   }
 
-  gfx->setCursor(130, 10);
+  gfx->setCursor(80, 20);
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
   gfx->println(stepString);
 
 
-  gfx->setCursor(130, 30);
+  gfx->setCursor(80, 43);
   gfx->setTextSize(3);
   gfx->setTextColor(BLACK);
   gfx->println("SCAN");
@@ -478,6 +562,10 @@ void setup()
   String wifiQR = "";
   wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
   drawQRCode(wifiQR, "Step 1");
+
+  ts.begin();
+  ts.setRotation(1);
+
 }
 
 
@@ -495,6 +583,9 @@ void loop()
   if(playVideo){
     videoLoop();
   }
+
+
+
   // Other code would go here...
   delay(1);
   
