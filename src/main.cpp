@@ -55,7 +55,7 @@ void handleJS(HTTPRequest * req, HTTPResponse * res);
 #define SCK 18
 #define MOSI 23
 #define MISO 19
-#define SS 15
+//#define SS 15
 #define TFT_BL 22
 
 #define SD_CS 15
@@ -80,7 +80,11 @@ bool playVideo = false;
 String wifiQR;
 bool printedSecondQR = false;
 
+bool videoFileFound = false;
+
 XPT2046_Touchscreen ts(TOUCH_CS);
+
+bool pauseVideo = false;
 
 // pixel drawing callback
 static int drawMCU(JPEGDRAW *pDraw)
@@ -94,7 +98,7 @@ static int drawMCU(JPEGDRAW *pDraw)
 void setupLCD(){
   Serial.println(("Setting up LCD"));
   gfx->begin();
-  gfx->fillScreen(WHITE);
+  gfx->displayOn();
 
   ledcAttachPin(TFT_BL, 1);     // assign TFT_BL pin to channel 1
   ledcSetup(1, 12000, 8);       // 12 kHz PWM, 8-bit resolution
@@ -149,81 +153,59 @@ void videoLoop(){
   curr_ms = start_ms;
   next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
 
+  pauseVideo = false;
   
   while (vFile.available() && mjpeg.readMjpegBuf()) // Read video
   {
-    curr_ms = millis();
-    // if (ts.touched()) {
-    //   //TS_Point p = ts.getPoint();
-    //   // Serial.print("Pressure = ");
-    //   // Serial.print(p.z);
-    //   // Serial.print(", x = ");
-    //   // Serial.print(p.x);
-    //   // Serial.print(", y = ");
-    //   // Serial.print(p.y);
-    //   Serial.println(millis() - touch_current_ms);
-    //   if(millis() - touch_current_ms < 25){
-    //     touch_current_ms = millis();
-    //   } else {
-    //     touch_start_ms = millis();
-    //   }
-
-
-
-    //   if(millis() - touch_start_ms > 1000){
-    //     touch_current_ms = millis();
-    //     touch_start_ms = millis();
-    //     Serial.println("3 sec touch");
-    //   }
-
-    //   if(millis() - touch_current_ms > 2000){
-    //     touch_current_ms = millis();
-    //     touch_start_ms = millis();
-    //   }
-
-      
-    //   //Serial.println();
-      
-    // }
-
-      //check if touched
-  if (ts.touched()) {
-    //Serial.println(millis() - touch_current_ms);
-    // Serial.println("=======================");
-    // Serial.print("Current Ms ");
-    // Serial.println(millis());
-    // Serial.print("Current touch ms ");
-    // Serial.println(millis() - touch_current_ms);
-    // Serial.print("Start touch ms ");
-    // Serial.println(millis() - touch_start_ms);
-    // Serial.println("=======================");
-    //check if touch intverl less then x amount
-    //if it is, set it to current 
-    //if not then set touch start to current
-    if(millis() - touch_current_ms < 100){
-      touch_current_ms = millis();
-    } else {
-      touch_start_ms = millis();
-    }
-
-    //if current and touch start more then 1000, then touched 3 second
-    if(millis() - touch_start_ms > 1000){
-      touch_current_ms = millis();
-      touch_start_ms = millis();
-      Serial.println("3 sec touch");
-    }
-
-    if(millis() - touch_current_ms > 2000){
-      touch_current_ms = millis();
-      touch_start_ms = millis();
-    }
     
-  }
+
+    while(pauseVideo){
+      //Serial.println("video is paused");
+      if (ts.touched()) {
+        TS_Point p = ts.getPoint();
+        // Serial.print("Pressure = ");
+        // Serial.print(p.z);
+        // Serial.print(", x = ");
+        // Serial.print(p.x);
+        // Serial.print(", y = ");
+        // Serial.print(p.y);
+        // Serial.println();
+        if(p.x > 3000){
+          pauseVideo = false;
+          Serial.print(p.x);
+          videoLoop();
+        }
+      }
+
+    }
+    curr_ms = millis();
 
 
+
+    if (ts.touched()) {
+      if(millis() - touch_current_ms < 100){
+        touch_current_ms = millis();
+      } else {
+        touch_start_ms = millis();
+      }
+
+      if(millis() - touch_start_ms > 1000){
+        touch_current_ms = millis();
+        touch_start_ms = millis();
+        pauseVideo = true;
+        Serial.println(pauseVideo);
+      }
+
+      if(millis() - touch_current_ms > 2000){
+        touch_current_ms = millis();
+        touch_start_ms = millis();
+      }
+      
+    }
 
     if (millis() < next_frame_ms) // check show frame or skip frame
     {
+
       // Play video
       mjpeg.drawJpg();
     }
@@ -236,16 +218,7 @@ void videoLoop(){
 
     while (millis() < next_frame_ms)
     {
-        // if (ts.touched()) {
-        //   TS_Point p = ts.getPoint();
-        //   Serial.print("Pressure = ");
-        //   Serial.print(p.z);
-        //   Serial.print(", x = ");
-        //   Serial.print(p.x);
-        //   Serial.print(", y = ");
-        //   Serial.print(p.y);
-        //   Serial.println();
-        // }
+      
       vTaskDelay(1);
     }
 
@@ -255,8 +228,16 @@ void videoLoop(){
   Serial.println(F("PCM audio MJPEG video end"));
   vFile.close();
 
+  Serial.println(F("Going to sleep"));
+  ledcDetachPin(TFT_BL);
+  gfx->displayOff();
+  
+  esp_deep_sleep_start();
+
   //delay(10000);
 }
+
+
 
 void handleFileUpload(HTTPRequest * req, HTTPResponse * res) {
   Serial.printf("trying file upload");
@@ -418,7 +399,7 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 
 void setupServer(){
    // Setup filesystem
-  if (!SPIFFS.begin(true)) Serial.println("Mounting SPIFFS failed");
+  
 
   Serial.println("Creating a new self-signed certificate.");
   Serial.println("This may take up to a minute, so be patient ;-)");
@@ -555,13 +536,32 @@ void drawQRCode(String inputString, String stepString){
 void setup()
 {
   Serial.begin(115200);
+
+  if (!SPIFFS.begin(true)) Serial.println("Mounting SPIFFS failed");
+  
   setupLCD();
   setupSD();
-  setupServer();
+  //setupServer();
+  
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_14,0);
 
-  String wifiQR = "";
-  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
-  drawQRCode(wifiQR, "Step 1");
+  File vFile = SD.open(MJPEG_FILENAME);
+  if (!vFile || vFile.isDirectory())
+  {
+    setupServer();
+    gfx->fillScreen(WHITE);
+    String wifiQR = "";
+    wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
+    drawQRCode(wifiQR, "Step 1");
+    playVideo = false;
+  } else {
+    playVideo = true;
+    printedSecondQR = true;
+    videoFileFound = true;
+  }
+
+
+  
 
   ts.begin();
   ts.setRotation(1);
@@ -573,12 +573,15 @@ void setup()
 void loop()
 {
   // This call will let the server do its work
-  secureServer->loop();
-  if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
-    Serial.println("printing QR");
-    drawQRCode(wifiQR ,"Step 2");
-    printedSecondQR = true;
+  if(!videoFileFound){
+    secureServer->loop();
+    if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
+      Serial.println("printing QR");
+      drawQRCode(wifiQR ,"Step 2");
+      printedSecondQR = true;
+    }
   }
+  
 
   if(playVideo){
     videoLoop();
