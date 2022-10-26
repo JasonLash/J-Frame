@@ -1,6 +1,7 @@
 #define MJPEG_FILENAME "/pleaseworkvideo.mjpeg"
 #define FPS 15
 #define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
+#include <U8g2lib.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include "qrcode.h"
@@ -85,6 +86,19 @@ bool videoFileFound = false;
 XPT2046_Touchscreen ts(TOUCH_CS);
 
 bool pauseVideo = false;
+bool drewPause = false;
+
+class ButtonData {
+  public:
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
+ButtonData resetFrameButton;
+
+
 
 // pixel drawing callback
 static int drawMCU(JPEGDRAW *pDraw)
@@ -112,6 +126,8 @@ void setupLCD(){
     exit(1);
   }
 
+  gfx->setFont(u8g2_font_profont15_mf);
+
   Serial.println(("Done setting up LCD"));
 }
 
@@ -126,6 +142,24 @@ void setupSD(){
 
   
   Serial.println(("Done setting up SD card"));
+}
+
+void drawPauseMenu(){
+  gfx->fillRoundRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width , resetFrameButton.height, 10, 0x7BEF);
+  gfx->setCursor(45, 165);
+  gfx->setTextSize(2);
+  gfx->setTextColor(BLACK);
+  gfx->println("Reset Frame");
+}
+
+bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int clickY){
+  if(clickX > recX &&  clickX < recX + recW){
+    if(clickY > recY &&  clickY < recY + recH){
+      return true;
+    }
+  }
+
+  return false;
 }
 
 
@@ -154,13 +188,20 @@ void videoLoop(){
   next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
 
   pauseVideo = false;
+  drewPause = false;
   
   while (vFile.available() && mjpeg.readMjpegBuf()) // Read video
   {
     
 
     while(pauseVideo){
-      //Serial.println("video is paused");
+      if(!drewPause){
+        drawPauseMenu();
+        delay(400);
+        drewPause = true;
+      }
+
+
       if (ts.touched()) {
         TS_Point p = ts.getPoint();
         // Serial.print("Pressure = ");
@@ -170,12 +211,23 @@ void videoLoop(){
         // Serial.print(", y = ");
         // Serial.print(p.y);
         // Serial.println();
-        if(p.x > 3000){
+        int touchWH = 3800;
+        int mapedX = map(p.x, 0, touchWH, 240, 0);;
+        int mapedY = map(p.y, 0, touchWH, 320, 0);;
+        // Serial.print(", x = ");
+        // Serial.print(mapedX);
+        // Serial.print(", y = ");
+        // Serial.print(mapedY);
+        // Serial.println();
+        //checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int clickY)
+        //Serial.println(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, p.x, p.y));
+        if(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, mapedX, mapedY)){
           pauseVideo = false;
-          Serial.print(p.x);
           videoLoop();
         }
       }
+
+
 
     }
     curr_ms = millis();
@@ -193,7 +245,8 @@ void videoLoop(){
         touch_current_ms = millis();
         touch_start_ms = millis();
         pauseVideo = true;
-        Serial.println(pauseVideo);
+        
+        //Serial.println(pauseVideo);
       }
 
       if(millis() - touch_current_ms > 2000){
@@ -532,6 +585,13 @@ void drawQRCode(String inputString, String stepString){
 }
 
 
+void setupButtons(){
+  resetFrameButton.x = 30;
+  resetFrameButton.y = 140;
+  resetFrameButton.width = 180;
+  resetFrameButton.height = 38;
+}
+
 
 void setup()
 {
@@ -542,6 +602,8 @@ void setup()
   setupLCD();
   setupSD();
   //setupServer();
+
+  setupButtons();
   
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_14,0);
 
@@ -560,11 +622,8 @@ void setup()
     videoFileFound = true;
   }
 
-
-  
-
   ts.begin();
-  ts.setRotation(1);
+  ts.setRotation(0);
 
 }
 
