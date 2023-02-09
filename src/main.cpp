@@ -319,6 +319,7 @@ void handleSpiffsUpload(HTTPRequest * req, HTTPResponse * res) {
     std::string pathname = "/" + filename;
 
     // Create a new file on spiffs to stream the data into
+    Serial.print("11");
     Serial.printf(pathname.c_str());
     File file = SPIFFS.open(pathname.c_str(), FILE_WRITE);
     size_t fileLength = 0;
@@ -414,6 +415,7 @@ void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
     std::string pathname = "/" + filename;
 
     // Create a new file on spiffs to stream the data into
+    Serial.print("112");
     Serial.printf(pathname.c_str());
     didwrite = true;
 
@@ -535,7 +537,7 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 void setupServer(){
    // Setup filesystem
   
-
+  //videoFileFound = false;
   Serial.println("Creating a new self-signed certificate.");
   Serial.println("This may take up to a minute, so be patient ;-)");
 
@@ -750,7 +752,10 @@ void videoLoop(){
         // Serial.println();
         Serial.println(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, p.x, p.y));
         if(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, mapedX, mapedY)){
-          drawWifiQR();
+          //drawWifiQR();
+          SD.remove(MJPEG_FILENAME);
+          Serial.println("Removed video");
+          ESP.restart();
         }else {
           pauseVideo = false;
           videoLoop();
@@ -822,6 +827,7 @@ void videoLoop(){
 }
 
 
+
 void setup()
 {
   Serial.begin(115200);
@@ -847,8 +853,6 @@ void setup()
 
   ts.begin();
   ts.setRotation(0);
-
-  Serial.println("TEST2");
 
 }
 
