@@ -31,7 +31,6 @@ using namespace httpsserver;
 //#define WIFI_SSID "J and L"
 #define WIFI_SSID "frameTest"
 #define WIFI_PSK  "thankyoufortheinternet"
-#define DIR_PUBLIC "/public"
 
 SSLCert * cert;
 HTTPSServer * secureServer;
@@ -61,12 +60,12 @@ void handleJS(HTTPRequest * req, HTTPResponse * res);
 //#define SS 15
 #define TFT_BL 22
 
-#define SD_CS 15
+#define SD_CS 21
 #define LCD_DC_A0 27
 #define LCD_RESET 33
 #define LCD_CS 5
 
-#define TOUCH_CS  21
+#define TOUCH_CS  15
 
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC_A0, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
@@ -839,7 +838,6 @@ void setup()
   File vFile = SD.open(MJPEG_FILENAME);
   if (!vFile || vFile.isDirectory())
   {
-    
     drawWifiQR();
   } else {
     playVideo = true;
