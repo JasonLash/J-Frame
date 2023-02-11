@@ -29,7 +29,7 @@
 using namespace httpsserver;
 
 //#define WIFI_SSID "J and L"
-#define WIFI_SSID "frameTest"
+#define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
 SSLCert * cert;
@@ -39,7 +39,7 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res);
 void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
-void handleJS(HTTPRequest * req, HTTPResponse * res);
+void getffmpeg(HTTPRequest * req, HTTPResponse * res);
 
 //<<Pin Hookup>>//
 //19  ::  MISO    
@@ -99,17 +99,7 @@ class ButtonData {
 
 ButtonData resetFrameButton;
 
-
-
-// pixel drawing callback
-static int drawMCU(JPEGDRAW *pDraw)
-{
-  //Serial.printf("Draw pos = %d,%d. size = %d x %d\n", pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight);
-  unsigned long start = millis();
-  gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
-  return 1;
-}
-
+//////////Setup
 void setupLCD(){
   Serial.println(("Setting up LCD"));
   gfx->begin();
@@ -140,9 +130,20 @@ void setupSD(){
     gfx->println(F("ERROR: SD card mount failed!"));
     exit(1);
   }
-
   
   Serial.println(("Done setting up SD card"));
+}
+
+
+
+
+////////////////Draw Logic
+
+static int drawMCU(JPEGDRAW *pDraw)
+{
+  unsigned long start = millis();
+  gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
+  return 1;
 }
 
 void drawPauseMenu(){
@@ -161,483 +162,6 @@ bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int click
   }
 
   return false;
-}
-
-void handleFileUpload(HTTPRequest * req, HTTPResponse * res) {
-  Serial.printf("trying file upload");
-  res->setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-  res->setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-
-  // First, we need to check the encoding of the form that we have received.
-  // The browser will set the Content-Type request header, so we can use it for that purpose.
-  // Then we select the body parser based on the encoding.
-  // Actually we do this only for documentary purposes, we know the form is going
-  // to be multipart/form-data.
-  HTTPBodyParser *parser;
-  std::string contentType = req->getHeader("Content-Type");
-
-  // The content type may have additional properties after a semicolon, for exampel:
-  // Content-Type: text/html;charset=utf-8
-  // Content-Type: multipart/form-data;boundary=------s0m3w31rdch4r4c73rs
-  // As we're interested only in the actual mime _type_, we strip everything after the
-  // first semicolon, if one exists:
-  size_t semicolonPos = contentType.find(";");
-  if (semicolonPos != std::string::npos) {
-    contentType = contentType.substr(0, semicolonPos);
-  }
-
-  // Now, we can decide based on the content type:
-  if (contentType == "multipart/form-data") {
-    parser = new HTTPMultipartBodyParser(req);
-  } else {
-    Serial.printf("Unknown POST Content-Type: %s\n", contentType.c_str());
-    return;
-  }
-
-  res->println("<html><head><title>File Upload</title></head><body><h1>File Upload</h1>");
-
-  // We iterate over the fields. Any field with a filename is uploaded.
-  // Note that the BodyParser consumes the request body, meaning that you can iterate over the request's
-  // fields only a single time. The reason for this is that it allows you to handle large requests
-  // which would not fit into memory.
-  bool didwrite = false;
-
-  // parser->nextField() will move the parser to the next field in the request body (field meaning a
-  // form field, if you take the HTML perspective). After the last field has been processed, nextField()
-  // returns false and the while loop ends.
-  while(parser->nextField()) {
-    // For Multipart data, each field has three properties:
-    // The name ("name" value of the <input> tag)
-    // The filename (If it was a <input type="file">, this is the filename on the machine of the
-    //   user uploading it)
-    // The mime type (It is determined by the client. So do not trust this value and blindly start
-    //   parsing files only if the type matches)
-    std::string name = parser->getFieldName();
-    std::string filename = parser->getFieldFilename();
-    std::string mimeType = parser->getFieldMimeType();
-    // We log all three values, so that you can observe the upload on the serial monitor:
-    Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
-
-    // Double check that it is what we expect
-    // if (name != "file") {
-    //   Serial.println("Skipping unexpected field");
-    //   break;
-    // }
-    
-    // You should check file name validity and all that, but we skip that to make the core
-    // concepts of the body parser functionality easier to understand.
-    std::string pathname = "/" + filename;
-
-    // Create a new file on spiffs to stream the data into
-    File file = SD.open(pathname.c_str(), FILE_WRITE);
-    size_t fileLength = 0;
-    didwrite = true;
-
-    // With endOfField you can check whether the end of field has been reached or if there's
-    // still data pending. With multipart bodies, you cannot know the field size in advance.
-    while (!parser->endOfField()) {
-      byte buf[512];
-      size_t readLength = parser->read(buf, 512);
-      file.write(buf, readLength);
-      fileLength += readLength;
-    }
-    file.close();
-    res->printf("<p>Saved %d bytes to %s</p>", (int)fileLength, pathname.c_str());
-  }
-  if (!didwrite) {
-    res->println("<p>Did not write any file</p>");
-  }else{
-    playVideo = true;
-  }
-  res->println("</body></html>");
-  delete parser;
-}
-
-void handleSpiffsUpload(HTTPRequest * req, HTTPResponse * res) {
-  Serial.printf("trying file upload");
-  res->setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-  res->setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-
-  // First, we need to check the encoding of the form that we have received.
-  // The browser will set the Content-Type request header, so we can use it for that purpose.
-  // Then we select the body parser based on the encoding.
-  // Actually we do this only for documentary purposes, we know the form is going
-  // to be multipart/form-data.
-  HTTPBodyParser *parser;
-  std::string contentType = req->getHeader("Content-Type");
-
-  // The content type may have additional properties after a semicolon, for exampel:
-  // Content-Type: text/html;charset=utf-8
-  // Content-Type: multipart/form-data;boundary=------s0m3w31rdch4r4c73rs
-  // As we're interested only in the actual mime _type_, we strip everything after the
-  // first semicolon, if one exists:
-  size_t semicolonPos = contentType.find(";");
-  if (semicolonPos != std::string::npos) {
-    contentType = contentType.substr(0, semicolonPos);
-  }
-
-  // Now, we can decide based on the content type:
-  if (contentType == "multipart/form-data") {
-    parser = new HTTPMultipartBodyParser(req);
-  } else {
-    Serial.printf("Unknown POST Content-Type: %s\n", contentType.c_str());
-    return;
-  }
-
-  res->println("<html><head><title>File Upload</title></head><body><h1>File Upload</h1>");
-
-  // We iterate over the fields. Any field with a filename is uploaded.
-  // Note that the BodyParser consumes the request body, meaning that you can iterate over the request's
-  // fields only a single time. The reason for this is that it allows you to handle large requests
-  // which would not fit into memory.
-  bool didwrite = false;
-
-  // parser->nextField() will move the parser to the next field in the request body (field meaning a
-  // form field, if you take the HTML perspective). After the last field has been processed, nextField()
-  // returns false and the while loop ends.
-  while(parser->nextField()) {
-    // For Multipart data, each field has three properties:
-    // The name ("name" value of the <input> tag)
-    // The filename (If it was a <input type="file">, this is the filename on the machine of the
-    //   user uploading it)
-    // The mime type (It is determined by the client. So do not trust this value and blindly start
-    //   parsing files only if the type matches)
-    std::string name = parser->getFieldName();
-    std::string filename = parser->getFieldFilename();
-    std::string mimeType = parser->getFieldMimeType();
-    // We log all three values, so that you can observe the upload on the serial monitor:
-    Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
-
-    // Double check that it is what we expect
-    // if (name != "file") {
-    //   Serial.println("Skipping unexpected field");
-    //   break;
-    // }
-    
-    // You should check file name validity and all that, but we skip that to make the core
-    // concepts of the body parser functionality easier to understand.
-    std::string pathname = "/" + filename;
-
-    // Create a new file on spiffs to stream the data into
-    Serial.print("11");
-    Serial.printf(pathname.c_str());
-    File file = SPIFFS.open(pathname.c_str(), FILE_WRITE);
-    size_t fileLength = 0;
-    didwrite = true;
-
-    // With endOfField you can check whether the end of field has been reached or if there's
-    // still data pending. With multipart bodies, you cannot know the field size in advance.
-    while (!parser->endOfField()) {
-      byte buf[512];
-      size_t readLength = parser->read(buf, 512);
-      file.write(buf, readLength);
-      fileLength += readLength;
-    }
-    file.close();
-    res->printf("<p>Saved %d bytes to %s</p>", (int)fileLength, pathname.c_str());
-  }
-  if (!didwrite) {
-    res->println("<p>Did not write any file</p>");
-  }else{
-    //playVideo = true;
-  }
-  res->println("</body></html>");
-  delete parser;
-}
-
-void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
-  Serial.printf("trying file upload");
-  res->setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-  res->setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-
-  // First, we need to check the encoding of the form that we have received.
-  // The browser will set the Content-Type request header, so we can use it for that purpose.
-  // Then we select the body parser based on the encoding.
-  // Actually we do this only for documentary purposes, we know the form is going
-  // to be multipart/form-data.
-  HTTPBodyParser *parser;
-  std::string contentType = req->getHeader("Content-Type");
-
-  // The content type may have additional properties after a semicolon, for exampel:
-  // Content-Type: text/html;charset=utf-8
-  // Content-Type: multipart/form-data;boundary=------s0m3w31rdch4r4c73rs
-  // As we're interested only in the actual mime _type_, we strip everything after the
-  // first semicolon, if one exists:
-  size_t semicolonPos = contentType.find(";");
-  if (semicolonPos != std::string::npos) {
-    contentType = contentType.substr(0, semicolonPos);
-  }
-
-  // Now, we can decide based on the content type:
-  if (contentType == "multipart/form-data") {
-    parser = new HTTPMultipartBodyParser(req);
-  } else {
-    Serial.printf("Unknown POST Content-Type: %s\n", contentType.c_str());
-    return;
-  }
-
-  res->println("<html><head><title>File Upload</title></head><body><h1>File Upload</h1>");
-
-  // We iterate over the fields. Any field with a filename is uploaded.
-  // Note that the BodyParser consumes the request body, meaning that you can iterate over the request's
-  // fields only a single time. The reason for this is that it allows you to handle large requests
-  // which would not fit into memory.
-  bool didwrite = false;
-
-  // parser->nextField() will move the parser to the next field in the request body (field meaning a
-  // form field, if you take the HTML perspective). After the last field has been processed, nextField()
-  // returns false and the while loop ends.
-  while(parser->nextField()) {
-    // For Multipart data, each field has three properties:
-    // The name ("name" value of the <input> tag)
-    // The filename (If it was a <input type="file">, this is the filename on the machine of the
-    //   user uploading it)
-    // The mime type (It is determined by the client. So do not trust this value and blindly start
-    //   parsing files only if the type matches)
-    std::string name = parser->getFieldName();
-    std::string filename = parser->getFieldFilename();
-    std::string mimeType = parser->getFieldMimeType();
-    // We log all three values, so that you can observe the upload on the serial monitor:
-    Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
-
-    // Double check that it is what we expect
-    // if (name != "file") {
-    //   Serial.println("Skipping unexpected field");
-    //   break;
-    // }
-
-    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        Update.printError(Serial);
-      }
-    
-    // You should check file name validity and all that, but we skip that to make the core
-    // concepts of the body parser functionality easier to understand.
-    std::string pathname = "/" + filename;
-
-    // Create a new file on spiffs to stream the data into
-    Serial.print("112");
-    Serial.printf(pathname.c_str());
-    didwrite = true;
-
-    // With endOfField you can check whether the end of field has been reached or if there's
-    // still data pending. With multipart bodies, you cannot know the field size in advance.
-    while (!parser->endOfField()) {
-      byte buf[512];
-      size_t readLength = parser->read(buf, 512);
-      Update.write(buf, readLength);
-    }
-  }
-
-  if (Update.end(true)) { //true to set the size to the current progress
-    Serial.printf("Update Success... Rebooting...");
-    ESP.restart();
-  } else {
-    Update.printError(Serial);
-  }
-
-  if (!didwrite) {
-    res->println("<p>Did not write any file</p>");
-  }else{
-    //playVideo = true;
-  }
-  res->println("</body></html>");
-  delete parser;
-}
-
-void handleJS(HTTPRequest * req, HTTPResponse * res) {
-  // Status code is 200 OK by default.
-  // We want to deliver a simple HTML page, so we send a corresponding content type:
-  Serial.printf("wants JS");
-  res->setHeader("Content-Type", "text/javascript");
-  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-
-  File file = SPIFFS.open("/ffmpeg.min.js", "r");
-    
-  uint8_t buffer[256];
-  size_t length = 0;
-  do {
-      length = file.read(buffer, 256);
-      res->write(buffer, length);
-  } while (length > 0);
-
-  file.close();
-}
-
-
-
-void handleRoot(HTTPRequest * req, HTTPResponse * res) {
-  // Status code is 200 OK by default.
-  // We want to deliver a simple HTML page, so we send a corresponding content type:
-
-  Serial.printf("wants root");
-  
-  res->setHeader("Content-Type", "text/html");
-  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-
-  File file = SPIFFS.open("/index.html", "r");
-  
-  uint8_t buffer[256];
-  size_t length = 0;
-  do {
-    length = file.read(buffer, 256);
-    res->write(buffer, length);
-  } while (length > 0);
-
-  file.close();
-  
-}
-
-void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
-  // Status code is 200 OK by default.
-  // We want to deliver a simple HTML page, so we send a corresponding content type:
-
-  Serial.printf("wants update page");
-  
-  res->setHeader("Content-Type", "text/html");
-  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-
-  File file = SPIFFS.open("/uploadSpiffs.html", "r");
-  
-  uint8_t buffer[256];
-  size_t length = 0;
-  do {
-    length = file.read(buffer, 256);
-    res->write(buffer, length);
-  } while (length > 0);
-
-  file.close();
-  
-}
-
-
-void handle404(HTTPRequest * req, HTTPResponse * res) {
-  // Discard request body, if we received any
-  // We do this, as this is the default node and may also server POST/PUT requests
-  req->discardRequestBody();
-
-  // Set the response status
-  res->setStatusCode(404);
-  res->setStatusText("Not Found");
-
-  // Set content type of the response
-  res->setHeader("Content-Type", "text/html");
-
-  // Write a tiny HTTP page
-  res->println("<!DOCTYPE html>");
-  res->println("<html>");
-  res->println("<head><title>Not Found</title></head>");
-  res->println("<body><h1>404 Not Found</h1><p>The requested resource was not found on this server.</p></body>");
-  res->println("</html>");
-}
-
-
-void setupServer(){
-   // Setup filesystem
-  
-  //videoFileFound = false;
-  Serial.println("Creating a new self-signed certificate.");
-  Serial.println("This may take up to a minute, so be patient ;-)");
-
-  // First, we create an empty certificate:
-  cert = new SSLCert();
-
-  // Now, we use the function createSelfSignedCert to create private key and certificate.
-  // The function takes the following paramters:
-  // - Key size: 1024 or 2048 bit should be fine here, 4096 on the ESP might be "paranoid mode"
-  //   (in generel: shorter key = faster but less secure)
-  // - Distinguished name: The name of the host as used in certificates.
-  //   If you want to run your own DNS, the part after CN (Common Name) should match the DNS
-  //   entry pointing to your ESP32. You can try to insert an IP there, but that's not really good style.
-  // - Dates for certificate validity (optional, default is 2019-2029, both included)
-  //   Format is YYYYMMDDhhmmss
-  int createCertResult = createSelfSignedCert(
-    *cert,
-    KEYSIZE_2048,
-    "CN=myesp32.local,O=FancyCompany,C=DE",
-    "20190101000000",
-    "20300101000000"
-  );
-
-  // Now check if creating that worked
-  if (createCertResult != 0) {
-    Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
-    while(true) delay(500);
-  }
-  Serial.println("Creating the certificate was successful");
-
-  // If you're working on a serious project, this would be a good place to initialize some form of non-volatile storage
-  // and to put the certificate and the key there. This has the advantage that the certificate stays the same after a reboot
-  // so your client still trusts your server, additionally you increase the speed-up of your application.
-  // Some browsers like Firefox might even reject the second run for the same issuer name (the distinguished name defined above).
-  //
-  // Storing:
-  //   For the key:
-  //     cert->getPKLength() will return the length of the private key in byte
-  //     cert->getPKData() will return the actual private key (in DER-format, if that matters to you)
-  //   For the certificate:
-  //     cert->getCertLength() and ->getCertData() do the same for the actual certificate data.
-  // Restoring:
-  //   When your applications boots, check your non-volatile storage for an existing certificate, and if you find one
-  //   use the parameterized SSLCert constructor to re-create the certificate and pass it to the HTTPSServer.
-  //
-  // A short reminder on key security: If you're working on something professional, be aware that the storage of the ESP32 is
-  // not encrypted in any way. This means that if you just write it to the flash storage, it is easy to extract it if someone
-  // gets a hand on your hardware. You should decide if that's a relevant risk for you and apply countermeasures like flash
-  // encryption if neccessary
-
-  // We can now use the new certificate to setup our server as usual.
-  secureServer = new HTTPSServer(cert);
-
-  // Connect to WiFi
-  Serial.println("Setting up WiFi");
-  //WiFi.begin(WIFI_SSID, WIFI_PSK);
-  WiFi.softAP(WIFI_SSID, WIFI_PSK);
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   Serial.print(".");
-  //   delay(500);
-  // }
-  Serial.print("Connected. IP=");
-  Serial.println(WiFi.softAPIP());
-  wifiQR = "";
-  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
-
-  // For every resource available on the server, we need to create a ResourceNode
-  // The ResourceNode links URL and HTTP method to a handler function
-  ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
-  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
-  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
-
-   // And of course we need some way to retrieve the file again. We use the placeholder
-  // feature in the path to do so:
-  ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleFileUpload);
-
-  ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
-
-    ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
-  
-  ResourceNode * nodeJS    = new ResourceNode("/ffmpeg.min.js", "GET", &handleJS);
-
-
-  // Add the root node to the server
-  secureServer->registerNode(nodeRoot);
-  // Add the 404 not found node to the server.
-  secureServer->setDefaultNode(node404);
-
-  secureServer->registerNode(nodeUploadPage);
-
-  secureServer->registerNode(nodeUpload);
-  secureServer->registerNode(nodeJS);
-  secureServer->registerNode(updateSpiffs);
-  secureServer->registerNode(updateFirmware);
-
-  Serial.println("Starting server...");
-  secureServer->start();
-  if (secureServer->isRunning()) {
-    Serial.println("Server ready.");
-  }
 }
 
 void drawQRCode(String inputString, String stepString){
@@ -677,24 +201,13 @@ void drawQRCode(String inputString, String stepString){
   gfx->println("SCAN");
 }
 
-void drawWifiQR(){
-  setupServer();
-  gfx->fillScreen(WHITE);
-  String wifiQR = "";
-  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
-  drawQRCode(wifiQR, "Step 1");
-  playVideo = false;
-}
+
 void setupButtons(){
   resetFrameButton.x = 30;
   resetFrameButton.y = 140;
   resetFrameButton.width = 180;
   resetFrameButton.height = 38;
 }
-
-
-
-
 
 void videoLoop(){
   File vFile = SD.open(MJPEG_FILENAME);
@@ -826,7 +339,243 @@ void videoLoop(){
   //delay(10000);
 }
 
+//////////WEB Logic
 
+void downloadBoilerplate(HTTPRequest * req, HTTPResponse * res, String saveType){
+  Serial.printf("trying file upload");
+  res->setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res->setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+
+  HTTPBodyParser *parser;
+  std::string contentType = req->getHeader("Content-Type");
+
+  size_t semicolonPos = contentType.find(";");
+  if (semicolonPos != std::string::npos) {
+    contentType = contentType.substr(0, semicolonPos);
+  }
+
+  if (contentType == "multipart/form-data") {
+    parser = new HTTPMultipartBodyParser(req);
+  } else {
+    Serial.printf("Unknown POST Content-Type: %s\n", contentType.c_str());
+    return;
+  }
+
+  bool didwrite = false;
+
+  while(parser->nextField()) {
+    std::string name = parser->getFieldName();
+    std::string filename = parser->getFieldFilename();
+    std::string mimeType = parser->getFieldMimeType();
+    Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
+    
+    std::string pathname = "/" + filename;
+    File file;
+    if(saveType == "SD"){
+      file = SD.open(pathname.c_str(), FILE_WRITE);
+    }else if(saveType == "SPIFFS"){
+      file = SPIFFS.open(pathname.c_str(), FILE_WRITE);
+    }else{
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+        Update.printError(Serial);
+      }
+    }
+    
+    size_t fileLength = 0;
+    didwrite = true;
+
+    while (!parser->endOfField()) {
+      byte buf[512];
+      size_t readLength = parser->read(buf, 512);
+      if(saveType == "UPDATE"){
+        Update.write(buf, readLength);
+      }else{
+        file.write(buf, readLength);
+        fileLength += readLength;
+      }
+
+    }
+    file.close();
+    Serial.printf("Saved %d bytes to %s", (int)fileLength, pathname.c_str());
+  }
+
+  if(saveType == "UPDATE"){
+     if (Update.end(true)) {
+      Serial.printf("Update Success... Rebooting...");
+      ESP.restart();
+    } else {
+      Update.printError(Serial);
+    }
+
+  }
+  if (!didwrite) {
+    Serial.printf("Did not write any file");
+  }else if(saveType == "SD"){
+    playVideo = true;
+  }
+
+  delete parser;
+}
+
+void simpleRequest(HTTPRequest * req, HTTPResponse * res, String fileName, String contentType){
+  Serial.printf("Requested: %s Content Type: %s", fileName, contentType);
+  res->setHeader("Content-Type", contentType.c_str());
+  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+
+  File file = SPIFFS.open(fileName, "r");
+    
+  uint8_t buffer[256];
+  size_t length = 0;
+  do {
+      length = file.read(buffer, 256);
+      res->write(buffer, length);
+  } while (length > 0);
+
+  file.close();
+}
+
+//File uploads
+void handleVideoUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "SD");
+}
+
+void handleSpiffsUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "SPIFFS");
+}
+
+void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "UPDATE");
+}
+
+//Page Requests
+void getffmpeg(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/ffmpeg.min.js", "text/javascript");
+}
+
+
+void handleRoot(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/index.html", "text/html");
+}
+
+void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/uploadSpiffs.html", "text/html");
+}
+
+void handle404(HTTPRequest * req, HTTPResponse * res) {
+  req->discardRequestBody();
+  res->setStatusCode(404);
+  res->setStatusText("Not Found");
+  res->setHeader("Content-Type", "text/html");
+  res->println("<!DOCTYPE html>");
+  res->println("<html>");
+  res->println("<head><title>Not Found</title></head>");
+  res->println("<body><h1>404 Not Found</h1><p>The requested resource was not found on this server.</p></body>");
+  res->println("</html>");
+}
+
+
+void setupServer(){
+  Serial.println("Creating a new self-signed certificate.");
+  Serial.println("This may take up to a minute, so be patient ;-)");
+
+  cert = new SSLCert();
+
+  int createCertResult = createSelfSignedCert(
+    *cert,
+    KEYSIZE_2048,
+    "CN=myesp32.local,O=FancyCompany,C=US",
+    "20190101000000",
+    "20300101000000"
+  );
+
+
+  if (createCertResult != 0) {
+    Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
+    while(true) delay(500);
+  }
+  Serial.println("Creating the certificate was successful");
+
+  // If you're working on a serious project, this would be a good place to initialize some form of non-volatile storage
+  // and to put the certificate and the key there. This has the advantage that the certificate stays the same after a reboot
+  // so your client still trusts your server, additionally you increase the speed-up of your application.
+  // Some browsers like Firefox might even reject the second run for the same issuer name (the distinguished name defined above).
+  //
+  // Storing:
+  //   For the key:
+  //     cert->getPKLength() will return the length of the private key in byte
+  //     cert->getPKData() will return the actual private key (in DER-format, if that matters to you)
+  //   For the certificate:
+  //     cert->getCertLength() and ->getCertData() do the same for the actual certificate data.
+  // Restoring:
+  //   When your applications boots, check your non-volatile storage for an existing certificate, and if you find one
+  //   use the parameterized SSLCert constructor to re-create the certificate and pass it to the HTTPSServer.
+  //
+  // A short reminder on key security: If you're working on something professional, be aware that the storage of the ESP32 is
+  // not encrypted in any way. This means that if you just write it to the flash storage, it is easy to extract it if someone
+  // gets a hand on your hardware. You should decide if that's a relevant risk for you and apply countermeasures like flash
+  // encryption if neccessary
+
+  // We can now use the new certificate to setup our server as usual.
+  secureServer = new HTTPSServer(cert);
+
+  // Connect to WiFi
+  Serial.println("Setting up WiFi");
+  //WiFi.begin(WIFI_SSID, WIFI_PSK);
+  WiFi.softAP(WIFI_SSID, WIFI_PSK);
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   Serial.print(".");
+  //   delay(500);
+  // }
+  Serial.print("Connected. IP=");
+  Serial.println(WiFi.softAPIP());
+  wifiQR = "";
+  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
+
+  // For every resource available on the server, we need to create a ResourceNode
+  // The ResourceNode links URL and HTTP method to a handler function
+  ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
+  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
+  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
+
+   // And of course we need some way to retrieve the file again. We use the placeholder
+  // feature in the path to do so:
+  ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
+
+  ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
+
+  ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
+  
+  ResourceNode * nodeJS    = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
+
+
+  // Add the root node to the server
+  secureServer->registerNode(nodeRoot);
+  // Add the 404 not found node to the server.
+  secureServer->setDefaultNode(node404);
+
+  secureServer->registerNode(nodeUploadPage);
+
+  secureServer->registerNode(nodeUpload);
+  secureServer->registerNode(nodeJS);
+  secureServer->registerNode(updateSpiffs);
+  secureServer->registerNode(updateFirmware);
+
+  Serial.println("Starting server...");
+  secureServer->start();
+  if (secureServer->isRunning()) {
+    Serial.println("Server ready.");
+  }
+}
+
+void drawWifiQR(){
+  setupServer();
+  gfx->fillScreen(WHITE);
+  String wifiQR = "";
+  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
+  drawQRCode(wifiQR, "Step 1");
+  playVideo = false;
+}
 
 void setup()
 {
@@ -860,7 +609,6 @@ void setup()
 
 void loop()
 {
-  // This call will let the server do its work
   if(!videoFileFound){
     secureServer->loop();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
@@ -869,16 +617,9 @@ void loop()
     }
   }
   
-
   if(playVideo){
     videoLoop();
   }
 
-
-
-  // Other code would go here...
   delay(1);
-  
-  
 }
-
