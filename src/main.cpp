@@ -25,6 +25,9 @@
 #include <HTTPURLEncodedBodyParser.hpp>
 #include "MjpegClass.h"
 
+#include "cert.h"
+#include "private_key.h"
+
 
 using namespace httpsserver;
 
@@ -32,7 +35,7 @@ using namespace httpsserver;
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
-SSLCert * cert;
+
 HTTPSServer * secureServer;
 
 void handleRoot(HTTPRequest * req, HTTPResponse * res);
@@ -476,25 +479,123 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 
 
 void setupServer(){
-  Serial.println("Creating a new self-signed certificate.");
-  Serial.println("This may take up to a minute, so be patient ;-)");
-
-  cert = new SSLCert();
-
-  int createCertResult = createSelfSignedCert(
-    *cert,
-    KEYSIZE_2048,
-    "CN=myesp32.local,O=FancyCompany,C=US",
-    "20190101000000",
-    "20300101000000"
-  );
 
 
-  if (createCertResult != 0) {
-    Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
-    while(true) delay(500);
-  }
-  Serial.println("Creating the certificate was successful");
+  // File certFile = SPIFFS.open("/cert.txt");
+  // File certLENFile = SPIFFS.open("/certLEN.txt");
+  // File pKeyFile = SPIFFS.open("/key.txt");
+  // File pKeyLENFile = SPIFFS.open("/keyLEN.txt");
+  // if (!certFile || certFile.isDirectory() || !pKeyFile || pKeyFile.isDirectory() || true)
+  // {
+  //   Serial.println("No certs Found");
+  //   Serial.println("Creating a new self-signed certificate.");
+  //   Serial.println("This may take up to a minute, so be patient ;-)");
+
+  //   SSLCert * cert = new SSLCert();
+
+  //   int createCertResult = createSelfSignedCert(
+  //     *cert,
+  //     KEYSIZE_2048,
+  //     "CN=myesp32.local,O=FancyCompany,C=US",
+  //     "20190101000000",
+  //     "20300101000000"
+  //   );
+
+
+  //   if (createCertResult != 0) {
+  //     Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
+  //     while(true) delay(500);
+  //   }
+  //   Serial.println("Creating the certificate was successful");
+
+  //   certFile.close();
+  //   certLENFile.close();
+  //   pKeyFile.close();
+  //   pKeyLENFile.close();
+
+  //   certFile = SPIFFS.open("/cert.txt", FILE_WRITE);
+  //   certLENFile = SPIFFS.open("/certLEN.txt", FILE_WRITE);
+  //   pKeyFile = SPIFFS.open("/key.txt", FILE_WRITE);
+  //   pKeyLENFile = SPIFFS.open("/keyLEN.txt", FILE_WRITE);
+
+  //   certFile.write(*cert->getCertData());
+  //   //certLENFile.write(cert->getCertLength());
+
+
+  //   certFile.close();
+
+  //   File cert32323 = SPIFFS.open("/cert.txt", FILE_READ);
+
+  //   ..unsigned char certData3 = cert32323.read();
+
+  //   byte image[IMAGE_SIZE];
+  //   char buffer[20];
+  //   int index = 0;
+
+  //   while (file.available())
+  //   {
+  //     int count = file.readBytesUntil(buffer, ',');
+  //     buffer[count] = '\0'; // Add null terminator
+  //     image[index++] = strtoul(buffer, 0); // Convert hex constant to binary
+  //   }
+
+
+  //   if(certData3 == *cert->getCertData()){
+  //     Serial.print("SETSTTSSTSTSTSTSTSTSTTSTST");
+  //   }
+  //   // pKeyFile.write(*cert->getPKData());
+  //   // pKeyLENFile.write(cert->getPKLength());
+
+
+    
+  //   // unsigned int certLength = certLENFile.read();
+  //   // unsigned char certData[] = new unsigned char[certLength]();
+  //   // certData = certFile.read();
+    
+  //   // unsigned char keyData[] = pKeyFile.read();
+  //   // unsigned int keyLength = certLENFile.read();
+
+  //   // SSLCert cert2 = SSLCert(&certData, certLength, &keyData, keyLength);
+  //   // secureServer = new HTTPSServer(&cert2);
+
+
+  //   SSLCert cert2 = SSLCert(cert->getCertData(), cert->getCertLength(), cert->getPKData(), cert->getPKLength());
+  //   secureServer = new HTTPSServer(&cert2);
+
+
+  //   //secureServer = new HTTPSServer(cert);
+  //   //save cert here
+  // }else {
+  //   //load cert here
+
+  //   unsigned char certData = certFile.read();
+  //   unsigned int certLength = certLENFile.read();
+  //   unsigned char keyData = pKeyFile.read();
+  //   unsigned int keyLength = pKeyLENFile.read();
+
+  //   //     String newString = "";
+  //   // if (certLENFile) {
+  //   // while (certLENFile.available()) {
+  //   //   char ch = certLENFile.read(); // read characters one by one from Micro SD Card
+  //   //   //Serial.print(ch); // print the character to Serial Monitor
+  //   //   newString += ch;
+  //   // }
+  //   // Serial.println(newString); 
+  //   //}
+  //   //unsigned int iStart=atoi(newString.c_str());
+
+
+  //   SSLCert cert = SSLCert(&certData, certLength, &keyData, keyLength);
+  //   secureServer = new HTTPSServer(&cert);
+
+  // }
+
+  //   certFile.close();
+  //   certLENFile.close();
+  //   pKeyFile.close();
+  //   pKeyLENFile.close();
+
+
 
   // If you're working on a serious project, this would be a good place to initialize some form of non-volatile storage
   // and to put the certificate and the key there. This has the advantage that the certificate stays the same after a reboot
@@ -517,7 +618,9 @@ void setupServer(){
   // encryption if neccessary
 
   // We can now use the new certificate to setup our server as usual.
-  secureServer = new HTTPSServer(cert);
+  
+  SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
+  secureServer = new HTTPSServer(&cert);
 
   // Connect to WiFi
   Serial.println("Setting up WiFi");
