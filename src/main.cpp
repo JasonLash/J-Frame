@@ -1,5 +1,5 @@
 #define MJPEG_FILENAME "/pleaseworkvideo.mjpeg"
-#define FPS 15
+#define FPS 10
 #define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
 #include <U8g2lib.h>
 #include <Arduino.h>
@@ -27,6 +27,8 @@
 
 #include "cert.h"
 #include "private_key.h"
+
+#include <DNSServer.h>
 
 
 using namespace httpsserver;
@@ -78,7 +80,7 @@ uint8_t *mjpeg_buf;
 
 /* variables */
 static unsigned long start_ms, curr_ms, next_frame_ms, touch_start_ms, touch_current_ms;
-static int skipped_frames, next_frame;
+static int next_frame;
 
 bool playVideo = false;
 
@@ -101,6 +103,19 @@ class ButtonData {
 };
 
 ButtonData resetFrameButton;
+
+
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
+
+  // Set your Static IP address
+//IPAddress local_IP(147, 182, 205, 102);
+IPAddress local_IP(192, 168, 1, 184);
+// Set your Gateway IP address
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
+IPAddress primaryDNS(8, 8, 8, 8);   
+IPAddress secondaryDNS(8, 8, 4, 4);
 
 //////////Setup
 void setupLCD(){
@@ -221,13 +236,10 @@ void videoLoop(){
     exit(1);
   }
 
-  Serial.println(F("PCM audio MJPEG video start"));
+  Serial.println(F("Video start"));
 
   // init Video
   mjpeg.setup(&vFile, mjpeg_buf, drawMCU, false, true);
-  //mjpeg.setup(&vFile, mjpeg_buf, drawMCU, true /* useBigEndian */, 0 /* x */, 0 /* y */, gfx->width() /* widthLimit */, gfx->height() /* heightLimit */);
-  //mjpeg.setup(vFile, mjpeg_buf, (Arduino_TFT *)gfx, true);
-
 
   next_frame = 0;
   start_ms = millis();
@@ -239,8 +251,6 @@ void videoLoop(){
   
   while (vFile.available() && mjpeg.readMjpegBuf()) // Read video
   {
-    
-
     while(pauseVideo){
       if(!drewPause){
         drawPauseMenu();
@@ -248,27 +258,13 @@ void videoLoop(){
         drewPause = true;
       }
 
-
       if (ts.touched()) {
         TS_Point p = ts.getPoint();
-        // Serial.print("Pressure = ");
-        // Serial.print(p.z);
-        // Serial.print(", x = ");
-        // Serial.print(p.x);
-        // Serial.print(", y = ");
-        // Serial.print(p.y);
-        // Serial.println();
         int touchWH = 3900;
         int mapedX = map(p.x, 250, touchWH, 240, 0);;
         int mapedY = map(p.y, 250, touchWH, 320, 0);;
-        // Serial.print(", x = ");
-        // Serial.print(mapedX);
-        // Serial.print(", y = ");
-        // Serial.print(mapedY);
-        // Serial.println();
         Serial.println(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, p.x, p.y));
         if(checkIfInRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width, resetFrameButton.height, mapedX, mapedY)){
-          //drawWifiQR();
           SD.remove(MJPEG_FILENAME);
           Serial.println("Removed video");
           ESP.restart();
@@ -277,16 +273,11 @@ void videoLoop(){
           videoLoop();
         }
       }
-
-
-
     }
     curr_ms = millis();
 
-
-
+    //check if touched and for how long
     if (ts.touched()) {
-      //Serial.println(millis() - touch_start_ms);
       if(millis() - touch_current_ms < 200){
         touch_current_ms = millis();
       } else {
@@ -297,40 +288,29 @@ void videoLoop(){
         touch_current_ms = millis();
         touch_start_ms = millis();
         pauseVideo = true;
-        
-        //Serial.println(pauseVideo);
       }
 
       if(millis() - touch_current_ms > 2000){
         touch_current_ms = millis();
         touch_start_ms = millis();
       }
-      
     }
 
-    if (millis() < next_frame_ms) // check show frame or skip frame
+    if (millis() < next_frame_ms)
     {
-
-      // Play video
       mjpeg.drawJpg();
-    }
-    else
-    {
-      ++skipped_frames;
-      //Serial.println(F("Skip frame"));
     }
     curr_ms = millis();
 
     while (millis() < next_frame_ms)
     {
-      
       vTaskDelay(1);
     }
 
     curr_ms = millis();
     next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
   }
-  Serial.println(F("PCM audio MJPEG video end"));
+  Serial.println(F("Video end"));
   vFile.close();
 
   Serial.println(F("Going to sleep"));
@@ -338,8 +318,6 @@ void videoLoop(){
   gfx->displayOff();
   
   esp_deep_sleep_start();
-
-  //delay(10000);
 }
 
 //////////WEB Logic
@@ -479,157 +457,18 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 
 
 void setupServer(){
-
-
-  // File certFile = SPIFFS.open("/cert.txt");
-  // File certLENFile = SPIFFS.open("/certLEN.txt");
-  // File pKeyFile = SPIFFS.open("/key.txt");
-  // File pKeyLENFile = SPIFFS.open("/keyLEN.txt");
-  // if (!certFile || certFile.isDirectory() || !pKeyFile || pKeyFile.isDirectory() || true)
-  // {
-  //   Serial.println("No certs Found");
-  //   Serial.println("Creating a new self-signed certificate.");
-  //   Serial.println("This may take up to a minute, so be patient ;-)");
-
-  //   SSLCert * cert = new SSLCert();
-
-  //   int createCertResult = createSelfSignedCert(
-  //     *cert,
-  //     KEYSIZE_2048,
-  //     "CN=myesp32.local,O=FancyCompany,C=US",
-  //     "20190101000000",
-  //     "20300101000000"
-  //   );
-
-
-  //   if (createCertResult != 0) {
-  //     Serial.printf("Cerating certificate failed. Error Code = 0x%02X, check SSLCert.hpp for details", createCertResult);
-  //     while(true) delay(500);
-  //   }
-  //   Serial.println("Creating the certificate was successful");
-
-  //   certFile.close();
-  //   certLENFile.close();
-  //   pKeyFile.close();
-  //   pKeyLENFile.close();
-
-  //   certFile = SPIFFS.open("/cert.txt", FILE_WRITE);
-  //   certLENFile = SPIFFS.open("/certLEN.txt", FILE_WRITE);
-  //   pKeyFile = SPIFFS.open("/key.txt", FILE_WRITE);
-  //   pKeyLENFile = SPIFFS.open("/keyLEN.txt", FILE_WRITE);
-
-  //   certFile.write(*cert->getCertData());
-  //   //certLENFile.write(cert->getCertLength());
-
-
-  //   certFile.close();
-
-  //   File cert32323 = SPIFFS.open("/cert.txt", FILE_READ);
-
-  //   ..unsigned char certData3 = cert32323.read();
-
-  //   byte image[IMAGE_SIZE];
-  //   char buffer[20];
-  //   int index = 0;
-
-  //   while (file.available())
-  //   {
-  //     int count = file.readBytesUntil(buffer, ',');
-  //     buffer[count] = '\0'; // Add null terminator
-  //     image[index++] = strtoul(buffer, 0); // Convert hex constant to binary
-  //   }
-
-
-  //   if(certData3 == *cert->getCertData()){
-  //     Serial.print("SETSTTSSTSTSTSTSTSTSTTSTST");
-  //   }
-  //   // pKeyFile.write(*cert->getPKData());
-  //   // pKeyLENFile.write(cert->getPKLength());
-
-
-    
-  //   // unsigned int certLength = certLENFile.read();
-  //   // unsigned char certData[] = new unsigned char[certLength]();
-  //   // certData = certFile.read();
-    
-  //   // unsigned char keyData[] = pKeyFile.read();
-  //   // unsigned int keyLength = certLENFile.read();
-
-  //   // SSLCert cert2 = SSLCert(&certData, certLength, &keyData, keyLength);
-  //   // secureServer = new HTTPSServer(&cert2);
-
-
-  //   SSLCert cert2 = SSLCert(cert->getCertData(), cert->getCertLength(), cert->getPKData(), cert->getPKLength());
-  //   secureServer = new HTTPSServer(&cert2);
-
-
-  //   //secureServer = new HTTPSServer(cert);
-  //   //save cert here
-  // }else {
-  //   //load cert here
-
-  //   unsigned char certData = certFile.read();
-  //   unsigned int certLength = certLENFile.read();
-  //   unsigned char keyData = pKeyFile.read();
-  //   unsigned int keyLength = pKeyLENFile.read();
-
-  //   //     String newString = "";
-  //   // if (certLENFile) {
-  //   // while (certLENFile.available()) {
-  //   //   char ch = certLENFile.read(); // read characters one by one from Micro SD Card
-  //   //   //Serial.print(ch); // print the character to Serial Monitor
-  //   //   newString += ch;
-  //   // }
-  //   // Serial.println(newString); 
-  //   //}
-  //   //unsigned int iStart=atoi(newString.c_str());
-
-
-  //   SSLCert cert = SSLCert(&certData, certLength, &keyData, keyLength);
-  //   secureServer = new HTTPSServer(&cert);
-
-  // }
-
-  //   certFile.close();
-  //   certLENFile.close();
-  //   pKeyFile.close();
-  //   pKeyLENFile.close();
-
-
-
-  // If you're working on a serious project, this would be a good place to initialize some form of non-volatile storage
-  // and to put the certificate and the key there. This has the advantage that the certificate stays the same after a reboot
-  // so your client still trusts your server, additionally you increase the speed-up of your application.
-  // Some browsers like Firefox might even reject the second run for the same issuer name (the distinguished name defined above).
-  //
-  // Storing:
-  //   For the key:
-  //     cert->getPKLength() will return the length of the private key in byte
-  //     cert->getPKData() will return the actual private key (in DER-format, if that matters to you)
-  //   For the certificate:
-  //     cert->getCertLength() and ->getCertData() do the same for the actual certificate data.
-  // Restoring:
-  //   When your applications boots, check your non-volatile storage for an existing certificate, and if you find one
-  //   use the parameterized SSLCert constructor to re-create the certificate and pass it to the HTTPSServer.
-  //
-  // A short reminder on key security: If you're working on something professional, be aware that the storage of the ESP32 is
-  // not encrypted in any way. This means that if you just write it to the flash storage, it is easy to extract it if someone
-  // gets a hand on your hardware. You should decide if that's a relevant risk for you and apply countermeasures like flash
-  // encryption if neccessary
-
-  // We can now use the new certificate to setup our server as usual.
-  
   SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
   secureServer = new HTTPSServer(&cert);
 
-  // Connect to WiFi
   Serial.println("Setting up WiFi");
-  //WiFi.begin(WIFI_SSID, WIFI_PSK);
+  
   WiFi.softAP(WIFI_SSID, WIFI_PSK);
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   Serial.print(".");
-  //   delay(500);
-  // }
+
+  Serial.println("Setting Static IP");
+  if (!WiFi.softAPConfig(local_IP, gateway, subnet)) {
+    Serial.println("STA Failed to configure");
+  }
+
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
   wifiQR = "";
@@ -641,22 +480,13 @@ void setupServer(){
   ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
   ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
 
-   // And of course we need some way to retrieve the file again. We use the placeholder
-  // feature in the path to do so:
   ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
-
   ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
-
   ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
-  
   ResourceNode * nodeJS    = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
 
-
-  // Add the root node to the server
   secureServer->registerNode(nodeRoot);
-  // Add the 404 not found node to the server.
   secureServer->setDefaultNode(node404);
-
   secureServer->registerNode(nodeUploadPage);
 
   secureServer->registerNode(nodeUpload);
@@ -664,11 +494,17 @@ void setupServer(){
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
 
+  //setting DNS
+  dnsServer.start(DNS_PORT, "esp32.com", IPAddress(192, 168, 4, 1));
+
+
   Serial.println("Starting server...");
   secureServer->start();
   if (secureServer->isRunning()) {
     Serial.println("Server ready.");
   }
+
+
 }
 
 void drawWifiQR(){
@@ -714,6 +550,7 @@ void loop()
 {
   if(!videoFileFound){
     secureServer->loop();
+    dnsServer.processNextRequest();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
       drawQRCode(wifiQR ,"Step 2");
       printedSecondQR = true;
