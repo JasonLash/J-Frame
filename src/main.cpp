@@ -108,14 +108,7 @@ ButtonData resetFrameButton;
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 
-  // Set your Static IP address
-//IPAddress local_IP(147, 182, 205, 102);
-IPAddress local_IP(192, 168, 1, 184);
-// Set your Gateway IP address
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
-IPAddress primaryDNS(8, 8, 8, 8);   
-IPAddress secondaryDNS(8, 8, 4, 4);
+const String webName = "jframe.cam";
 
 //////////Setup
 void setupLCD(){
@@ -461,14 +454,7 @@ void setupServer(){
   secureServer = new HTTPSServer(&cert);
 
   Serial.println("Setting up WiFi");
-  
   WiFi.softAP(WIFI_SSID, WIFI_PSK);
-
-  Serial.println("Setting Static IP");
-  if (!WiFi.softAPConfig(local_IP, gateway, subnet)) {
-    Serial.println("STA Failed to configure");
-  }
-
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
   wifiQR = "";
@@ -495,7 +481,7 @@ void setupServer(){
   secureServer->registerNode(updateFirmware);
 
   //setting DNS
-  dnsServer.start(DNS_PORT, "esp32.com", IPAddress(192, 168, 4, 1));
+  dnsServer.start(DNS_PORT, "jframe.cam", WiFi.softAPIP());
 
 
   Serial.println("Starting server...");
