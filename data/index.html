@@ -314,9 +314,7 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
             var recorder; // globally accessible
             var video = document.getElementById('your-video-id');
 
-            document.getElementById('btn-start-recording').onclick = function() {
-                this.disabled = true;
-                captureCamera(function(camera) {
+            captureCamera(function(camera) {
                     video.muted = true;
                     video.volume = 0;
                     video.srcObject = camera;
@@ -325,13 +323,17 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
                         type: 'video'
                     });
 
-                    recorder.startRecording();
+                    //recorder.startRecording();
 
-                    // release camera on stopRecording
+                    // // release camera on stopRecording
                     recorder.camera = camera;
                     
 
-                });
+            });
+
+            document.getElementById('btn-start-recording').onclick = function() {
+                this.disabled = true;
+                recorder.startRecording();
 
                 var milliSeconds = 10 * 1000;
                 setTimeout(function() {

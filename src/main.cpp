@@ -20,6 +20,7 @@
 #include <HTTPResponse.hpp>
 #include <esp32/sha.h>
 #include <HTTPSServer.hpp>
+#include <HTTPServer.hpp>
 #include <HTTPBodyParser.hpp>
 #include <HTTPMultipartBodyParser.hpp>
 #include <HTTPURLEncodedBodyParser.hpp>
@@ -39,12 +40,15 @@ using namespace httpsserver;
 
 
 HTTPSServer * secureServer;
+HTTPServer * insecureServer;
 
 void handleRoot(HTTPRequest * req, HTTPResponse * res);
 void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
 void getffmpeg(HTTPRequest * req, HTTPResponse * res);
+
+void handleRedirect(HTTPRequest * req, HTTPResponse * res);
 
 //<<Pin Hookup>>//
 //19  ::  MISO    
@@ -341,7 +345,7 @@ void downloadBoilerplate(HTTPRequest * req, HTTPResponse * res, String saveType)
     std::string name = parser->getFieldName();
     std::string filename = parser->getFieldFilename();
     std::string mimeType = parser->getFieldMimeType();
-    Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
+    //Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
     
     std::string pathname = "/" + filename;
     File file;
@@ -436,6 +440,17 @@ void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
   simpleRequest(req, res, "/uploadSpiffs.html", "text/html");
 }
 
+void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
+  req->discardRequestBody();
+  res->setStatusCode(308);
+  res->setStatusText("Redirect");
+  res->setHeader("Content-Type", "text/html");
+  res->println("<!DOCTYPE html>");
+  res->println("<HEAD>");
+  res->println("<meta http-equiv=\"refresh\" content=\"0;url=https://jframe.cam/\">");
+  res->println("</head>");
+}
+
 void handle404(HTTPRequest * req, HTTPResponse * res) {
   req->discardRequestBody();
   res->setStatusCode(404);
@@ -452,6 +467,7 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 void setupServer(){
   SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
   secureServer = new HTTPSServer(&cert);
+  insecureServer = new HTTPServer();
 
   Serial.println("Setting up WiFi");
   WiFi.softAP(WIFI_SSID, WIFI_PSK);
@@ -471,6 +487,9 @@ void setupServer(){
   ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
   ResourceNode * nodeJS    = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
 
+  ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
+  ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
+
   secureServer->registerNode(nodeRoot);
   secureServer->setDefaultNode(node404);
   secureServer->registerNode(nodeUploadPage);
@@ -480,13 +499,17 @@ void setupServer(){
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
 
+  insecureServer->registerNode(nodeRedirect);
+  insecureServer->registerNode(nodeRedirect404);
+
   //setting DNS
   dnsServer.start(DNS_PORT, "jframe.cam", WiFi.softAPIP());
 
 
   Serial.println("Starting server...");
   secureServer->start();
-  if (secureServer->isRunning()) {
+  insecureServer->start();
+  if (secureServer->isRunning() && insecureServer->isRunning()) {
     Serial.println("Server ready.");
   }
 
@@ -535,6 +558,7 @@ void setup()
 void loop()
 {
   if(!videoFileFound){
+    insecureServer->loop();
     secureServer->loop();
     dnsServer.processNextRequest();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
