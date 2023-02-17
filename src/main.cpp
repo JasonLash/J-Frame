@@ -756,7 +756,7 @@ void serverTask(void *params) {
 }
 
 void drawWifiQR(){
-  //setupServer();
+  setupServer();
   gfx->fillScreen(WHITE);
   String wifiQR = "";
   wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
@@ -790,7 +790,7 @@ void setup()
   ts.begin();
   ts.setRotation(0);
 
-  xTaskCreatePinnedToCore(serverTask, "https443", 6144, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
+  //xTaskCreatePinnedToCore(serverTask, "https443", 6144, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
 }
 
 
@@ -799,7 +799,7 @@ void loop()
 {
   if(!videoFileFound){
     //insecureServer->loop();
-    //secureServer->loop();
+    secureServer->loop();
     dnsServer.processNextRequest();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
       drawQRCode(wifiQR ,"Step 2");

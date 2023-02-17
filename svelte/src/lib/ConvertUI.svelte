@@ -284,6 +284,7 @@
 	});
 
     const converVideo = (blob) =>{
+        
         (async () => {
             //const sourceBuffer = await fetch(blobURL).then(r => r.arrayBuffer());
             const { createFFmpeg, fetchFile } = FFmpeg;
@@ -296,7 +297,7 @@
             await ffmpeg.load();
             currentTaskText = "Successfully loaded FFMPEG"
             ffmpeg.setLogger(({ type, message }) => {
-                alert(message)
+                //alert(message)
                 currentTaskText = message;
             });
 
@@ -316,26 +317,27 @@
                 await fetchFile(new Uint8Array(await (blob).arrayBuffer()))
             );
 
-            //await ffmpeg.run("-i", "record.webm", "-vf", "transpose=0,fps=15,scale=-1:240:flags=lanczos,crop=320:in_h:(in_w-320)/2:0", "-vcodec", "mjpeg", "-q:v", "5", "320_30fps.avi");
+        
+            //await ffmpeg.run("-i", "record.webm", "-vf", "transpose=0,fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.avi");
             await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.avi");
 
             // read the MP4 file back from the FFmpeg file system
             const output = ffmpeg.FS("readFile", "320_30fps.avi");
 
-            // ... and now do something with the file
-            link.href = URL.createObjectURL(
-                new Blob([output.buffer], { type: "video/mjpeg" })
-            );
-            link.download = "320_30fps.mjpeg";                            // ... and now do something with the file
+
+
+            // // ... and now do something with the file
+            // link.href = URL.createObjectURL(
+            //     new Blob([output.buffer], { type: "video/mjpeg" })
+            // );
+            // link.download = "320_30fps.mjpeg";                            // ... and now do something with the file
 
             let formData = new FormData();
             let newFile = new File([output.buffer], "pleaseworkvideo.mjpeg")
 
-            //alert(newFile.size)
-
             formData.append("data", newFile);
 
-            fetch('/upload', {method: "POST", body: formData});
+            fetch('/upload', {method: "POST", body: formData})
         })();
     }
 </script>
