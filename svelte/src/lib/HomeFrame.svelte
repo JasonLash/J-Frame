@@ -1,8 +1,13 @@
 <script>
+    import { currentFrameID } from '../stores';
+
 
     export let frameID;
-
+    export let showRecordPage;
+    
     const clickedFrame = () =>{
+        currentFrameID.set(frameID)
+        showRecordPage = true;
         console.log(frameID);
     }
 </script>

@@ -3,6 +3,7 @@
 	import FrameDetected from "./lib/FrameDetected.svelte";
 	import FrameCollection from "./lib/FrameCollection.svelte";
 	import { onMount } from 'svelte';
+    import RecordPage from "./lib/RecordPage.svelte";
 
 
 
@@ -16,6 +17,8 @@
 	let frameDetected = false;
 
 	let showFrameDetected = false;
+
+	let showRecordPage = true;
 
 	//temp put yes
 	//showFrameDetected = true;
@@ -34,10 +37,15 @@
 	//if there is saved video, show upload window, else show new frame window
 </script>
 
-{#if showFrameDetected}
-	<FrameDetected frameID={frameID} bind:showFrameDetected={showFrameDetected}/>
+{#if !showRecordPage}
+
+	{#if showFrameDetected}
+		<FrameDetected frameID={frameID} bind:showFrameDetected={showFrameDetected}/>
+	{/if}
+
+	<Refresh />
+	<FrameCollection bind:savedFrameIDs={savedFrameIDs} bind:showRecordPage={showRecordPage}/>
+{:else}
+	<RecordPage bind:showRecordPage={showRecordPage}/>
+
 {/if}
-
-<Refresh />
-<FrameCollection bind:savedFrameIDs={savedFrameIDs}/>
-
