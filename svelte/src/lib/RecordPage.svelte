@@ -7,10 +7,67 @@
 
     let currentCameraType = "BACK";
     let currentTime = 5;
+    let videoElement;
+    var recorder;
+    let isRecording = false;
 
     const goBack = () =>{
         showRecordPage = false;
     }
+
+
+    //video stuff
+    
+
+    captureCamera(function(camera) {
+        videoElement.muted = true;
+        videoElement.volume = 0;
+        videoElement.srcObject = camera;
+
+        recorder = RecordRTC(camera, {
+            type: 'video'
+        });
+
+        recorder.camera = camera;
+    });
+    
+    function captureCamera(callback) {
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true  }).then(function(camera) {
+            callback(camera);
+        }).catch(function(error) {
+            alert('Unable to capture your camera. Please check console logs.');
+            console.error(error);
+        });
+    }
+
+    const record = (time) =>{
+        if(isRecording) return;
+        isRecording = true;
+
+        recorder.startRecording();
+
+        var timeOutTime = time * 1000;
+        setTimeout(function() {
+            recorder.stopRecording(stopRecordingCallback);
+        }, timeOutTime);
+    }
+
+    function stopRecordingCallback() {
+        videoElement.src = videoElement.srcObject = null;
+        videoElement.muted = false;
+        videoElement.volume = 1;
+        videoElement.src = URL.createObjectURL(recorder.getBlob());
+        let blob = recorder.getBlob()
+
+        console.log(recorder.getBlob());
+        
+        recorder.camera.stop();
+        recorder.destroy();
+        recorder = null;
+    }
+
+
+    
 </script>
 
 
@@ -18,18 +75,12 @@
 
 <div class="center">
     <h3>Frame #{$currentFrameID}</h3>
-
-    <video muted></video>
-
+    <video bind:this={videoElement} muted autoplay playsinline loop></video>
     <h4>Camera type</h4>
-
     <CameraTypeButtons bind:currentCameraType={currentCameraType}/>
-
     <h4 style="margin-top: 1rem;">Record Time</h4>
-
     <RecordTimeButtons bind:currentTime={currentTime}/>
-
-    <button class="recordBtn"><h3>Record</h3></button>
+    <button on:click={() => record(2)} class="recordBtn"><h3>Record</h3></button>
 </div>
 
 
