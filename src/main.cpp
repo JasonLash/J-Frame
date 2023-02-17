@@ -38,6 +38,15 @@ using namespace httpsserver;
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
+/** Check if we have multiple cores */
+#if CONFIG_FREERTOS_UNICORE
+#define ARDUINO_RUNNING_CORE 0
+#else
+#define ARDUINO_RUNNING_CORE 1
+#endif
+
+
+
 
 HTTPSServer * secureServer;
 HTTPServer * insecureServer;
@@ -47,8 +56,33 @@ void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
 void getffmpeg(HTTPRequest * req, HTTPResponse * res);
+void getCSSBundle(HTTPRequest * req, HTTPResponse * res);
+void getJSBundle(HTTPRequest * req, HTTPResponse * res);
+void getJSMap(HTTPRequest * req, HTTPResponse * res);
+void getGlobalCSS(HTTPRequest * req, HTTPResponse * res);
+void getManifest(HTTPRequest * req, HTTPResponse * res);
+void getServiceWorker(HTTPRequest * req, HTTPResponse * res);
+
+void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
 
 void handleRedirect(HTTPRequest * req, HTTPResponse * res);
+
+
+//spiifs test
+void handleSPIFFS(HTTPRequest * req, HTTPResponse * res);
+// We need to specify some content-type mapping, so the resources get delivered with the
+// right content type and are displayed correctly in the browser
+char contentTypes[][2][32] = {
+  {".html", "text/html"},
+  {".css",  "text/css"},
+  {".js",   "application/javascript"},
+  {".json", "application/json"},
+  {".png",  "image/png"},
+  {".jpg",  "image/jpg"},
+  {"", ""}
+};
+
+
 
 //<<Pin Hookup>>//
 //19  ::  MISO    
@@ -113,6 +147,12 @@ const byte DNS_PORT = 53;
 DNSServer dnsServer;
 
 const String webName = "jframe.cam";
+
+// We declare a function that will be the entry-point for the task that is going to be
+// created.
+void serverTask(void *params);
+
+
 
 //////////Setup
 void setupLCD(){
@@ -395,16 +435,28 @@ void downloadBoilerplate(HTTPRequest * req, HTTPResponse * res, String saveType)
   delete parser;
 }
 
-void simpleRequest(HTTPRequest * req, HTTPResponse * res, String fileName, String contentType){
+void simpleRequest(HTTPRequest * req, HTTPResponse * res, String fileName, String contentType, bool doSD){
   Serial.printf("Requested: %s Content Type: %s", fileName, contentType);
+  Serial.println();
+  File file;
+  if(doSD){
+    file = SD.open(fileName, "r");
+  }else{
+    file = SPIFFS.open(fileName, "r");
+  }
+  
+    
+  uint8_t buffer[256];
+  size_t length = 0;
+
+  unsigned int fileSize = file.size();
+  res->setHeader("Content-Length", String(fileSize).c_str());
   res->setHeader("Content-Type", contentType.c_str());
   res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
 
-  File file = SPIFFS.open(fileName, "r");
-    
-  uint8_t buffer[256];
-  size_t length = 0;
+   Serial.println(String(fileSize).c_str());
+
   do {
       length = file.read(buffer, 256);
       res->write(buffer, length);
@@ -428,17 +480,47 @@ void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
 
 //Page Requests
 void getffmpeg(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/ffmpeg.min.js", "text/javascript");
+  simpleRequest(req, res, "/ffmpeg.min.js", "text/javascript", false);
 }
 
-
 void handleRoot(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/index.html", "text/html");
+  simpleRequest(req, res, "/index.html", "text/html", false);
 }
 
 void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/uploadSpiffs.html", "text/html");
+  simpleRequest(req, res, "/uploadSpiffs.html", "text/html", false);
 }
+
+void handleCSSBundle(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/bundle.css", "text/css", false);
+}
+
+void handleJSBundle(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/bundle.js", "text/javascript", false);
+}
+
+void handleJSMap(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/bundle.js.map", "text/javascript", false);
+}
+
+void handleGlobalCSS(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/global.css", "text/css", false);
+}
+
+void handleManifest(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/manifest.json", "application/json", false);
+}
+
+void handleServiceWorker(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/service-worker.js", "text/javascript", false);
+}
+
+void handleFFmpegWASM(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/ffmpeg-core.wasm", "application/wasm", true);
+}
+
+
+
 
 void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
   req->discardRequestBody();
@@ -463,6 +545,61 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
   res->println("</html>");
 }
 
+void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
+	
+  // We only handle GET here
+  if (req->getMethod() == "GET") {
+    // Redirect / to /index.html
+    std::string reqFile = req->getRequestString()=="/" ? "/index.html" : req->getRequestString();
+
+    // Try to open the file
+    std::string filename = reqFile;
+
+    // Check if the file exists
+    if (!SPIFFS.exists(filename.c_str())) {
+      // Send "404 Not Found" as response, as the file doesn't seem to exist
+      res->setStatusCode(404);
+      res->setStatusText("Not found");
+      res->println("404 Not Found");
+      return;
+    }
+
+    File file = SPIFFS.open(filename.c_str());
+
+    // Set length
+    res->setHeader("Content-Length", httpsserver::intToString(file.size()));
+
+    // Content-Type is guessed using the definition of the contentTypes-table defined above
+    int cTypeIdx = 0;
+    do {
+      if(reqFile.rfind(contentTypes[cTypeIdx][0])!=std::string::npos) {
+        res->setHeader("Content-Type", contentTypes[cTypeIdx][1]);
+        break;
+      }
+      cTypeIdx+=1;
+    } while(strlen(contentTypes[cTypeIdx][0])>0);
+
+    // Read the file and write it to the response
+    uint8_t buffer[256];
+    size_t length = 0;
+    do {
+      length = file.read(buffer, 256);
+      res->write(buffer, length);
+    } while (length > 0);
+
+    file.close();
+  } else {
+    // If there's any body, discard it
+    req->discardRequestBody();
+    // Send "405 Method not allowed" as response
+    res->setStatusCode(405);
+    res->setStatusText("Method not allowed");
+    res->println("405 Method not allowed");
+  }
+}
+
+
+
 
 void setupServer(){
   SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
@@ -478,26 +615,47 @@ void setupServer(){
 
   // For every resource available on the server, we need to create a ResourceNode
   // The ResourceNode links URL and HTTP method to a handler function
+  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
   ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
   ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
-  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
+  ResourceNode * nodeFFMPEG = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
 
+  // ResourceNode * nodeBundleCSS = new ResourceNode("/bundle.css", "GET", &handleCSSBundle);
+  // ResourceNode * nodeBundleJS = new ResourceNode("/bundle.js", "GET", &handleJSBundle);
+  // ResourceNode * nodeBundleJSMap = new ResourceNode("/bundle.js.map", "GET", &handleJSMap);
+  // ResourceNode * nodeGlobalCSS = new ResourceNode("/global.css", "GET", &handleGlobalCSS);
+  // ResourceNode * nodeManifest = new ResourceNode("/manifest.json", "GET", &handleManifest);
+  // ResourceNode * nodeServiceWorker = new ResourceNode("/service-worker.js", "GET", &handleServiceWorker);
+  ResourceNode * nodeFFmpegWASM = new ResourceNode("/ffmpeg-core.wasm", "GET", &handleFFmpegWASM);
+  
   ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
   ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
   ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
-  ResourceNode * nodeJS    = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
 
   ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
   ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
 
-  secureServer->registerNode(nodeRoot);
-  secureServer->setDefaultNode(node404);
-  secureServer->registerNode(nodeUploadPage);
+  // We register the SPIFFS handler as the default node, so every request that does
+  // not hit any other node will be redirected to the file system.
+  ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
+  secureServer->setDefaultNode(spiffsNode);
 
+  secureServer->registerNode(nodeRoot);
+  //secureServer->setDefaultNode(node404);
+  secureServer->registerNode(nodeUploadPage);
   secureServer->registerNode(nodeUpload);
-  secureServer->registerNode(nodeJS);
+  //secureServer->registerNode(nodeFFMPEG);
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
+
+  // secureServer->registerNode(nodeBundleCSS);
+  // secureServer->registerNode(nodeBundleJS);
+  // secureServer->registerNode(nodeBundleJSMap);
+  // secureServer->registerNode(nodeGlobalCSS);
+  // secureServer->registerNode(nodeManifest);
+  // secureServer->registerNode(nodeServiceWorker);
+
+  secureServer->registerNode(nodeFFmpegWASM);
 
   insecureServer->registerNode(nodeRedirect);
   insecureServer->registerNode(nodeRedirect404);
@@ -508,16 +666,97 @@ void setupServer(){
 
   Serial.println("Starting server...");
   secureServer->start();
-  insecureServer->start();
-  if (secureServer->isRunning() && insecureServer->isRunning()) {
+  //insecureServer->start();
+  //if (secureServer->isRunning() && insecureServer->isRunning()) {
+  if (secureServer->isRunning() ) {
     Serial.println("Server ready.");
   }
 
 
 }
 
+void serverTask(void *params) {
+  SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
+  secureServer = new HTTPSServer(&cert);
+  insecureServer = new HTTPServer();
+
+  Serial.println("Setting up WiFi");
+  WiFi.softAP(WIFI_SSID, WIFI_PSK);
+  Serial.print("Connected. IP=");
+  Serial.println(WiFi.softAPIP());
+  wifiQR = "";
+  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
+  // In the separate task we first do everything that we would have done in the
+  // setup() function, if we would run the server synchronously.
+
+  // Note: The second task has its own stack, so you need to think about where
+  // you create the server's resources and how to make sure that the server
+  // can access everything it needs to access. Also make sure that concurrent
+  // access is no problem in your sketch or implement countermeasures like locks
+  // or mutexes.
+
+    // For every resource available on the server, we need to create a ResourceNode
+  // The ResourceNode links URL and HTTP method to a handler function
+  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
+  ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
+  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
+  ResourceNode * nodeFFMPEG = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
+
+  // ResourceNode * nodeBundleCSS = new ResourceNode("/bundle.css", "GET", &handleCSSBundle);
+  // ResourceNode * nodeBundleJS = new ResourceNode("/bundle.js", "GET", &handleJSBundle);
+  // ResourceNode * nodeBundleJSMap = new ResourceNode("/bundle.js.map", "GET", &handleJSMap);
+  // ResourceNode * nodeGlobalCSS = new ResourceNode("/global.css", "GET", &handleGlobalCSS);
+  // ResourceNode * nodeManifest = new ResourceNode("/manifest.json", "GET", &handleManifest);
+  // ResourceNode * nodeServiceWorker = new ResourceNode("/service-worker.js", "GET", &handleServiceWorker);
+  
+  ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
+  ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
+  ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
+
+  // We register the SPIFFS handler as the default node, so every request that does
+  // not hit any other node will be redirected to the file system.
+  ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
+  secureServer->setDefaultNode(spiffsNode);
+
+  secureServer->registerNode(nodeRoot);
+  //secureServer->setDefaultNode(node404);
+  secureServer->registerNode(nodeUploadPage);
+  secureServer->registerNode(nodeUpload);
+  //secureServer->registerNode(nodeFFMPEG);
+  secureServer->registerNode(updateSpiffs);
+  secureServer->registerNode(updateFirmware);
+
+  // secureServer->registerNode(nodeBundleCSS);
+  // secureServer->registerNode(nodeBundleJS);
+  // secureServer->registerNode(nodeBundleJSMap);
+  // secureServer->registerNode(nodeGlobalCSS);
+  // secureServer->registerNode(nodeManifest);
+  // secureServer->registerNode(nodeServiceWorker);
+
+
+
+  //setting DNS
+  dnsServer.start(DNS_PORT, "jframe.cam", WiFi.softAPIP());
+
+
+  Serial.println("Starting server...");
+  secureServer->start();
+  if (secureServer->isRunning()) {
+    Serial.println("Server ready.");
+
+    // "loop()" function of the separate task
+    while(true) {
+      // This call will let the server do its work
+      secureServer->loop();
+
+      // Other code would go here...
+      delay(1);
+    }
+  }
+}
+
 void drawWifiQR(){
-  setupServer();
+  //setupServer();
   gfx->fillScreen(WHITE);
   String wifiQR = "";
   wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
@@ -551,6 +790,7 @@ void setup()
   ts.begin();
   ts.setRotation(0);
 
+  xTaskCreatePinnedToCore(serverTask, "https443", 6144, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
 }
 
 
@@ -558,8 +798,8 @@ void setup()
 void loop()
 {
   if(!videoFileFound){
-    insecureServer->loop();
-    secureServer->loop();
+    //insecureServer->loop();
+    //secureServer->loop();
     dnsServer.processNextRequest();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
       drawQRCode(wifiQR ,"Step 2");

@@ -2,6 +2,7 @@
     import { currentFrameID } from '../stores';
     import CameraTypeButtons from "./CameraTypeButtons.svelte";
     import RecordTimeButtons from "./RecordTimeButtons.svelte";
+    import ConvertUI from "./ConvertUI.svelte";
 
     export let showRecordPage;
 
@@ -10,6 +11,10 @@
     let videoElement;
     var recorder;
     let isRecording = false;
+    let recorededVideo = false;
+    let showConvert = false;
+    let blob;
+
 
     const goBack = () =>{
         showRecordPage = false;
@@ -18,6 +23,18 @@
 
     //video stuff
     
+    const record = (time) =>{
+        if(isRecording) return;
+        isRecording = true;
+
+        recorder.startRecording();
+
+        var timeOutTime = time * 1000;
+        setTimeout(function() {
+            recorder.stopRecording(stopRecordingCallback);
+        }, timeOutTime);
+    }
+
 
     captureCamera(function(camera) {
         videoElement.muted = true;
@@ -40,47 +57,70 @@
         });
     }
 
-    const record = (time) =>{
-        if(isRecording) return;
-        isRecording = true;
-
-        recorder.startRecording();
-
-        var timeOutTime = time * 1000;
-        setTimeout(function() {
-            recorder.stopRecording(stopRecordingCallback);
-        }, timeOutTime);
-    }
-
     function stopRecordingCallback() {
+        recorededVideo = true;
+        isRecording = false;
         videoElement.src = videoElement.srcObject = null;
         videoElement.muted = false;
         videoElement.volume = 1;
         videoElement.src = URL.createObjectURL(recorder.getBlob());
-        let blob = recorder.getBlob()
+        blob = recorder.getBlob()
 
-        console.log(recorder.getBlob());
         
         recorder.camera.stop();
         recorder.destroy();
         recorder = null;
     }
 
+    const deleteVideo = () =>{
+        recorededVideo = false;
+        isRecording = false;
 
-    
+        captureCamera(function(camera) {
+            videoElement.muted = true;
+            videoElement.volume = 0;
+            videoElement.srcObject = camera;
+
+            recorder = RecordRTC(camera, {
+                type: 'video'
+            });
+
+            recorder.camera = camera;
+        });
+
+    }
+
+    const convertVideo = () =>{
+        showConvert = true;
+    }
+
+
 </script>
+
+{#if showConvert}
+    <ConvertUI blob={blob}/>
+{/if}
 
 
 <button class="backBtn" on:click={goBack}>Back</button>
 
 <div class="center">
+
     <h3>Frame #{$currentFrameID}</h3>
     <video bind:this={videoElement} muted autoplay playsinline loop></video>
-    <h4>Camera type</h4>
-    <CameraTypeButtons bind:currentCameraType={currentCameraType}/>
-    <h4 style="margin-top: 1rem;">Record Time</h4>
-    <RecordTimeButtons bind:currentTime={currentTime}/>
-    <button on:click={() => record(2)} class="recordBtn"><h3>Record</h3></button>
+
+    {#if !isRecording && !recorededVideo}
+        <h4>Camera type</h4>
+        <CameraTypeButtons bind:currentCameraType={currentCameraType}/>
+        <h4 style="margin-top: 1rem;">Record Time</h4>
+        <RecordTimeButtons bind:currentTime={currentTime}/>
+        <button on:click={() => record(2)} class="recordBtn"><h3>Record</h3></button>
+    {:else if isRecording}
+        <h3>Recording</h3>
+    {:else if recorededVideo}
+        <button on:click={convertVideo} class="saveBtn"><h3>Save Video</h3></button>
+        <button on:click={deleteVideo} class="recordBtn"><h3>Delete Video</h3></button>
+    {/if}
 </div>
 
 
@@ -89,6 +129,11 @@
     .recordBtn{
         margin-top: 2rem;
         background: #97504B;
+    }
+
+    .saveBtn{
+        margin-top: 2rem;
+        background: #E9CA5D;
     }
 
     .center{
