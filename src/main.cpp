@@ -38,15 +38,6 @@ using namespace httpsserver;
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
-/** Check if we have multiple cores */
-#if CONFIG_FREERTOS_UNICORE
-#define ARDUINO_RUNNING_CORE 0
-#else
-#define ARDUINO_RUNNING_CORE 1
-#endif
-
-
-
 
 HTTPSServer * secureServer;
 HTTPServer * insecureServer;
@@ -55,18 +46,10 @@ void handleRoot(HTTPRequest * req, HTTPResponse * res);
 void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
-void getffmpeg(HTTPRequest * req, HTTPResponse * res);
-void getCSSBundle(HTTPRequest * req, HTTPResponse * res);
-void getJSBundle(HTTPRequest * req, HTTPResponse * res);
-void getJSMap(HTTPRequest * req, HTTPResponse * res);
-void getGlobalCSS(HTTPRequest * req, HTTPResponse * res);
-void getManifest(HTTPRequest * req, HTTPResponse * res);
-void getServiceWorker(HTTPRequest * req, HTTPResponse * res);
-
-void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
-
 void handleRedirect(HTTPRequest * req, HTTPResponse * res);
 
+
+void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
 
 //spiifs test
 void handleSPIFFS(HTTPRequest * req, HTTPResponse * res);
@@ -96,39 +79,37 @@ char contentTypes[][2][32] = {
 //5   ::  LCD_CS
 //22  ::  LCD_Backlight
 
-#define TFT_BRIGHTNESS 200
+
 #define SCK 18
 #define MOSI 23
 #define MISO 19
-//#define SS 15
-#define TFT_BL 22
+
+#define LCD_BRIGHTNESS 200
+#define LCD_BL 22
+#define LCD_DC 27
+#define LCD_CS 5
+#define LCD_RESET 33
 
 #define SD_CS 21
-#define LCD_DC_A0 27
-#define LCD_RESET 33
-#define LCD_CS 5
 
 #define TOUCH_CS  15
 
-Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC_A0, LCD_CS, SCK, MOSI, MISO);
+const byte DNS_PORT = 53;
+
+XPT2046_Touchscreen ts(TOUCH_CS);
+
+Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
 static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
 
-/* variables */
 static unsigned long start_ms, curr_ms, next_frame_ms, touch_start_ms, touch_current_ms;
 static int next_frame;
-
 bool playVideo = false;
-
 String wifiQR;
 bool printedSecondQR = false;
-
 bool videoFileFound = false;
-
-XPT2046_Touchscreen ts(TOUCH_CS);
-
 bool pauseVideo = false;
 bool drewPause = false;
 
@@ -142,15 +123,8 @@ class ButtonData {
 
 ButtonData resetFrameButton;
 
-
-const byte DNS_PORT = 53;
 DNSServer dnsServer;
-
 const String webName = "jframe.cam";
-
-// We declare a function that will be the entry-point for the task that is going to be
-// created.
-void serverTask(void *params);
 
 
 
@@ -160,9 +134,9 @@ void setupLCD(){
   gfx->begin();
   gfx->displayOn();
 
-  ledcAttachPin(TFT_BL, 1);     // assign TFT_BL pin to channel 1
+  ledcAttachPin(LCD_BL, 1);     // assign LCD_BL pin to channel 1
   ledcSetup(1, 12000, 8);       // 12 kHz PWM, 8-bit resolution
-  ledcWrite(1, TFT_BRIGHTNESS); // brightness 0 - 255
+  ledcWrite(1, LCD_BRIGHTNESS); // brightness 0 - 255
 
   mjpeg_buf = (uint8_t *)malloc(MJPEG_BUFFER_SIZE);
   if (!mjpeg_buf)
@@ -351,7 +325,7 @@ void videoLoop(){
   vFile.close();
 
   Serial.println(F("Going to sleep"));
-  ledcDetachPin(TFT_BL);
+  ledcDetachPin(LCD_BL);
   gfx->displayOff();
   
   esp_deep_sleep_start();
@@ -478,49 +452,9 @@ void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
   downloadBoilerplate(req, res, "UPDATE");
 }
 
-//Page Requests
-void getffmpeg(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/ffmpeg.min.js", "text/javascript", false);
-}
-
-void handleRoot(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/index.html", "text/html", false);
-}
-
 void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
   simpleRequest(req, res, "/uploadSpiffs.html", "text/html", false);
 }
-
-void handleCSSBundle(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/bundle.css", "text/css", false);
-}
-
-void handleJSBundle(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/bundle.js", "text/javascript", false);
-}
-
-void handleJSMap(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/bundle.js.map", "text/javascript", false);
-}
-
-void handleGlobalCSS(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/global.css", "text/css", false);
-}
-
-void handleManifest(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/manifest.json", "application/json", false);
-}
-
-void handleServiceWorker(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/service-worker.js", "text/javascript", false);
-}
-
-void handleFFmpegWASM(HTTPRequest * req, HTTPResponse * res) {
-  simpleRequest(req, res, "/ffmpeg-core.wasm", "application/wasm", true);
-}
-
-
-
 
 void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
   req->discardRequestBody();
@@ -533,6 +467,8 @@ void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
   res->println("</head>");
 }
 
+
+//this isn't used anymore
 void handle404(HTTPRequest * req, HTTPResponse * res) {
   req->discardRequestBody();
   res->setStatusCode(404);
@@ -546,7 +482,6 @@ void handle404(HTTPRequest * req, HTTPResponse * res) {
 }
 
 void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
-	
   // We only handle GET here
   if (req->getMethod() == "GET") {
     // Redirect / to /index.html
@@ -613,20 +548,8 @@ void setupServer(){
   wifiQR = "";
   wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
 
-  // For every resource available on the server, we need to create a ResourceNode
-  // The ResourceNode links URL and HTTP method to a handler function
-  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
-  ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
-  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
-  ResourceNode * nodeFFMPEG = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
 
-  // ResourceNode * nodeBundleCSS = new ResourceNode("/bundle.css", "GET", &handleCSSBundle);
-  // ResourceNode * nodeBundleJS = new ResourceNode("/bundle.js", "GET", &handleJSBundle);
-  // ResourceNode * nodeBundleJSMap = new ResourceNode("/bundle.js.map", "GET", &handleJSMap);
-  // ResourceNode * nodeGlobalCSS = new ResourceNode("/global.css", "GET", &handleGlobalCSS);
-  // ResourceNode * nodeManifest = new ResourceNode("/manifest.json", "GET", &handleManifest);
-  // ResourceNode * nodeServiceWorker = new ResourceNode("/service-worker.js", "GET", &handleServiceWorker);
-  ResourceNode * nodeFFmpegWASM = new ResourceNode("/ffmpeg-core.wasm", "GET", &handleFFmpegWASM);
+  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
   
   ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
   ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
@@ -635,33 +558,19 @@ void setupServer(){
   ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
   ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
 
-  // We register the SPIFFS handler as the default node, so every request that does
-  // not hit any other node will be redirected to the file system.
   ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
   secureServer->setDefaultNode(spiffsNode);
 
-  secureServer->registerNode(nodeRoot);
-  //secureServer->setDefaultNode(node404);
   secureServer->registerNode(nodeUploadPage);
   secureServer->registerNode(nodeUpload);
-  //secureServer->registerNode(nodeFFMPEG);
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
 
-  // secureServer->registerNode(nodeBundleCSS);
-  // secureServer->registerNode(nodeBundleJS);
-  // secureServer->registerNode(nodeBundleJSMap);
-  // secureServer->registerNode(nodeGlobalCSS);
-  // secureServer->registerNode(nodeManifest);
-  // secureServer->registerNode(nodeServiceWorker);
-
-  secureServer->registerNode(nodeFFmpegWASM);
-
-  insecureServer->registerNode(nodeRedirect);
+  insecureServer->setDefaultNode(nodeRedirect);
   insecureServer->registerNode(nodeRedirect404);
 
   //setting DNS
-  dnsServer.start(DNS_PORT, "jframe.cam", WiFi.softAPIP());
+  dnsServer.start(DNS_PORT, webName, WiFi.softAPIP());
 
 
   Serial.println("Starting server...");
@@ -673,86 +582,6 @@ void setupServer(){
   }
 
 
-}
-
-void serverTask(void *params) {
-  SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
-  secureServer = new HTTPSServer(&cert);
-  insecureServer = new HTTPServer();
-
-  Serial.println("Setting up WiFi");
-  WiFi.softAP(WIFI_SSID, WIFI_PSK);
-  Serial.print("Connected. IP=");
-  Serial.println(WiFi.softAPIP());
-  wifiQR = "";
-  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
-  // In the separate task we first do everything that we would have done in the
-  // setup() function, if we would run the server synchronously.
-
-  // Note: The second task has its own stack, so you need to think about where
-  // you create the server's resources and how to make sure that the server
-  // can access everything it needs to access. Also make sure that concurrent
-  // access is no problem in your sketch or implement countermeasures like locks
-  // or mutexes.
-
-    // For every resource available on the server, we need to create a ResourceNode
-  // The ResourceNode links URL and HTTP method to a handler function
-  ResourceNode * node404     = new ResourceNode("", "GET", &handle404);
-  ResourceNode * nodeRoot    = new ResourceNode("/", "GET", &handleRoot);
-  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
-  ResourceNode * nodeFFMPEG = new ResourceNode("/ffmpeg.min.js", "GET", &getffmpeg);
-
-  // ResourceNode * nodeBundleCSS = new ResourceNode("/bundle.css", "GET", &handleCSSBundle);
-  // ResourceNode * nodeBundleJS = new ResourceNode("/bundle.js", "GET", &handleJSBundle);
-  // ResourceNode * nodeBundleJSMap = new ResourceNode("/bundle.js.map", "GET", &handleJSMap);
-  // ResourceNode * nodeGlobalCSS = new ResourceNode("/global.css", "GET", &handleGlobalCSS);
-  // ResourceNode * nodeManifest = new ResourceNode("/manifest.json", "GET", &handleManifest);
-  // ResourceNode * nodeServiceWorker = new ResourceNode("/service-worker.js", "GET", &handleServiceWorker);
-  
-  ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
-  ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
-  ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
-
-  // We register the SPIFFS handler as the default node, so every request that does
-  // not hit any other node will be redirected to the file system.
-  ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
-  secureServer->setDefaultNode(spiffsNode);
-
-  secureServer->registerNode(nodeRoot);
-  //secureServer->setDefaultNode(node404);
-  secureServer->registerNode(nodeUploadPage);
-  secureServer->registerNode(nodeUpload);
-  //secureServer->registerNode(nodeFFMPEG);
-  secureServer->registerNode(updateSpiffs);
-  secureServer->registerNode(updateFirmware);
-
-  // secureServer->registerNode(nodeBundleCSS);
-  // secureServer->registerNode(nodeBundleJS);
-  // secureServer->registerNode(nodeBundleJSMap);
-  // secureServer->registerNode(nodeGlobalCSS);
-  // secureServer->registerNode(nodeManifest);
-  // secureServer->registerNode(nodeServiceWorker);
-
-
-
-  //setting DNS
-  dnsServer.start(DNS_PORT, "jframe.cam", WiFi.softAPIP());
-
-
-  Serial.println("Starting server...");
-  secureServer->start();
-  if (secureServer->isRunning()) {
-    Serial.println("Server ready.");
-
-    // "loop()" function of the separate task
-    while(true) {
-      // This call will let the server do its work
-      secureServer->loop();
-
-      // Other code would go here...
-      delay(1);
-    }
-  }
 }
 
 void drawWifiQR(){
@@ -789,8 +618,6 @@ void setup()
 
   ts.begin();
   ts.setRotation(0);
-
-  //xTaskCreatePinnedToCore(serverTask, "https443", 6144, NULL, 1, NULL, ARDUINO_RUNNING_CORE);
 }
 
 

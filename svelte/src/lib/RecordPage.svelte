@@ -114,7 +114,7 @@
         <CameraTypeButtons bind:currentCameraType={currentCameraType}/>
         <h4 style="margin-top: 1rem;">Record Time</h4>
         <RecordTimeButtons bind:currentTime={currentTime}/>
-        <button on:click={() => record(2)} class="recordBtn"><h3>Record</h3></button>
+        <button on:click={() => record(currentTime)} class="recordBtn"><h3>Record</h3></button>
     {:else if isRecording}
         <h3>Recording</h3>
     {:else if recorededVideo}
