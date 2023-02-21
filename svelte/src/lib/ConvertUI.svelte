@@ -321,7 +321,9 @@
 
         
             //await ffmpeg.run("-i", "record.webm", "-vf", "transpose=0,fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.avi");
-            await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.mjpeg");
+            
+            //await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.mjpeg");
+            await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,crop=240:in_w:(in_h-240)/2:0", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.mjpeg");
 
             // read the MP4 file back from the FFmpeg file system
             const output = ffmpeg.FS("readFile", "320_30fps.mjpeg");
