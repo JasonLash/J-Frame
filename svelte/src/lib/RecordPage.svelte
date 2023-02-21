@@ -115,6 +115,65 @@
         showConvert = true;
     }
 
+    let frameData = [
+        { id: "001", videoFile: null},
+        { id: "002", videoFile: null}
+    ];
+
+    const request = window.indexedDB.open("MyTestDatabase", 1);
+    let db;
+    request.onerror = (event) => {
+        console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        const transaction = db.transaction(["frames"]);
+        const objectStore = transaction.objectStore("frames");
+        const request2 = objectStore.get("001");
+        request2.onerror = (event) => {
+            console.log("SETSEESTSTES ERROR")
+        };
+        request2.onsuccess = (event) => {
+            console.log(event.target.result);
+        };
+    };
+
+    // This event is only implemented in recent browsers
+    request.onupgradeneeded = (event) => {
+        // Save the IDBDatabase interface
+        db = event.target.result;
+        let objectStore = db.createObjectStore("frames", { keyPath: "id" });
+        objectStore.transaction.oncomplete = (event) => {
+            // Store values in the newly created objectStore.
+            const frameObjectStore = db.transaction("frames", "readwrite").objectStore("frames");
+            frameData.forEach((frame) => {
+                frameObjectStore.add(frame);
+            });
+        };
+    };
+
+
+
+
+    // const transaction = db.transaction(["frames"], "readwrite");
+    // transaction.oncomplete = (event) => {
+    //     console.log("All done!");
+    // };
+
+    // transaction.onerror = (event) => {
+    // // Don't forget to handle errors!
+    // };
+
+    // const objectStore = transaction.objectStore("customers");
+    //     customerData.forEach((customer) => {
+    //         const request = objectStore.add(customer);
+    //         request.onsuccess = (event) => {
+    //             // event.target.result === customer.ssn;
+    //     };
+    // });
+
+
+
     
     async function extractFramesFromVideo(videoBlob, fps) {
         return new Promise(async (resolve) => {
@@ -172,6 +231,32 @@
             let newBlob = new Blob(frames, { type: "video/mjpeg" });
             console.log(newBlob);
             downloadLink = URL.createObjectURL(newBlob);
+            
+            const objectStore = db.transaction(["frames"], "readwrite").objectStore("frames");
+            const request = objectStore.get("001");
+            request.onerror = (event) => {
+            // Handle errors!
+                console.log("ERERERE")
+            };
+            request.onsuccess = (event) => {
+                // Get the old value that we want to update
+                const data = event.target.result;
+
+                // update the value(s) in the object that you want to change
+                data.video = newBlob;
+
+                // Put this updated object back into the database.
+                const requestUpdate = objectStore.put(data);
+                requestUpdate.onerror = (event) => {
+                    // Do something with the error
+                    console.log("Data ERROR while loged")
+                };
+                requestUpdate.onsuccess = (event) => {
+                    // Success - the data is updated!
+                    console.log("Data loged")
+                };
+            };
+
         });
     }
 
