@@ -283,6 +283,8 @@
         converVideo(blob);
 	});
 
+    let downloadLink;
+
     const converVideo = (blob) =>{
         
         (async () => {
@@ -319,10 +321,10 @@
 
         
             //await ffmpeg.run("-i", "record.webm", "-vf", "transpose=0,fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.avi");
-            await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.avi");
+            await ffmpeg.run("-i", "record.webm", "-vf", "fps=10,scale=320:-1:flags=lanczos,crop=240:in_w:(in_h-240)/2:0,eq=brightness=-0.1", "-vcodec", "mjpeg", "-q:v", "2", "320_30fps.mjpeg");
 
             // read the MP4 file back from the FFmpeg file system
-            const output = ffmpeg.FS("readFile", "320_30fps.avi");
+            const output = ffmpeg.FS("readFile", "320_30fps.mjpeg");
 
 
 
@@ -332,8 +334,17 @@
             // );
             // link.download = "320_30fps.mjpeg";                            // ... and now do something with the file
 
+            var reader = new FileReader();
+            reader.readAsDataURL(new Blob([output.buffer], { type: "video/mjpeg" })); 
+            reader.onloadend = function() {
+                var base64data = reader.result;                
+                console.log(base64data);
+            }
+
             let formData = new FormData();
             let newFile = new File([output.buffer], "pleaseworkvideo.mjpeg")
+
+            downloadLink = URL.createObjectURL(new Blob([output.buffer], { type: "video/mjpeg" }));
 
             formData.append("data", newFile);
 
@@ -346,6 +357,7 @@
 
 <div class="bg">
     <div class="topAndBottom">
+        <a href={downloadLink}>DOWNLOAD!!!!!</a>
         <h2>Saving Video</h2>
         <h4>This might take a few minutes</h4>
     </div>
@@ -357,6 +369,8 @@
     
         <h4>{currentTaskText}</h4>
     </div>
+
+    
 
 </div>
 

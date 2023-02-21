@@ -31,6 +31,9 @@
 
 #include <DNSServer.h>
 
+#include "FS.h"
+#include "FFat.h"
+
 
 using namespace httpsserver;
 
@@ -126,7 +129,9 @@ ButtonData resetFrameButton;
 DNSServer dnsServer;
 const String webName = "jframe.cam";
 
-
+int startTime;
+int endTime;
+String timeDiff;
 
 //////////Setup
 void setupLCD(){
@@ -499,7 +504,11 @@ void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
       return;
     }
 
+    startTime = millis();
     File file = SPIFFS.open(filename.c_str());
+
+    res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
 
     // Set length
     res->setHeader("Content-Length", httpsserver::intToString(file.size()));
@@ -523,6 +532,11 @@ void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
     } while (length > 0);
 
     file.close();
+
+    endTime = millis() - startTime;
+    timeDiff = String(endTime);
+    Serial.printf("time to send File %s was %s: ", filename.c_str(), timeDiff.c_str());
+    Serial.println();
   } else {
     // If there's any body, discard it
     req->discardRequestBody();
