@@ -11,26 +11,75 @@
 	const frameID = "000";
 
 	//check saved array for id #
-	let savedFrameIDs = ["001", "002", "003", "004"];
+	let FramesData = [];
 
 	let isNewFrame = true;
 	let frameDetected = false;
 
 	let showFrameDetected = false;
 
-	let showRecordPage = true;
+	let showRecordPage = false;
 
 	//temp put yes
 	//showFrameDetected = true;
 
 
 	onMount(async () => {
-		savedFrameIDs.forEach(id => {
-			if(frameID == id){
-				isNewFrame = false;
-			}
-		});
+		// FramesData.forEach(id => {
+		// 	if(frameID == id){
+		// 		isNewFrame = false;
+		// 	}
+		// });
 	});
+
+	// let frameData = [
+    //     { id: "001", videoFile: null},
+    //     { id: "002", videoFile: null}
+    // ];
+
+    const request = window.indexedDB.open("MyTestDatabase", 1);
+    let db;
+    request.onerror = (event) => {
+        console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        const transaction = db.transaction(["frames"]);
+        const objectStore = transaction.objectStore("frames");
+		objectStore.openCursor().onsuccess = (event) => {
+			const cursor = event.target.result;
+			if (cursor) {
+				//console.log(`Frame ID: ${cursor.key}`);
+				FramesData.push(cursor.value);
+				FramesData = FramesData;
+				cursor.continue();
+			}
+		};
+
+		console.log(FramesData);
+        // const request2 = objectStore.get("001");
+        // request2.onerror = (event) => {
+        //     console.log("SETSEESTSTES ERROR")
+        // };
+        // request2.onsuccess = (event) => {
+        //     console.log(event.target.result);
+        // };
+    };
+
+    // This event is only implemented in recent browsers
+    request.onupgradeneeded = (event) => {
+        // Save the IDBDatabase interface
+        db = event.target.result;
+		db.createObjectStore("frames", { keyPath: "id" });
+        //let objectStore = db.createObjectStore("frames", { keyPath: "id" });
+        // objectStore.transaction.oncomplete = (event) => {
+        //     // Store values in the newly created objectStore.
+        //     const frameObjectStore = db.transaction("frames", "readwrite").objectStore("frames");
+        //     frameData.forEach((frame) => {
+        //         frameObjectStore.add(frame);
+        //     });
+        // };
+    };
 
 
 	//if not found then show frame
@@ -44,8 +93,8 @@
 	{/if}
 
 	<Refresh />
-	<FrameCollection bind:savedFrameIDs={savedFrameIDs} bind:showRecordPage={showRecordPage}/>
+	<FrameCollection bind:FramesData={FramesData} bind:showRecordPage={showRecordPage}/>
 {:else}
-	<RecordPage bind:showRecordPage={showRecordPage}/>
+	<RecordPage bind:showRecordPage={showRecordPage} bind:db={db}/>
 
 {/if}

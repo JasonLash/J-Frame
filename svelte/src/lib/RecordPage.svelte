@@ -7,6 +7,7 @@
     import ConvertUI from "./ConvertUI.svelte";
 
     export let showRecordPage;
+    export let db;
 
     let currentCameraType = "BACK";
     let currentTime = 5;
@@ -75,6 +76,20 @@
 
     }
 
+    $: if (currentCameraType == "FRONT" || currentCameraType == "BACK"){
+        captureCamera(function(camera) {
+            videoElement.muted = true;
+            videoElement.volume = 0;
+            videoElement.srcObject = camera;
+
+            recorder = RecordRTC(camera, {
+                type: 'video'
+            });
+
+            recorder.camera = camera;
+        });
+    }
+
     function stopRecordingCallback() {
         recorededVideo = true;
         isRecording = false;
@@ -84,9 +99,9 @@
         videoElement.src = URL.createObjectURL(recorder.getBlob());
         blob = recorder.getBlob()
 
-        let frames = extractFramesFromVideo(blob, 30);
+        // let frames = extractFramesFromVideo(blob, 30);
 
-        console.log(frames);
+        // console.log(frames);
         
         recorder.camera.stop();
         recorder.destroy();
@@ -115,170 +130,10 @@
         showConvert = true;
     }
 
-    let frameData = [
-        { id: "001", videoFile: null},
-        { id: "002", videoFile: null}
-    ];
-
-    const request = window.indexedDB.open("MyTestDatabase", 1);
-    let db;
-    request.onerror = (event) => {
-        console.error("Why didn't you allow my web app to use IndexedDB?!");
-    };
-    request.onsuccess = (event) => {
-        db = event.target.result;
-        const transaction = db.transaction(["frames"]);
-        const objectStore = transaction.objectStore("frames");
-        const request2 = objectStore.get("001");
-        request2.onerror = (event) => {
-            console.log("SETSEESTSTES ERROR")
-        };
-        request2.onsuccess = (event) => {
-            console.log(event.target.result);
-        };
-    };
-
-    // This event is only implemented in recent browsers
-    request.onupgradeneeded = (event) => {
-        // Save the IDBDatabase interface
-        db = event.target.result;
-        let objectStore = db.createObjectStore("frames", { keyPath: "id" });
-        objectStore.transaction.oncomplete = (event) => {
-            // Store values in the newly created objectStore.
-            const frameObjectStore = db.transaction("frames", "readwrite").objectStore("frames");
-            frameData.forEach((frame) => {
-                frameObjectStore.add(frame);
-            });
-        };
-    };
-
-
-
-
-    // const transaction = db.transaction(["frames"], "readwrite");
-    // transaction.oncomplete = (event) => {
-    //     console.log("All done!");
-    // };
-
-    // transaction.onerror = (event) => {
-    // // Don't forget to handle errors!
-    // };
-
-    // const objectStore = transaction.objectStore("customers");
-    //     customerData.forEach((customer) => {
-    //         const request = objectStore.add(customer);
-    //         request.onsuccess = (event) => {
-    //             // event.target.result === customer.ssn;
-    //     };
-    // });
-
-
-
-    
-    async function extractFramesFromVideo(videoBlob, fps) {
-        return new Promise(async (resolve) => {
-            // fully download it first (no buffering):
-            let videoObjectUrl = URL.createObjectURL(videoBlob);
-            let video = document.createElement("video");
-
-            let seekResolve;
-            video.addEventListener("seeked", async function () {
-                if (seekResolve) seekResolve();
-            });
-
-            video.src = videoObjectUrl;
-
-            // workaround chromium metadata bug (https://stackoverflow.com/q/38062864/993683)
-            while ((video.duration === Infinity || isNaN(video.duration)) &&
-                video.readyState < 2) 
-            {
-                await new Promise((r) => setTimeout(r, 1000));
-                video.currentTime = 10000000 * Math.random();
-            }
-            let duration = video.duration;
-
-            let canvas = document.createElement("canvas");
-            let context = canvas.getContext("2d");
-            console.log(video.videoWidth);
-            console.log(video.videoHeight);
-            let [w, h] = [video.videoWidth, video.videoHeight];
-            canvas.width = 240;
-            canvas.height = 320;
-
-            let frames = [];
-            let interval = 1 / fps;
-            let currentTime = 0;
-
-            let currentFrame = 0;
-
-            while (currentTime < duration) {
-                video.currentTime = currentTime;
-                await new Promise((r) => (seekResolve = r));
-
-                if(currentFrame == 3){
-                    context.drawImage(video, 0, 0, w, h);
-                    let base64ImageData = canvas.toDataURL('image/jpeg', 0.9);
-                    //console.log(base64ImageData);
-                    frames.push(base64ImageToBlob(base64ImageData.slice(23)));
-                    currentFrame = 0;
-                }
-  
-                currentFrame++;
-                currentTime += interval;
-            }
-            resolve(frames);
-
-            let newBlob = new Blob(frames, { type: "video/mjpeg" });
-            console.log(newBlob);
-            downloadLink = URL.createObjectURL(newBlob);
-            
-            const objectStore = db.transaction(["frames"], "readwrite").objectStore("frames");
-            const request = objectStore.get("001");
-            request.onerror = (event) => {
-            // Handle errors!
-                console.log("ERERERE")
-            };
-            request.onsuccess = (event) => {
-                // Get the old value that we want to update
-                const data = event.target.result;
-
-                // update the value(s) in the object that you want to change
-                data.video = newBlob;
-
-                // Put this updated object back into the database.
-                const requestUpdate = objectStore.put(data);
-                requestUpdate.onerror = (event) => {
-                    // Do something with the error
-                    console.log("Data ERROR while loged")
-                };
-                requestUpdate.onsuccess = (event) => {
-                    // Success - the data is updated!
-                    console.log("Data loged")
-                };
-            };
-
-        });
-    }
-
-    function base64ImageToBlob(b64) {
-        var imageContent = atob(b64);
-        var buffer = new ArrayBuffer(imageContent.length);
-        var view = new Uint8Array(buffer);
-
-        for(var n = 0; n < imageContent.length; n++) {
-            view[n] = imageContent.charCodeAt(n);
-        }
-
-        return buffer;
-    }
-
-
-
-
 </script>
 
 {#if showConvert}
-    <ConvertUI blob={blob}/>
+    <ConvertUI blob={blob} bind:db={db}/>
 {/if}
 
 
@@ -288,7 +143,9 @@
 
     <h3>Frame #{$currentFrameID}</h3>
     <div class="vidHolder">
-        <button on:click={() => record(currentTime)} class="recordBtn"><h3>Record</h3></button>
+        {#if !isRecording && !recorededVideo}
+            <button on:click={() => record(currentTime)} class="recordBtn"><h3>Record</h3></button>
+        {/if}
         <video bind:this={videoElement} muted autoplay playsinline loop></video>
     </div>
     
@@ -305,8 +162,6 @@
         <button on:click={convertVideo} class="saveBtn"><h3>Save Video</h3></button>
         <button on:click={deleteVideo} class="redBtn"><h3>Delete Video</h3></button>
     {/if}
-
-    <a href={downloadLink}>DOWNLOAD!!!!!</a>
 </div>
 
 
@@ -320,7 +175,7 @@
 
     .recordBtn{
         position: absolute;
-        z-index: 10;
+        z-index: 4;
         margin-top: 25rem;
         width: 80%;
         background: #97504B;

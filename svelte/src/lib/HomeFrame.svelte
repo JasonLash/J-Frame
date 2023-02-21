@@ -1,14 +1,12 @@
 <script>
     import { currentFrameID } from '../stores';
-
-
-    export let frameID;
+    export let frameData;
     export let showRecordPage;
     
     const clickedFrame = () =>{
-        currentFrameID.set(frameID)
+        currentFrameID.set(frameData.id)
         showRecordPage = true;
-        console.log(frameID);
+        console.log(frameData.id);
     }
 </script>
 
@@ -17,7 +15,7 @@
         <div class="small"></div>
     </div>    
     
-    <h3>#{frameID}</h3>
+    <h3>#{frameData.id}</h3>
 </div>
 
 
