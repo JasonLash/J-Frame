@@ -1,5 +1,5 @@
 <script>
-    import { currentFrameID } from '../stores';
+    import { currentFrameID, FRAMEID } from '../stores';
     export let frameData;
     export let showRecordPage;
     
@@ -11,11 +11,11 @@
 </script>
 
 <div class="frameObject" on:click={clickedFrame}>
-    {#if frameData.id == FRAMEID && frameData.videoFile == null}
+    {#if frameData.id == $FRAMEID && frameData.videoFile == null}
         <div class="big" style="outline: 4px solid #5D6AE8;">
             <div class="small"></div>
         </div> 
-    {:else if frameData.id == FRAMEID && frameData.videoFile != null}
+    {:else if frameData.id == $FRAMEID && frameData.videoFile != null}
         <div class="big" style="outline: 4px solid #5D6AE8; background: #E9CA5D;">
             <div class="small"></div>
         </div>  

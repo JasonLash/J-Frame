@@ -3,19 +3,40 @@
 	import FrameDetected from "./lib/FrameDetected.svelte";
 	import FrameCollection from "./lib/FrameCollection.svelte";
     import RecordPage from "./lib/RecordPage.svelte";
+	import { FRAMEID } from './stores';
 
 	//State 
 	let isNewFrame = true;
 	let showFrameDetected = false;
 	let showRecordPage = false;
 
-	//fetch esp32 for its id #
-	let frameID;
+	let FramesData = [];  
 
-	//check saved array for id #
-	let FramesData = [];
+	let gotFrameID = false;
+	let initializedDB = false;
+
+
+	//Get frame ID
+	fetch('getFrameID')
+	.then((response) => response.json())
+	.then((data) => {
+		console.log(data)
+		FRAMEID.set(data.frameID);
+		gotFrameID = true;
+		if(initializedDB == true){
+			checkFrame($FRAMEID);
+		}
+	})
+	.catch((error) => {
+		console.log("Could not connect to frame")
+		FRAMEID.set("OFFLINE");
+		console.log($FRAMEID);
+		
+  	});;
+
 
 	const checkFrame = (postFrameID) => {
+		console.log(postFrameID);
 		if (postFrameID == "OFFLINE") return false;
 
 		FramesData.forEach(frame => {
@@ -25,7 +46,6 @@
 		});
 
 		if(isNewFrame){
-			frameID = postFrameID;
 			const transaction = db.transaction(["frames"], "readwrite");
 			transaction.oncomplete = (event) => {
 				console.log("Added new frame!");
@@ -71,8 +91,12 @@
 				FramesData = FramesData;
 				cursor.continue();
 			}else{
+				initializedDB = true;
 				console.log(FramesData);
-				checkFrame(FRAMEID);
+				if(gotFrameID == true){
+					console.log("checking frame in indexdb")
+					checkFrame($FRAMEID);
+				}
 			}
 		};
     };
@@ -90,7 +114,7 @@
 {#if !showRecordPage}
 
 	{#if showFrameDetected}
-		<FrameDetected frameID={frameID} bind:showFrameDetected={showFrameDetected}/>
+		<FrameDetected bind:showFrameDetected={showFrameDetected}/>
 	{/if}
 
 	<Refresh />

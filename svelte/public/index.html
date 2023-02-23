@@ -6,10 +6,6 @@
 
     <title>FRAME</title>
 
-    <script>
-      var FRAMEID = "002";
-    </script>
-
     <link rel="manifest" href="/manifest.json" />
     <meta name="description" content="Frame App" />
     <meta name="theme-color" content="#2F3BA2" />
@@ -46,8 +42,6 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
 
   </script>
 
-    <script src="index.js"></script>
-
     <script defer src="/build/bundle.js"></script>
 
 
@@ -59,13 +53,13 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
     </noscript>
 
     <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/service-worker.js").then((reg) => {
-            console.log("Service worker registered.", reg);
-          });
-        });
-      }
+      // if ("serviceWorker" in navigator) {
+      //   window.addEventListener("load", () => {
+      //     navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+      //       console.log("Service worker registered.", reg);
+      //     });
+      //   });
+      // }
     </script>
   </body>
 </html>

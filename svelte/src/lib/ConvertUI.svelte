@@ -1,6 +1,5 @@
 <script>
     import { onMount } from 'svelte';
-    import { currentFrameID } from '../stores';
 
     let convertLoadingBar;
     let currentTaskText = "Loading in video file...";
@@ -165,23 +164,18 @@
                 convertFrames(frames);
                 return;
             };
-
             setTimeout(() => {
                 video.currentTime = currentTime;
-
                 if(frameCounter % fpsIntervel == 0){
                     context.drawImage(video, 0, 0, 240, 320);
                     //let base64ImageData = canvas.toDataURL('image/jpeg', 0.1);
-                    canvas.toBlob(function(blob){frames.push(blob);}, 'image/jpeg', 0.4);
+                    canvas.toBlob(function(blob){frames.push(blob);}, 'image/jpeg', 0.5);
                 }
 
                 frameCounter++;
                 console.log(currentTime);
                 currentTime += interval;
             }, "100")
-
-
-
         });
 
         video.addEventListener('loadeddata', function() { 

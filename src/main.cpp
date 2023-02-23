@@ -31,6 +31,8 @@
 
 #include <DNSServer.h>
 
+#include <ArduinoJson.h>
+
 #include "FS.h"
 #include "FFat.h"
 
@@ -466,11 +468,11 @@ void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
 }
 
 void handleFrameID(HTTPRequest * req, HTTPResponse * res){
-  res->setStatusCode(200);
-  res->setHeader("Content-Type", "text/plain");
-  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-  res->println(FRAMEID.c_str());
+  StaticJsonBuffer<JSON_OBJECT_SIZE(1)> jsonBuffer;
+  JsonObject& obj = jsonBuffer.createObject();
+  obj["frameID"] = FRAMEID.c_str();
+  res->setHeader("Content-Type", "application/json");
+  obj.printTo(*res);
 }
 
 void handleRedirect(HTTPRequest * req, HTTPResponse * res) {

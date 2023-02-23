@@ -1,8 +1,8 @@
 <script>
     import FrameIcon from "./FrameIcon.svelte";
     import { fade } from 'svelte/transition';
+    import { FRAMEID } from '../stores';
 
-    export let frameID;
     export let showFrameDetected;
 
     const closePopup = () =>{
@@ -17,7 +17,7 @@
 
     <FrameIcon />
 
-    <h2 style="color:#BABABA;">#{frameID}</h2>
+    <h2 style="color:#BABABA;">#{$FRAMEID}</h2>
     <button on:click={closePopup}>Close</button>
 </div>
 
