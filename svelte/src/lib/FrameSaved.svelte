@@ -1,23 +1,17 @@
 <script>
-    import FrameIcon from "./FrameIcon.svelte";
     import { fade } from 'svelte/transition';
-    import { FRAMEID } from '../stores';
 
-    export let showFrameDetected;
+    export let showFrameSaved;
 
     const closePopup = () =>{
-        showFrameDetected= false;
+        showFrameSaved= false;
     }
 </script>
 
 <div class="blackout"></div>
 
 <div class="bg" transition:fade="{{duration: 200 }}">
-    <h2>New Frame Detected!</h2>
-
-    <FrameIcon bgColor={"#BEBEBE"}/>
-
-    <h2 style="color:#BABABA;">#{$FRAMEID}</h2>
+    <h2>Successfully Saved Video!</h2>
     <button on:click={closePopup}>Close</button>
 </div>
 
@@ -32,7 +26,6 @@
         border: 7px solid #757575;
         border-radius: 23px;
         width: 90%;
-        min-height: 50%;
 
         display: flex;
         flex-direction: column;
@@ -51,6 +44,7 @@
         text-align: center;
         color: #fff;
         padding-top: 0.5em;
+        margin: 0.5em 0;
     }
 
     button{

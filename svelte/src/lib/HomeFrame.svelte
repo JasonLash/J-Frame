@@ -6,7 +6,7 @@
     const clickedFrame = () =>{
         currentFrameID.set(frameData.id)
         showRecordPage = true;
-        console.log(frameData.id);
+        console.log(frameData);
     }
 </script>
 

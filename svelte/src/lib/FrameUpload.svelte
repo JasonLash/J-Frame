@@ -3,22 +3,33 @@
     import { fade } from 'svelte/transition';
     import { FRAMEID } from '../stores';
 
-    export let showFrameDetected;
+    export let showUpload;
+    export let videoFileToUpload;
 
     const closePopup = () =>{
-        showFrameDetected= false;
+        showUpload= false;
     }
+
+    const uploadToFrame = () => {
+        let formData = new FormData();
+        let newFile = new File([videoFileToUpload], "pleaseworkvideo.mjpeg")
+        formData.append("data", newFile);
+        fetch('/upload', {method: "POST", body: formData})
+    }
+
+
 </script>
 
 <div class="blackout"></div>
 
 <div class="bg" transition:fade="{{duration: 200 }}">
-    <h2>New Frame Detected!</h2>
+    <h2>Upload To Frame</h2>
 
-    <FrameIcon bgColor={"#BEBEBE"}/>
+    <FrameIcon bgColor={"#E9CA5D"}/>
 
     <h2 style="color:#BABABA;">#{$FRAMEID}</h2>
-    <button on:click={closePopup}>Close</button>
+    <button on:click={uploadToFrame} class="uploadBTN">Upload</button>
+    <button on:click={closePopup}>Cancel</button>
 </div>
 
 <style>
@@ -54,7 +65,12 @@
     }
 
     button{
-        margin: 1em auto;
+        margin: 0.75em auto;
+    }
+
+    .uploadBTN{
+        background: #E9CA5D;
+        color:#222222;
     }
 
 </style>

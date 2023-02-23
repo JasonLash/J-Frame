@@ -1,38 +1,68 @@
 <script>
 	import Refresh from "./lib/Refresh.svelte";
 	import FrameDetected from "./lib/FrameDetected.svelte";
+	import FrameSaved from "./lib/FrameSaved.svelte";
 	import FrameCollection from "./lib/FrameCollection.svelte";
     import RecordPage from "./lib/RecordPage.svelte";
+	import FrameUpload from "./lib/FrameUpload.svelte";
+	
 	import { FRAMEID } from './stores';
 
 	//State 
 	let isNewFrame = true;
 	let showFrameDetected = false;
+	let showFrameSaved = false;
 	let showRecordPage = false;
+	let showUpload = false;
+	let savedVideoConnectedFrame = false;
 
 	let FramesData = [];  
 
 	let gotFrameID = false;
 	let initializedDB = false;
+	let videoFileToUpload;
+
+	function getFrameData(){
+		//Get frame ID
+		fetch('getFrameID')
+		.then((response) => response.json())
+		.then((data) => {
+			console.log(data)
+			FRAMEID.set(data.frameID);
+			gotFrameID = true;
+			if(initializedDB == true){
+				checkFrame($FRAMEID);
+			}
+		})
+		.catch((error) => {
+			console.log("Could not connect to frame")
+			FRAMEID.set("OFFLINE");
+			//FRAMEID.set("001");
+			// gotFrameID = true;
+			// if(initializedDB == true){
+			// 	checkFrame($FRAMEID);
+			// }
+			console.log($FRAMEID);
+			
+		});;
+	}
 
 
-	//Get frame ID
-	fetch('getFrameID')
-	.then((response) => response.json())
-	.then((data) => {
-		console.log(data)
-		FRAMEID.set(data.frameID);
-		gotFrameID = true;
+	//getFrameData();
+
+	$: if(showRecordPage == false){
+		getFrameData();
 		if(initializedDB == true){
-			checkFrame($FRAMEID);
+			checkDB();
 		}
-	})
-	.catch((error) => {
-		console.log("Could not connect to frame")
-		FRAMEID.set("OFFLINE");
-		console.log($FRAMEID);
-		
-  	});;
+	}
+
+
+	$: if(showFrameSaved == false){
+		if(savedVideoConnectedFrame){
+			showUpload = true;
+		}
+	}
 
 
 	const checkFrame = (postFrameID) => {
@@ -71,18 +101,40 @@
 
 			FramesData.push(frameDataScheme);
 			FramesData = FramesData;
+		}else {
+			FramesData.every(f => {
+				if(f.id == postFrameID){
+					console.log(f.id == postFrameID)
+					if(f.videoFile != null){
+						savedVideoConnectedFrame = true;
+						videoFileToUpload = f.videoFile;
+					}
+					return false;
+				}
+				return true;
+			})
 		}
 	}
 
     const request = window.indexedDB.open("MyTestDatabase", 1);
     let db;
+
+
     request.onerror = (event) => {
         console.error("Why didn't you allow my web app to use IndexedDB?!");
     };
-    request.onsuccess = (event) => {
-        db = event.target.result;
-        const transaction = db.transaction(["frames"]);
-        const objectStore = transaction.objectStore("frames");
+
+	request.onsuccess = (event) => {
+		db = event.target.result;
+		checkDB();
+	};
+
+
+	
+	function checkDB(){
+		FramesData = [];
+		const transaction = db.transaction(["frames"]);
+		const objectStore = transaction.objectStore("frames");
 		objectStore.openCursor().onsuccess = (event) => {
 			const cursor = event.target.result;
 			if (cursor) {
@@ -99,7 +151,8 @@
 				}
 			}
 		};
-    };
+	}
+
 
     request.onupgradeneeded = (event) => {
         db = event.target.result;
@@ -115,11 +168,15 @@
 
 	{#if showFrameDetected}
 		<FrameDetected bind:showFrameDetected={showFrameDetected}/>
+	{:else if showFrameSaved}
+		<FrameSaved  bind:showFrameSaved={showFrameSaved}/>
+	{:else if showUpload}
+		<FrameUpload  bind:showUpload={showUpload} bind:videoFileToUpload={videoFileToUpload}/>
 	{/if}
 
 	<Refresh />
 	<FrameCollection bind:FramesData={FramesData} bind:showRecordPage={showRecordPage}/>
 {:else}
-	<RecordPage bind:showRecordPage={showRecordPage} bind:db={db}/>
+	<RecordPage bind:showRecordPage={showRecordPage} bind:db={db} bind:showFrameSaved={showFrameSaved}/>
 
 {/if}

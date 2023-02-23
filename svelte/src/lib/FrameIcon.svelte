@@ -1,14 +1,15 @@
-
+<script>
+    export let bgColor;
+</script>
 
 <div class="center">
-    <div class="big">
+    <div class="big" style="background: {bgColor};">
         <div class="small"></div>
     </div>    
 </div>
 
 <style>
     .big{
-        background: #BEBEBE;
         border: 17px solid #000000;
         border-radius: 28px;
 

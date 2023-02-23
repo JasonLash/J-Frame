@@ -8,132 +8,109 @@
 
     export let showRecordPage;
     export let db;
+    export let showFrameSaved;
 
-    let currentCameraType = "BACK";
+    let currentCameraType = "FRONT";
     let currentTime = 5;
     let videoElement;
-    var recorder;
     let isRecording = false;
     let recorededVideo = false;
     let showConvert = false;
     let blob;
     let downloadLink;
+    let cameraAccess = false;
 
-
-    const goBack = () =>{
-        showRecordPage = false;
-    }
-
-
-    //video stuff
-    
-    const record = (time) =>{
-        if(isRecording) return;
-        isRecording = true;
-
-        recorder.startRecording();
-
-        var timeOutTime = time * 1000;
-        setTimeout(function() {
-            recorder.stopRecording(stopRecordingCallback);
-        }, timeOutTime);
-    }
 
     onMount(async () => {
-        captureCamera(function(camera) {
-            videoElement.muted = true;
-            videoElement.volume = 0;
-            videoElement.srcObject = camera;
-
-            recorder = RecordRTC(camera, {
-                type: 'video'
-            });
-
-            recorder.camera = camera;
-        });
+        cameraAccess = false;
+        askForCameraPermission().then((e) =>{
+            cameraAccess = true;
+        }).catch(function(error) {
+            alert('Unable to capture your camera. Please check console logs.');
+            console.error(error);
+        });;
 	});
 
-
-
-    
-    function captureCamera(callback) {
-        if(currentCameraType == "FRONT"){
-            navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240, facingMode: { exact: "environment" } }  }).then(function(camera) {
-                callback(camera);
-            }).catch(function(error) {
-                alert('Unable to capture your camera. Please check console logs.');
-                console.error(error);
-            });
-        }else{
-            navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 }  }).then(function(camera) {
-            //navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 240, height: 320 }  }).then(function(camera) {
-                callback(camera);
-            }).catch(function(error) {
-                alert('Unable to capture your camera. Please check console logs.');
-                console.error(error);
-            });
-        }
-
-    }
-
     $: if (currentCameraType == "FRONT" || currentCameraType == "BACK"){
-        captureCamera(function(camera) {
-            videoElement.muted = true;
-            videoElement.volume = 0;
-            videoElement.srcObject = camera;
-
-            recorder = RecordRTC(camera, {
-                type: 'video'
-            });
-
-            recorder.camera = camera;
-        });
-    }
-
-    function stopRecordingCallback() {
-        recorededVideo = true;
-        isRecording = false;
-        videoElement.src = videoElement.srcObject = null;
-        videoElement.muted = false;
-        videoElement.volume = 1;
-        videoElement.src = URL.createObjectURL(recorder.getBlob());
-        blob = recorder.getBlob()
-
-        // let frames = extractFramesFromVideo(blob, 30);
-
-        // console.log(frames);
-        
-        recorder.camera.stop();
-        recorder.destroy();
-        recorder = null;
+        askForCameraPermission();
     }
 
     const deleteVideo = () =>{
         recorededVideo = false;
         isRecording = false;
 
-        captureCamera(function(camera) {
-            videoElement.muted = true;
-            videoElement.volume = 0;
-            videoElement.srcObject = camera;
-
-            recorder = RecordRTC(camera, {
-                type: 'video'
-            });
-
-            recorder.camera = camera;
-        });
-
+        askForCameraPermission();
     }
 
     const convertVideo = () =>{
         showConvert = true;
     }
 
+    const goBack = () =>{
+        showRecordPage = false;
+    }
+
+    //new video stuff
+    let camStream = null;
+    let recorder = null;
+    let blobs_recorded = [];
+
+    async function askForCameraPermission(){
+        if(currentCameraType == "FRONT"){
+            camStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 }});
+        }else{
+            camStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240, facingMode: { exact: "environment" }}});
+        }
+        
+        
+        recorder = new MediaRecorder(camStream);
+
+        videoElement.muted = true;
+        videoElement.volume = 0;
+        videoElement.srcObject = camStream;
+    }
+
+    const startRecording = (time) => {
+        recorededVideo = false;
+        isRecording = true;
+
+        
+
+        recorder.addEventListener('dataavailable', function(e) {
+            blobs_recorded.push(e.data);
+        });
+
+        recorder.start(100);
+
+        setTimeout(function() {
+            stopRecording();
+        }, time * 1000);
+
+    }
+
+
+    const stopRecording = () => {
+        recorededVideo = true;
+        isRecording = false;
+
+        recorder.stop(); 
+        camStream.getTracks().forEach(track => track.stop());
+
+
+        blob = new Blob(blobs_recorded, { type: recorder.mimeType });
+        let videoLink = URL.createObjectURL(blob);
+        //alert(blob.size)
+        videoElement.src = videoLink;
+        downloadLink = videoLink;
+
+        console.log(blobs_recorded);
+        console.log(blob);
+    }
+
 </script>
 
 {#if showConvert}
-    <ConvertUI blob={blob} bind:db={db}/>
+    <ConvertUI blob={blob} bind:db={db} bind:showFrameSaved={showFrameSaved} bind:showRecordPage={showRecordPage}/>
 {/if}
 
 
@@ -143,8 +120,8 @@
 
     <h3>Frame #{$currentFrameID}</h3>
     <div class="vidHolder">
-        {#if !isRecording && !recorededVideo}
-            <button on:click={() => record(currentTime)} class="recordBtn"><h3>Record</h3></button>
+        {#if !isRecording && !recorededVideo && cameraAccess}
+            <button on:click={() => startRecording(currentTime)} class="recordBtn"><h3>Record</h3></button>
         {/if}
         <video bind:this={videoElement} muted autoplay playsinline loop></video>
     </div>
@@ -217,7 +194,6 @@
     }
 
     video{
-        background: red;
         width: 22rem;
         height: 30rem;
         margin: auto;
