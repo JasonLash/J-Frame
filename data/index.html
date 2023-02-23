@@ -6,7 +6,11 @@
 
     <title>FRAME</title>
 
-    <!-- <link rel="manifest" href="/manifest.json" /> -->
+    <script>
+      var FRAMEID = "001";
+    </script>
+
+    <link rel="manifest" href="/manifest.json" />
     <meta name="description" content="Frame App" />
     <meta name="theme-color" content="#2F3BA2" />
 
@@ -15,212 +19,207 @@
     <meta name="apple-mobile-web-app-title" content="Svelte PWA" />
     <!-- <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" /> -->
 
-    <script defer src="/bundle.js"></script>
     <style>
       * {
-          padding: 0;
-          margin: 0;
-          -moz-box-sizing: border-box; 
-          -webkit-box-sizing: border-box; 
-        box-sizing: border-box; 
-          font-family: '-apple-system', 'Roboto', sans-serif;
-      }
+    padding: 0;
+    margin: 0;
+    -moz-box-sizing: border-box; 
+    -webkit-box-sizing: border-box; 
+	box-sizing: border-box; 
+    font-family: '-apple-system', 'Roboto', sans-serif;
+}
 
-      html, body {
-          max-width: 100%;
-          overflow: hidden;
-          background: #323232;
-      }
+html, body {
+    max-width: 100%;
+    overflow: hidden;
+    background: #323232;
+}
 
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-      }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
 
-      h3{
-          color: #fff;
-          text-align: center;
-      }
+h3{
+    color: #fff;
+    text-align: center;
+}
 
-      h2{
-          color: #fff;
-          text-align: center;
-      }
-
-
-
-      button{
-          animation : none;
-          animation-delay : 0;
-          animation-direction : normal;
-          animation-duration : 0;
-          animation-fill-mode : none;
-          animation-iteration-count : 1;
-          animation-name : none;
-          animation-play-state : running;
-          animation-timing-function : ease;
-          backface-visibility : visible;
-          background : 0;
-          background-attachment : scroll;
-          background-clip : border-box;
-          background-color : transparent;
-          background-image : none;
-          background-origin : padding-box;
-          background-position : 0 0;
-          background-position-x : 0;
-          background-position-y : 0;
-          background-repeat : repeat;
-          background-size : auto auto;
-          border : 0;
-          border-style : none;
-          border-width : medium;
-          border-color : inherit;
-          border-bottom : 0;
-          border-bottom-color : inherit;
-          border-bottom-left-radius : 0;
-          border-bottom-right-radius : 0;
-          border-bottom-style : none;
-          border-bottom-width : medium;
-          border-collapse : separate;
-          border-image : none;
-          border-left : 0;
-          border-left-color : inherit;
-          border-left-style : none;
-          border-left-width : medium;
-          border-radius : 0;
-          border-right : 0;
-          border-right-color : inherit;
-          border-right-style : none;
-          border-right-width : medium;
-          border-spacing : 0;
-          border-top : 0;
-          border-top-color : inherit;
-          border-top-left-radius : 0;
-          border-top-right-radius : 0;
-          border-top-style : none;
-          border-top-width : medium;
-          bottom : auto;
-          box-shadow : none;
-          box-sizing : content-box;
-          caption-side : top;
-          clear : none;
-          clip : auto;
-          color : inherit;
-          columns : auto;
-          column-count : auto;
-          column-fill : balance;
-          column-gap : normal;
-          column-rule : medium none currentColor;
-          column-rule-color : currentColor;
-          column-rule-style : none;
-          column-rule-width : none;
-          column-span : 1;
-          column-width : auto;
-          content : normal;
-          counter-increment : none;
-          counter-reset : none;
-          cursor : auto;
-          direction : ltr;
-          display : inline;
-          empty-cells : show;
-          float : none;
-          font : normal;
-          font-family : inherit;
-          font-size : medium;
-          font-style : normal;
-          font-variant : normal;
-          font-weight : normal;
-          height : auto;
-          hyphens : none;
-          left : auto;
-          letter-spacing : normal;
-          line-height : normal;
-          list-style : none;
-          list-style-image : none;
-          list-style-position : outside;
-          list-style-type : disc;
-          margin : 0;
-          margin-bottom : 0;
-          margin-left : 0;
-          margin-right : 0;
-          margin-top : 0;
-          max-height : none;
-          max-width : none;
-          min-height : 0;
-          min-width : 0;
-          opacity : 1;
-          orphans : 0;
-          outline : 0;
-          outline-color : invert;
-          outline-style : none;
-          outline-width : medium;
-          overflow : visible;
-          overflow-x : visible;
-          overflow-y : visible;
-          padding : 0;
-          padding-bottom : 0;
-          padding-left : 0;
-          padding-right : 0;
-          padding-top : 0;
-          page-break-after : auto;
-          page-break-before : auto;
-          page-break-inside : auto;
-          perspective : none;
-          perspective-origin : 50% 50%;
-          position : static;
-          /* May need to alter quotes for different locales (e.g fr) */
-          quotes : '\201C' '\201D' '\2018' '\2019';
-          right : auto;
-          tab-size : 8;
-          table-layout : auto;
-          text-align : inherit;
-          text-align-last : auto;
-          text-decoration : none;
-          text-decoration-color : inherit;
-          text-decoration-line : none;
-          text-decoration-style : solid;
-          text-indent : 0;
-          text-shadow : none;
-          text-transform : none;
-          top : auto;
-          transform : none;
-          transform-style : flat;
-          transition : none;
-          transition-delay : 0s;
-          transition-duration : 0s;
-          transition-property : none;
-          transition-timing-function : ease;
-          unicode-bidi : normal;
-          vertical-align : baseline;
-          visibility : visible;
-          white-space : normal;
-          widows : 0;
-          width : auto;
-          word-spacing : normal;
-          z-index : auto;
-      }
+h2{
+    color: #fff;
+    text-align: center;
+}
 
 
-      button{
-          background: #939393;
-          color: #FFFFFF;
-          border: 4px solid #3C3C3C;
-          border-radius: 12px;
-          width: 90%;
-          text-align: center;
-          padding: .4em 0em;
-          font-size: 1.1em;
-          font-weight: 550;
-          margin: auto;
-      }
-      .vidHolder.svelte-1i78tf8{margin:auto;display:flex;justify-content:center}.recordBtn.svelte-1i78tf8{position:absolute;z-index:4;margin-top:25rem;width:80%;background:#97504B}.redBtn.svelte-1i78tf8{margin-top:2rem;background:#97504B}.saveBtn.svelte-1i78tf8{margin-top:2rem;background:#E9CA5D}.center.svelte-1i78tf8{display:flex;flex-direction:column;justify-content:center}h4.svelte-1i78tf8{color:#C7C7C7;text-align:center;margin:0.35rem auto}h3.svelte-1i78tf8{margin:0.25em auto}.backBtn.svelte-1i78tf8{width:30%}h3.svelte-1i78tf8{color:#fff;text-align:center}video.svelte-1i78tf8{background:red;width:22rem;height:30rem;margin:auto}.bg.svelte-1ebz6b2{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:50%;display:flex;flex-direction:column;justify-content:center}.blackout.svelte-1ebz6b2{position:absolute;background:#000000aa;width:100%;height:100%}h2.svelte-1ebz6b2{text-align:center;color:#fff;padding-top:0.5em}button.svelte-1ebz6b2{margin:1em auto}.frameCollection.svelte-p5k6wu{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-around}h1.svelte-1u93ogr{text-align:center;color:#fff;padding-top:1rem}.center.svelte-1u93ogr{padding-top:1em;display:flex;justify-content:center}.btnObj.svelte-17zyqyg{background:#939393;border:4px solid #3C3C3C;width:45%}.btnCollection.svelte-17zyqyg{display:flex;flex-direction:row;justify-content:center}h3.svelte-17zyqyg{margin:0.25em auto}.big.svelte-ihoour{background:#BEBEBE;border:17px solid #000000;border-radius:28px;width:12em;height:16em}.small.svelte-ihoour{border:13px solid #000000;border-radius:15px;width:8em;height:10em;margin:0 auto;margin-top:1em}.center.svelte-ihoour{display:flex;justify-content:center;padding-top:1em
-    }.btnObj.svelte-1osvx2o{background:#939393;border:4px solid #3C3C3C;width:30%}.btnCollection.svelte-1osvx2o{display:flex;flex-direction:row;justify-content:center}h3.svelte-1osvx2o{margin:0.25em auto}.big.svelte-8axr32{background:#BEBEBE;border:10px solid #000000;border-radius:14px;width:6em;height:8em}.small.svelte-8axr32{border:7px solid #000000;border-radius:9px;width:4em;height:5em;margin:0 auto;margin-top:0.5em}.frameObject.svelte-8axr32{margin:1em auto}h3.svelte-8axr32{text-align:center;color:#bbbbbb;letter-spacing:.05rem;margin-top:0.25em}.topAndBottom.svelte-8jmvgp{margin:1rem auto;display:flex;justify-content:center;flex-direction:column;width:90%}h4.svelte-8jmvgp{color:#C7C7C7;text-align:center;margin:0.35rem auto}.loadingBG.svelte-8jmvgp{width:100%;background:#757575;margin:1rem auto;border-radius:5px}.loadingMain.svelte-8jmvgp{height:30px;background:#E9CA5D;border-radius:5px}.bg.svelte-8jmvgp{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:10%;display:flex;flex-direction:column;justify-content:space-between;z-index:6}.blackout.svelte-8jmvgp{z-index:5;position:absolute;background:#000000aa;width:100vw;height:100vh}
 
+button{
+    animation : none;
+    animation-delay : 0;
+    animation-direction : normal;
+    animation-duration : 0;
+    animation-fill-mode : none;
+    animation-iteration-count : 1;
+    animation-name : none;
+    animation-play-state : running;
+    animation-timing-function : ease;
+    backface-visibility : visible;
+    background : 0;
+    background-attachment : scroll;
+    background-clip : border-box;
+    background-color : transparent;
+    background-image : none;
+    background-origin : padding-box;
+    background-position : 0 0;
+    background-position-x : 0;
+    background-position-y : 0;
+    background-repeat : repeat;
+    background-size : auto auto;
+    border : 0;
+    border-style : none;
+    border-width : medium;
+    border-color : inherit;
+    border-bottom : 0;
+    border-bottom-color : inherit;
+    border-bottom-left-radius : 0;
+    border-bottom-right-radius : 0;
+    border-bottom-style : none;
+    border-bottom-width : medium;
+    border-collapse : separate;
+    border-image : none;
+    border-left : 0;
+    border-left-color : inherit;
+    border-left-style : none;
+    border-left-width : medium;
+    border-radius : 0;
+    border-right : 0;
+    border-right-color : inherit;
+    border-right-style : none;
+    border-right-width : medium;
+    border-spacing : 0;
+    border-top : 0;
+    border-top-color : inherit;
+    border-top-left-radius : 0;
+    border-top-right-radius : 0;
+    border-top-style : none;
+    border-top-width : medium;
+    bottom : auto;
+    box-shadow : none;
+    box-sizing : content-box;
+    caption-side : top;
+    clear : none;
+    clip : auto;
+    color : inherit;
+    columns : auto;
+    column-count : auto;
+    column-fill : balance;
+    column-gap : normal;
+    column-rule : medium none currentColor;
+    column-rule-color : currentColor;
+    column-rule-style : none;
+    column-rule-width : none;
+    column-span : 1;
+    column-width : auto;
+    content : normal;
+    counter-increment : none;
+    counter-reset : none;
+    cursor : auto;
+    direction : ltr;
+    display : inline;
+    empty-cells : show;
+    float : none;
+    font : normal;
+    font-family : inherit;
+    font-size : medium;
+    font-style : normal;
+    font-variant : normal;
+    font-weight : normal;
+    height : auto;
+    hyphens : none;
+    left : auto;
+    letter-spacing : normal;
+    line-height : normal;
+    list-style : none;
+    list-style-image : none;
+    list-style-position : outside;
+    list-style-type : disc;
+    margin : 0;
+    margin-bottom : 0;
+    margin-left : 0;
+    margin-right : 0;
+    margin-top : 0;
+    max-height : none;
+    max-width : none;
+    min-height : 0;
+    min-width : 0;
+    opacity : 1;
+    orphans : 0;
+    outline : 0;
+    outline-color : invert;
+    outline-style : none;
+    outline-width : medium;
+    overflow : visible;
+    overflow-x : visible;
+    overflow-y : visible;
+    padding : 0;
+    padding-bottom : 0;
+    padding-left : 0;
+    padding-right : 0;
+    padding-top : 0;
+    page-break-after : auto;
+    page-break-before : auto;
+    page-break-inside : auto;
+    perspective : none;
+    perspective-origin : 50% 50%;
+    position : static;
+    /* May need to alter quotes for different locales (e.g fr) */
+    quotes : '\201C' '\201D' '\2018' '\2019';
+    right : auto;
+    tab-size : 8;
+    table-layout : auto;
+    text-align : inherit;
+    text-align-last : auto;
+    text-decoration : none;
+    text-decoration-color : inherit;
+    text-decoration-line : none;
+    text-decoration-style : solid;
+    text-indent : 0;
+    text-shadow : none;
+    text-transform : none;
+    top : auto;
+    transform : none;
+    transform-style : flat;
+    transition : none;
+    transition-delay : 0s;
+    transition-duration : 0s;
+    transition-property : none;
+    transition-timing-function : ease;
+    unicode-bidi : normal;
+    vertical-align : baseline;
+    visibility : visible;
+    white-space : normal;
+    widows : 0;
+    width : auto;
+    word-spacing : normal;
+    z-index : auto;
+}
+
+
+button{
+    background: #939393;
+    color: #FFFFFF;
+    border: 4px solid #3C3C3C;
+    border-radius: 12px;
+    width: 90%;
+    text-align: center;
+    padding: .4em 0em;
+    font-size: 1.1em;
+    font-weight: 550;
+    margin: auto;
+}
     </style>
+    <style>.bg.svelte-1ebz6b2{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:50%;display:flex;flex-direction:column;justify-content:center}.blackout.svelte-1ebz6b2{position:absolute;background:#000000aa;width:100%;height:100%}h2.svelte-1ebz6b2{text-align:center;color:#fff;padding-top:0.5em}button.svelte-1ebz6b2{margin:1em auto}h1.svelte-1u93ogr{text-align:center;color:#fff;padding-top:1rem}.center.svelte-1u93ogr{padding-top:1em;display:flex;justify-content:center}.frameCollection.svelte-p5k6wu{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-around}.vidHolder.svelte-1i78tf8{margin:auto;display:flex;justify-content:center}.recordBtn.svelte-1i78tf8{position:absolute;z-index:4;margin-top:25rem;width:80%;background:#97504B}.redBtn.svelte-1i78tf8{margin-top:2rem;background:#97504B}.saveBtn.svelte-1i78tf8{margin-top:2rem;background:#E9CA5D}.center.svelte-1i78tf8{display:flex;flex-direction:column;justify-content:center}h4.svelte-1i78tf8{color:#C7C7C7;text-align:center;margin:0.35rem auto}h3.svelte-1i78tf8{margin:0.25em auto}.backBtn.svelte-1i78tf8{width:30%}h3.svelte-1i78tf8{color:#fff;text-align:center}video.svelte-1i78tf8{background:red;width:22rem;height:30rem;margin:auto}.big.svelte-gc3fbo{background:#BEBEBE;border:10px solid #000000;border-radius:14px;width:6em;height:8em}.small.svelte-gc3fbo{border:7px solid #000000;border-radius:9px;width:4em;height:5em;margin:0 auto;margin-top:0.5em}.frameObject.svelte-gc3fbo{margin:1em auto}h3.svelte-gc3fbo{text-align:center;color:#bbbbbb;letter-spacing:.05rem;margin-top:0.3em}.btnObj.svelte-17zyqyg{background:#939393;border:4px solid #3C3C3C;width:45%}.btnCollection.svelte-17zyqyg{display:flex;flex-direction:row;justify-content:center}h3.svelte-17zyqyg{margin:0.25em auto}.big.svelte-ihoour{background:#BEBEBE;border:17px solid #000000;border-radius:28px;width:12em;height:16em}.small.svelte-ihoour{border:13px solid #000000;border-radius:15px;width:8em;height:10em;margin:0 auto;margin-top:1em}.center.svelte-ihoour{display:flex;justify-content:center;padding-top:1em
+    }.btnObj.svelte-1osvx2o{background:#939393;border:4px solid #3C3C3C;width:30%}.btnCollection.svelte-1osvx2o{display:flex;flex-direction:row;justify-content:center}h3.svelte-1osvx2o{margin:0.25em auto}.topAndBottom.svelte-8jmvgp{margin:1rem auto;display:flex;justify-content:center;flex-direction:column;width:90%}h4.svelte-8jmvgp{color:#C7C7C7;text-align:center;margin:0.35rem auto}.loadingBG.svelte-8jmvgp{width:100%;background:#757575;margin:1rem auto;border-radius:5px}.loadingMain.svelte-8jmvgp{height:30px;background:#E9CA5D;border-radius:5px}.bg.svelte-8jmvgp{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:10%;display:flex;flex-direction:column;justify-content:space-between;z-index:6}.blackout.svelte-8jmvgp{z-index:5;position:absolute;background:#000000aa;width:100vw;height:100vh}</style>
 
-    <script>
 
-
-    </script>
 
 
     <script>
@@ -245,6 +244,12 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
   </script>
 
 
+    <script>window.onload = function() {var app=function(){"use strict";function e(){}const t=e=>e;function n(e){return e()}function o(){return Object.create(null)}function s(e){e.forEach(n)}function r(e){return"function"==typeof e}function c(e,t){return e!=e?t==t:e!==t||e&&"object"==typeof e||"function"==typeof e}function l(t,n,o){t.$$.on_destroy.push(function(t,...n){if(null==t)return e;const o=t.subscribe(...n);return o.unsubscribe?()=>o.unsubscribe():o}(n,o))}const i="undefined"!=typeof window;let a=i?()=>window.performance.now():()=>Date.now(),u=i?e=>requestAnimationFrame(e):e;const d=new Set;function f(e){d.forEach((t=>{t.c(e)||(d.delete(t),t.f())})),0!==d.size&&u(f)}let m=!1;function p(e,t,n,o){for(;e<t;){const s=e+(t-e>>1);n(s)<=o?e=s+1:t=s}return e}function h(e,t){m?(!function(e){if(e.hydrate_init)return;e.hydrate_init=!0;const t=e.childNodes,n=new Int32Array(t.length+1),o=new Int32Array(t.length);n[0]=-1;let s=0;for(let e=0;e<t.length;e++){const r=p(1,s+1,(e=>t[n[e]].claim_order),t[e].claim_order)-1;o[e]=n[r]+1;const c=r+1;n[c]=e,s=Math.max(c,s)}const r=[],c=[];let l=t.length-1;for(let e=n[s]+1;0!=e;e=o[e-1]){for(r.push(t[e-1]);l>=e;l--)c.push(t[l]);l--}for(;l>=0;l--)c.push(t[l]);r.reverse(),c.sort(((e,t)=>e.claim_order-t.claim_order));for(let t=0,n=0;t<c.length;t++){for(;n<r.length&&c[t].claim_order>=r[n].claim_order;)n++;const o=n<r.length?r[n]:null;e.insertBefore(c[t],o)}}(e),(void 0===e.actual_end_child||null!==e.actual_end_child&&e.actual_end_child.parentElement!==e)&&(e.actual_end_child=e.firstChild),t!==e.actual_end_child?e.insertBefore(t,e.actual_end_child):e.actual_end_child=t.nextSibling):t.parentNode!==e&&e.appendChild(t)}function v(e,t,n){m&&!n?h(e,t):t.parentNode===e&&t.nextSibling==n||e.insertBefore(t,n||null)}function g(e){e.parentNode.removeChild(e)}function b(e){return document.createElement(e)}function $(e){return document.createTextNode(e)}function x(){return $(" ")}function y(e,t,n,o){return e.addEventListener(t,n,o),()=>e.removeEventListener(t,n,o)}function w(e,t,n){null==n?e.removeAttribute(t):e.getAttribute(t)!==n&&e.setAttribute(t,n)}function C(e,t){t=""+t,e.wholeText!==t&&(e.data=t)}function _(e,t,n,o){e.style.setProperty(t,n,o?"important":"")}const T=new Set;let R,k=0;function D(e,t,n,o,s,r,c,l=0){const i=16.666/o;let a="{\n";for(let e=0;e<=1;e+=i){const o=t+(n-t)*r(e);a+=100*e+`%{${c(o,1-o)}}\n`}const u=a+`100% {${c(n,1-n)}}\n}`,d=`__svelte_${function(e){let t=5381,n=e.length;for(;n--;)t=(t<<5)-t^e.charCodeAt(n);return t>>>0}(u)}_${l}`,f=e.ownerDocument;T.add(f);const m=f.__svelte_stylesheet||(f.__svelte_stylesheet=f.head.appendChild(b("style")).sheet),p=f.__svelte_rules||(f.__svelte_rules={});p[d]||(p[d]=!0,m.insertRule(`@keyframes ${d} ${u}`,m.cssRules.length));const h=e.style.animation||"";return e.style.animation=`${h?`${h}, `:""}${d} ${o}ms linear ${s}ms 1 both`,k+=1,d}function j(e,t){const n=(e.style.animation||"").split(", "),o=n.filter(t?e=>e.indexOf(t)<0:e=>-1===e.indexOf("__svelte")),s=n.length-o.length;s&&(e.style.animation=o.join(", "),k-=s,k||u((()=>{k||(T.forEach((e=>{const t=e.__svelte_stylesheet;let n=t.cssRules.length;for(;n--;)t.deleteRule(n);e.__svelte_rules={}})),T.clear())})))}function O(e){R=e}function F(e){(function(){if(!R)throw new Error("Function called outside component initialization");return R})().$$.on_mount.push(e)}const L=[],M=[],E=[],B=[],P=Promise.resolve();let A=!1;function H(e){E.push(e)}function z(e){B.push(e)}let N=!1;const I=new Set;function S(){if(!N){N=!0;do{for(let e=0;e<L.length;e+=1){const t=L[e];O(t),q(t.$$)}for(O(null),L.length=0;M.length;)M.pop()();for(let e=0;e<E.length;e+=1){const t=E[e];I.has(t)||(I.add(t),t())}E.length=0}while(L.length);for(;B.length;)B.pop()();A=!1,N=!1,I.clear()}}function q(e){if(null!==e.fragment){e.update(),s(e.before_update);const t=e.dirty;e.dirty=[-1],e.fragment&&e.fragment.p(e.ctx,t),e.after_update.forEach(H)}}let U;function K(e,t,n){e.dispatchEvent(function(e,t,n=!1){const o=document.createEvent("CustomEvent");return o.initCustomEvent(e,n,!1,t),o}(`${t?"intro":"outro"}${n}`))}const V=new Set;let W;function G(){W={r:0,c:[],p:W}}function J(){W.r||s(W.c),W=W.p}function Q(e,t){e&&e.i&&(V.delete(e),e.i(t))}function X(e,t,n,o){if(e&&e.o){if(V.has(e))return;V.add(e),W.c.push((()=>{V.delete(e),o&&(n&&e.d(1),o())})),e.o(t)}}const Y={duration:0};function Z(n,o,c,l){let i=o(n,c),m=l?0:1,p=null,h=null,v=null;function g(){v&&j(n,v)}function b(e,t){const n=e.b-m;return t*=Math.abs(n),{a:m,b:e.b,d:n,duration:t,start:e.start,end:e.start+t,group:e.group}}function $(o){const{delay:r=0,duration:c=300,easing:l=t,tick:$=e,css:x}=i||Y,y={start:a()+r,b:o};o||(y.group=W,W.r+=1),p||h?h=y:(x&&(g(),v=D(n,m,o,c,r,l,x)),o&&$(0,1),p=b(y,c),H((()=>K(n,o,"start"))),function(e){let t;0===d.size&&u(f),new Promise((n=>{d.add(t={c:e,f:n})}))}((e=>{if(h&&e>h.start&&(p=b(h,c),h=null,K(n,p.b,"start"),x&&(g(),v=D(n,m,p.b,p.duration,0,l,i.css))),p)if(e>=p.end)$(m=p.b,1-m),K(n,p.b,"end"),h||(p.b?g():--p.group.r||s(p.group.c)),p=null;else if(e>=p.start){const t=e-p.start;m=p.a+p.d*l(t/p.duration),$(m,1-m)}return!(!p&&!h)})))}return{run(e){r(i)?(U||(U=Promise.resolve(),U.then((()=>{U=null}))),U).then((()=>{i=i(),$(e)})):$(e)},end(){g(),p=h=null}}}function ee(e,t,n){const o=e.$$.props[t];void 0!==o&&(e.$$.bound[o]=n,n(e.$$.ctx[o]))}function te(e){e&&e.c()}function ne(e,t,o,c){const{fragment:l,on_mount:i,on_destroy:a,after_update:u}=e.$$;l&&l.m(t,o),c||H((()=>{const t=i.map(n).filter(r);a?a.push(...t):s(t),e.$$.on_mount=[]})),u.forEach(H)}function oe(e,t){const n=e.$$;null!==n.fragment&&(s(n.on_destroy),n.fragment&&n.fragment.d(t),n.on_destroy=n.fragment=null,n.ctx=[])}function se(e,t){-1===e.$$.dirty[0]&&(L.push(e),A||(A=!0,P.then(S)),e.$$.dirty.fill(0)),e.$$.dirty[t/31|0]|=1<<t%31}function re(t,n,r,c,l,i,a=[-1]){const u=R;O(t);const d=t.$$={fragment:null,ctx:null,props:i,update:e,not_equal:l,bound:o(),on_mount:[],on_destroy:[],on_disconnect:[],before_update:[],after_update:[],context:new Map(u?u.$$.context:n.context||[]),callbacks:o(),dirty:a,skip_bound:!1};let f=!1;if(d.ctx=r?r(t,n.props||{},((e,n,...o)=>{const s=o.length?o[0]:n;return d.ctx&&l(d.ctx[e],d.ctx[e]=s)&&(!d.skip_bound&&d.bound[e]&&d.bound[e](s),f&&se(t,e)),n})):[],d.update(),f=!0,s(d.before_update),d.fragment=!!c&&c(d.ctx),n.target){if(n.hydrate){m=!0;const e=function(e){return Array.from(e.childNodes)}(n.target);d.fragment&&d.fragment.l(e),e.forEach(g)}else d.fragment&&d.fragment.c();n.intro&&Q(t.$$.fragment),ne(t,n.target,n.anchor,n.customElement),m=!1,S()}O(u)}class ce{$destroy(){oe(this,1),this.$destroy=e}$on(e,t){const n=this.$$.callbacks[e]||(this.$$.callbacks[e]=[]);return n.push(t),()=>{const e=n.indexOf(t);-1!==e&&n.splice(e,1)}}$set(e){var t;this.$$set&&(t=e,0!==Object.keys(t).length)&&(this.$$.skip_bound=!0,this.$$set(e),this.$$.skip_bound=!1)}}function le(t){let n,o,s,r,c,l;return{c(){n=b("h1"),n.textContent="Frames",o=x(),s=b("div"),r=b("button"),r.textContent="Refresh",w(n,"class","svelte-1u93ogr"),w(s,"class","center svelte-1u93ogr")},m(e,i){v(e,n,i),v(e,o,i),v(e,s,i),h(s,r),c||(l=y(r,"click",t[0]),c=!0)},p:e,i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(s),c=!1,l()}}}function ie(e){return[()=>{window.location.href="/"}]}class ae extends ce{constructor(e){super(),re(this,e,ie,le,c,{})}}function ue(t){let n;return{c(){n=b("div"),n.innerHTML='<div class="big svelte-ihoour"><div class="small svelte-ihoour"></div></div>',w(n,"class","center svelte-ihoour")},m(e,t){v(e,n,t)},p:e,i:e,o:e,d(e){e&&g(n)}}}class de extends ce{constructor(e){super(),re(this,e,null,ue,c,{})}}function fe(e,{delay:n=0,duration:o=400,easing:s=t}={}){const r=+getComputedStyle(e).opacity;return{delay:n,duration:o,easing:s,css:e=>"opacity: "+e*r}}function me(e){let t,n,o,s,r,c,l,i,a,u,d,f,m,p,T,R;return c=new de({}),{c(){t=b("div"),n=x(),o=b("div"),s=b("h2"),s.textContent="New Frame Detected!",r=x(),te(c.$$.fragment),l=x(),i=b("h2"),a=$("#"),u=$(e[0]),d=x(),f=b("button"),f.textContent="Close",w(t,"class","blackout svelte-1ebz6b2"),w(s,"class","svelte-1ebz6b2"),_(i,"color","#BABABA"),w(i,"class","svelte-1ebz6b2"),w(f,"class","svelte-1ebz6b2"),w(o,"class","bg svelte-1ebz6b2")},m(m,g){v(m,t,g),v(m,n,g),v(m,o,g),h(o,s),h(o,r),ne(c,o,null),h(o,l),h(o,i),h(i,a),h(i,u),h(o,d),h(o,f),p=!0,T||(R=y(f,"click",e[1]),T=!0)},p(e,[t]){(!p||1&t)&&C(u,e[0])},i(e){p||(Q(c.$$.fragment,e),H((()=>{m||(m=Z(o,fe,{duration:200},!0)),m.run(1)})),p=!0)},o(e){X(c.$$.fragment,e),m||(m=Z(o,fe,{duration:200},!1)),m.run(0),p=!1},d(e){e&&g(t),e&&g(n),e&&g(o),oe(c),e&&m&&m.end(),T=!1,R()}}}function pe(e,t,n){let{frameID:o}=t,{showFrameDetected:s}=t;return e.$$set=e=>{"frameID"in e&&n(0,o=e.frameID),"showFrameDetected"in e&&n(2,s=e.showFrameDetected)},[o,()=>{n(2,s=!1)},s]}class he extends ce{constructor(e){super(),re(this,e,pe,me,c,{frameID:0,showFrameDetected:2})}}const ve=[];const ge=function(t,n=e){let o;const s=[];function r(e){if(c(t,e)&&(t=e,o)){const e=!ve.length;for(let e=0;e<s.length;e+=1){const n=s[e];n[1](),ve.push(n,t)}if(e){for(let e=0;e<ve.length;e+=2)ve[e][0](ve[e+1]);ve.length=0}}}return{set:r,update:function(e){r(e(t))},subscribe:function(c,l=e){const i=[c,l];return s.push(i),1===s.length&&(o=n(r)||e),c(t),()=>{const e=s.indexOf(i);-1!==e&&s.splice(e,1),0===s.length&&(o(),o=null)}}}}("001");function be(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',w(t,"class","big svelte-gc3fbo")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function $e(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',w(t,"class","big svelte-gc3fbo"),_(t,"background","#E9CA5D")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function xe(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',w(t,"class","big svelte-gc3fbo"),_(t,"outline","4px solid #5D6AE8"),_(t,"background","#E9CA5D")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function ye(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',w(t,"class","big svelte-gc3fbo"),_(t,"outline","4px solid #5D6AE8")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function we(t){let n,o,s,r,c,l,i,a=t[0].id+"";function u(e,t){return e[0].id==FRAMEID&&null==e[0].videoFile?ye:e[0].id==FRAMEID&&null!=e[0].videoFile?xe:null!=e[0].videoFile?$e:be}let d=u(t),f=d(t);return{c(){n=b("div"),f.c(),o=x(),s=b("h3"),r=$("#"),c=$(a),w(s,"class","svelte-gc3fbo"),w(n,"class","frameObject svelte-gc3fbo")},m(e,a){v(e,n,a),f.m(n,null),h(n,o),h(n,s),h(s,r),h(s,c),l||(i=y(n,"click",t[1]),l=!0)},p(e,[t]){d!==(d=u(e))&&(f.d(1),f=d(e),f&&(f.c(),f.m(n,o))),1&t&&a!==(a=e[0].id+"")&&C(c,a)},i:e,o:e,d(e){e&&g(n),f.d(),l=!1,i()}}}function Ce(e,t,n){let{frameData:o}=t,{showRecordPage:s}=t;return e.$$set=e=>{"frameData"in e&&n(0,o=e.frameData),"showRecordPage"in e&&n(2,s=e.showRecordPage)},[o,()=>{ge.set(o.id),n(2,s=!0),console.log(o.id)},s]}class _e extends ce{constructor(e){super(),re(this,e,Ce,we,c,{frameData:0,showRecordPage:2})}}function Te(e,t,n){const o=e.slice();return o[3]=t[n],o}function Re(e){let t,n,o;function s(t){e[2](t)}let r={frameData:e[3]};return void 0!==e[0]&&(r.showRecordPage=e[0]),t=new _e({props:r}),M.push((()=>ee(t,"showRecordPage",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};2&o&&(s.frameData=e[3]),!n&&1&o&&(n=!0,s.showRecordPage=e[0],z((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function ke(e){let t,n,o=e[1],s=[];for(let t=0;t<o.length;t+=1)s[t]=Re(Te(e,o,t));const r=e=>X(s[e],1,1,(()=>{s[e]=null}));return{c(){t=b("div");for(let e=0;e<s.length;e+=1)s[e].c();w(t,"class","frameCollection svelte-p5k6wu")},m(e,o){v(e,t,o);for(let e=0;e<s.length;e+=1)s[e].m(t,null);n=!0},p(e,[n]){if(3&n){let c;for(o=e[1],c=0;c<o.length;c+=1){const r=Te(e,o,c);s[c]?(s[c].p(r,n),Q(s[c],1)):(s[c]=Re(r),s[c].c(),Q(s[c],1),s[c].m(t,null))}for(G(),c=o.length;c<s.length;c+=1)r(c);J()}},i(e){if(!n){for(let e=0;e<o.length;e+=1)Q(s[e]);n=!0}},o(e){s=s.filter(Boolean);for(let e=0;e<s.length;e+=1)X(s[e]);n=!1},d(e){e&&g(t),function(e,t){for(let n=0;n<e.length;n+=1)e[n]&&e[n].d(t)}(s,e)}}}function De(e,t,n){let{FramesData:o}=t,{showRecordPage:s}=t;return e.$$set=e=>{"FramesData"in e&&n(1,o=e.FramesData),"showRecordPage"in e&&n(0,s=e.showRecordPage)},[s,o,function(e){s=e,n(0,s)}]}class je extends ce{constructor(e){super(),re(this,e,De,ke,c,{FramesData:1,showRecordPage:0})}}function Oe(t){let n,o,s,r,c;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-17zyqyg">Front</h3>',o=x(),s=b("div"),s.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-17zyqyg">Back</h3>',w(n,"class","btnObj svelte-17zyqyg"),_(n,"border-radius","12px 0px 0px 12px"),w(s,"class","btnObj svelte-17zyqyg"),_(s,"border-radius","0px 12px 12px 0px"),_(s,"background","#3C3C3C")},m(e,l){v(e,n,l),v(e,o,l),v(e,s,l),r||(c=y(n,"click",t[3]),r=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(s),r=!1,c()}}}function Fe(t){let n,o,s,r,c;return{c(){n=b("div"),n.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-17zyqyg">Front</h3>',o=x(),s=b("div"),s.innerHTML='<h3 class="svelte-17zyqyg">Back</h3>',w(n,"class","btnObj svelte-17zyqyg"),_(n,"border-radius","12px 0px 0px 12px"),_(n,"background","#3C3C3C"),w(s,"class","btnObj svelte-17zyqyg"),_(s,"border-radius","0px 12px 12px 0px")},m(e,l){v(e,n,l),v(e,o,l),v(e,s,l),r||(c=y(s,"click",t[2]),r=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(s),r=!1,c()}}}function Le(t){let n;function o(e,t){return"FRONT"==e[0]?Fe:Oe}let s=o(t),r=s(t);return{c(){n=b("div"),r.c(),w(n,"class","btnCollection svelte-17zyqyg")},m(e,t){v(e,n,t),r.m(n,null)},p(e,[t]){s===(s=o(e))&&r?r.p(e,t):(r.d(1),r=s(e),r&&(r.c(),r.m(n,null)))},i:e,o:e,d(e){e&&g(n),r.d()}}}function Me(e,t,n){let{currentCameraType:o}=t;const s=e=>{n(0,o=e)};return e.$$set=e=>{"currentCameraType"in e&&n(0,o=e.currentCameraType)},[o,s,()=>s("BACK"),()=>s("FRONT")]}class Ee extends ce{constructor(e){super(),re(this,e,Me,Le,c,{currentCameraType:0})}}function Be(t){let n,o,r,c,l,i,a;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-1osvx2o">5 s</h3>',o=x(),r=b("div"),r.innerHTML='<h3 class="svelte-1osvx2o">10 s</h3>',c=x(),l=b("div"),l.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">15 s</h3>',w(n,"class","btnObj svelte-1osvx2o"),_(n,"border-radius","12px 0px 0px 12px"),w(r,"class","btnObj svelte-1osvx2o"),w(l,"class","btnObj svelte-1osvx2o"),_(l,"border-radius","0px 12px 12px 0px"),_(l,"background","#3C3C3C")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),i||(a=[y(n,"click",t[6]),y(r,"click",t[7])],i=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),i=!1,s(a)}}}function Pe(t){let n,o,r,c,l,i,a;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-1osvx2o">5 s</h3>',o=x(),r=b("div"),r.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">10 s</h3>',c=x(),l=b("div"),l.innerHTML='<h3 class="svelte-1osvx2o">15 s</h3>',w(n,"class","btnObj svelte-1osvx2o"),_(n,"border-radius","12px 0px 0px 12px"),w(r,"class","btnObj svelte-1osvx2o"),_(r,"background","#3C3C3C"),w(l,"class","btnObj svelte-1osvx2o"),_(l,"border-radius","0px 12px 12px 0px")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),i||(a=[y(n,"click",t[4]),y(l,"click",t[5])],i=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),i=!1,s(a)}}}function Ae(t){let n,o,r,c,l,i,a;return{c(){n=b("div"),n.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">5 s</h3>',o=x(),r=b("div"),r.innerHTML='<h3 class="svelte-1osvx2o">10 s</h3>',c=x(),l=b("div"),l.innerHTML='<h3 class="svelte-1osvx2o">15 s</h3>',w(n,"class","btnObj sBtnObj svelte-1osvx2o"),_(n,"border-radius","12px 0px 0px 12px"),_(n,"background","#3C3C3C"),w(r,"class","btnObj sBtnObj svelte-1osvx2o"),w(l,"class","btnObj sBtnObj svelte-1osvx2o"),_(l,"border-radius","0px 12px 12px 0px")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),i||(a=[y(r,"click",t[2]),y(l,"click",t[3])],i=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),i=!1,s(a)}}}function He(t){let n;function o(e,t){return 5==e[0]?Ae:10==e[0]?Pe:Be}let s=o(t),r=s(t);return{c(){n=b("div"),r.c(),w(n,"class","btnCollection svelte-1osvx2o")},m(e,t){v(e,n,t),r.m(n,null)},p(e,[t]){s===(s=o(e))&&r?r.p(e,t):(r.d(1),r=s(e),r&&(r.c(),r.m(n,null)))},i:e,o:e,d(e){e&&g(n),r.d()}}}function ze(e,t,n){let{currentTime:o}=t;const s=e=>{n(0,o=e)};return e.$$set=e=>{"currentTime"in e&&n(0,o=e.currentTime)},[o,s,()=>s(10),()=>s(15),()=>s(5),()=>s(15),()=>s(5),()=>s(10)]}class Ne extends ce{constructor(e){super(),re(this,e,ze,He,c,{currentTime:0})}}function Ie(t){let n,o,s,r,c,l,i,a,u,d,f,m,p,y,C,_,T,R;return{c(){n=b("div"),o=x(),s=b("div"),r=b("div"),c=b("video"),l=x(),i=b("a"),a=$("DOWNLOADNOW"),u=x(),d=b("h2"),d.textContent="Saving Video",f=x(),m=b("h4"),m.textContent="This might take a bit",p=x(),y=b("div"),C=b("div"),_=b("div"),T=x(),R=b("h4"),R.textContent=`${Se}`,w(n,"class","blackout svelte-8jmvgp"),w(i,"href",t[2]),w(m,"class","svelte-8jmvgp"),w(r,"class","topAndBottom svelte-8jmvgp"),w(_,"class","loadingMain svelte-8jmvgp"),w(C,"class","loadingBG svelte-8jmvgp"),w(R,"class","svelte-8jmvgp"),w(y,"class","topAndBottom svelte-8jmvgp"),w(s,"class","bg svelte-8jmvgp")},m(e,g){v(e,n,g),v(e,o,g),v(e,s,g),h(s,r),h(r,c),t[5](c),h(r,l),h(r,i),h(i,a),h(r,u),h(r,d),h(r,f),h(r,m),h(s,p),h(s,y),h(y,C),h(C,_),t[6](_),h(y,T),h(y,R)},p(e,[t]){4&t&&w(i,"href",e[2])},i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(s),t[5](null),t[6](null)}}}let Se="Loading in video file...";function qe(e,t,n){let o,s,r,{blob:c}=t,{db:l}=t;F((async()=>{n(0,o.style.width="0%",o),i(c)}));const i=e=>{let t,o=URL.createObjectURL(e),c=document.createElement("canvas"),l=c.getContext("2d"),i=0;c.width=240,c.height=320,n(1,s.src=o,s),n(1,s.autoplay=!0,s),n(1,s.playsInline=!0,s),n(1,s.muted=!0,s),n(1,s.controls=!1,s),s.load();let a=[],u=0;s.addEventListener("seeked",(e=>{i>t?(e=>{let t=new Blob(e,{type:"video/mjpeg"});n(2,r=URL.createObjectURL(t));let o=new FormData,s=new File([t],"pleaseworkvideo.mjpeg");o.append("data",s),fetch("/upload",{method:"POST",body:o})})(a):setTimeout((()=>{n(1,s.currentTime=i,s),u%3==0&&(l.drawImage(s,0,0,240,320),c.toBlob((function(e){a.push(e)}),"image/jpeg",.4)),u++,console.log(i),i+=.03333333333333333}),"100")})),s.addEventListener("loadeddata",(function(){t=s.duration,console.log(t),n(1,s.currentTime=i,s)})),s.addEventListener("durationchange",(function(){t=s.duration}))};return e.$$set=e=>{"blob"in e&&n(3,c=e.blob),"db"in e&&n(4,l=e.db)},[o,s,r,c,l,function(e){M[e?"unshift":"push"]((()=>{s=e,n(1,s)}))},function(e){M[e?"unshift":"push"]((()=>{o=e,n(0,o)}))}]}class Ue extends ce{constructor(e){super(),re(this,e,qe,Ie,c,{blob:3,db:4})}}function Ke(e){let t,n,o;function s(t){e[14](t)}let r={blob:e[7]};return void 0!==e[0]&&(r.db=e[0]),t=new Ue({props:r}),M.push((()=>ee(t,"db",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};128&o&&(s.blob=e[7]),!n&&1&o&&(n=!0,s.db=e[0],z((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function Ve(t){let n,o,s;return{c(){n=b("button"),n.innerHTML='<h3 class="svelte-1i78tf8">Record</h3>',w(n,"class","recordBtn svelte-1i78tf8")},m(e,r){v(e,n,r),o||(s=y(n,"click",t[15]),o=!0)},p:e,d(e){e&&g(n),o=!1,s()}}}function We(t){let n,o,r,c,l;return{c(){n=b("button"),n.innerHTML='<h3 class="svelte-1i78tf8">Save Video</h3>',o=x(),r=b("button"),r.innerHTML='<h3 class="svelte-1i78tf8">Delete Video</h3>',w(n,"class","saveBtn svelte-1i78tf8"),w(r,"class","redBtn svelte-1i78tf8")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),c||(l=[y(n,"click",t[12]),y(r,"click",t[11])],c=!0)},p:e,i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(r),c=!1,s(l)}}}function Ge(t){let n;return{c(){n=b("h3"),n.textContent="Recording",w(n,"class","svelte-1i78tf8")},m(e,t){v(e,n,t)},p:e,i:e,o:e,d(e){e&&g(n)}}}function Je(e){let t,n,o,s,r,c,l,i,a,u;function d(t){e[17](t)}let f={};function m(t){e[18](t)}void 0!==e[1]&&(f.currentCameraType=e[1]),o=new Ee({props:f}),M.push((()=>ee(o,"currentCameraType",d)));let p={};return void 0!==e[2]&&(p.currentTime=e[2]),i=new Ne({props:p}),M.push((()=>ee(i,"currentTime",m))),{c(){t=b("h4"),t.textContent="Camera type",n=x(),te(o.$$.fragment),r=x(),c=b("h4"),c.textContent="Record Time",l=x(),te(i.$$.fragment),w(t,"class","svelte-1i78tf8"),_(c,"margin-top","1rem"),w(c,"class","svelte-1i78tf8")},m(e,s){v(e,t,s),v(e,n,s),ne(o,e,s),v(e,r,s),v(e,c,s),v(e,l,s),ne(i,e,s),u=!0},p(e,t){const n={};!s&&2&t&&(s=!0,n.currentCameraType=e[1],z((()=>s=!1))),o.$set(n);const r={};!a&&4&t&&(a=!0,r.currentTime=e[2],z((()=>a=!1))),i.$set(r)},i(e){u||(Q(o.$$.fragment,e),Q(i.$$.fragment,e),u=!0)},o(e){X(o.$$.fragment,e),X(i.$$.fragment,e),u=!1},d(e){e&&g(t),e&&g(n),oe(o,e),e&&g(r),e&&g(c),e&&g(l),oe(i,e)}}}function Qe(e){let t,n,o,s,r,c,l,i,a,u,d,f,m,p,_,T,R,k=e[6]&&Ke(e),D=!e[4]&&!e[5]&&Ve(e);const j=[Je,Ge,We],O=[];function F(e,t){return e[4]||e[5]?e[4]?1:e[5]?2:-1:0}return~(m=F(e))&&(p=O[m]=j[m](e)),{c(){k&&k.c(),t=x(),n=b("button"),n.textContent="Back",o=x(),s=b("div"),r=b("h3"),c=$("Frame #"),l=$(e[8]),i=x(),a=b("div"),D&&D.c(),u=x(),d=b("video"),f=x(),p&&p.c(),w(n,"class","backBtn svelte-1i78tf8"),w(r,"class","svelte-1i78tf8"),d.muted=!0,d.autoplay=!0,d.playsInline=!0,d.loop=!0,w(d,"class","svelte-1i78tf8"),w(a,"class","vidHolder svelte-1i78tf8"),w(s,"class","center svelte-1i78tf8")},m(p,g){k&&k.m(p,g),v(p,t,g),v(p,n,g),v(p,o,g),v(p,s,g),h(s,r),h(r,c),h(r,l),h(s,i),h(s,a),D&&D.m(a,null),h(a,u),h(a,d),e[16](d),h(s,f),~m&&O[m].m(s,null),_=!0,T||(R=y(n,"click",e[9]),T=!0)},p(e,[n]){e[6]?k?(k.p(e,n),64&n&&Q(k,1)):(k=Ke(e),k.c(),Q(k,1),k.m(t.parentNode,t)):k&&(G(),X(k,1,1,(()=>{k=null})),J()),(!_||256&n)&&C(l,e[8]),e[4]||e[5]?D&&(D.d(1),D=null):D?D.p(e,n):(D=Ve(e),D.c(),D.m(a,u));let o=m;m=F(e),m===o?~m&&O[m].p(e,n):(p&&(G(),X(O[o],1,1,(()=>{O[o]=null})),J()),~m?(p=O[m],p?p.p(e,n):(p=O[m]=j[m](e),p.c()),Q(p,1),p.m(s,null)):p=null)},i(e){_||(Q(k),Q(p),_=!0)},o(e){X(k),X(p),_=!1},d(r){k&&k.d(r),r&&g(t),r&&g(n),r&&g(o),r&&g(s),D&&D.d(),e[16](null),~m&&O[m].d(),T=!1,R()}}}function Xe(e,t,n){let o;l(e,ge,(e=>n(8,o=e)));let s,{showRecordPage:r}=t,{db:c}=t,i="BACK",a=5;var u;let d,f=!1,m=!1,p=!1;const h=e=>{f||(n(4,f=!0),u.startRecording(),setTimeout((function(){u.stopRecording(g)}),1e3*e))};function v(e){"FRONT"==i?navigator.mediaDevices.getUserMedia({audio:!0,video:{width:320,height:240,facingMode:{exact:"environment"}}}).then((function(t){e(t)})).catch((function(e){alert("Unable to capture your camera. Please check console logs."),console.error(e)})):navigator.mediaDevices.getUserMedia({audio:!0,video:{width:320,height:240}}).then((function(t){e(t)})).catch((function(e){alert("Unable to capture your camera. Please check console logs."),console.error(e)}))}function g(){n(5,m=!0),n(4,f=!1),n(3,s.src=n(3,s.srcObject=null,s),s),n(3,s.muted=!1,s),n(3,s.volume=1,s),n(3,s.src=URL.createObjectURL(u.getBlob()),s),n(7,d=u.getBlob()),u.camera.stop(),u.destroy(),u=null}F((async()=>{v((function(e){n(3,s.muted=!0,s),n(3,s.volume=0,s),n(3,s.srcObject=e,s),(u=RecordRTC(e,{type:"video"})).camera=e}))}));return e.$$set=e=>{"showRecordPage"in e&&n(13,r=e.showRecordPage),"db"in e&&n(0,c=e.db)},e.$$.update=()=>{2&e.$$.dirty&&("FRONT"!=i&&"BACK"!=i||v((function(e){n(3,s.muted=!0,s),n(3,s.volume=0,s),n(3,s.srcObject=e,s),(u=RecordRTC(e,{type:"video"})).camera=e})))},[c,i,a,s,f,m,p,d,o,()=>{n(13,r=!1)},h,()=>{n(5,m=!1),n(4,f=!1),v((function(e){n(3,s.muted=!0,s),n(3,s.volume=0,s),n(3,s.srcObject=e,s),(u=RecordRTC(e,{type:"video"})).camera=e}))},()=>{n(6,p=!0)},r,function(e){c=e,n(0,c)},()=>h(a),function(e){M[e?"unshift":"push"]((()=>{s=e,n(3,s),n(1,i)}))},function(e){i=e,n(1,i)},function(e){a=e,n(2,a)}]}class Ye extends ce{constructor(e){super(),re(this,e,Xe,Qe,c,{showRecordPage:13,db:0})}}function Ze(e){let t,n,o,s;function r(t){e[8](t)}function c(t){e[9](t)}let l={};return void 0!==e[1]&&(l.showRecordPage=e[1]),void 0!==e[4]&&(l.db=e[4]),t=new Ye({props:l}),M.push((()=>ee(t,"showRecordPage",r))),M.push((()=>ee(t,"db",c))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),s=!0},p(e,s){const r={};!n&&2&s&&(n=!0,r.showRecordPage=e[1],z((()=>n=!1))),!o&&16&s&&(o=!0,r.db=e[4],z((()=>o=!1))),t.$set(r)},i(e){s||(Q(t.$$.fragment,e),s=!0)},o(e){X(t.$$.fragment,e),s=!1},d(e){oe(t,e)}}}function et(e){let t,n,o,s,r,c,l,i=e[0]&&tt(e);function a(t){e[6](t)}function u(t){e[7](t)}n=new ae({});let d={};return void 0!==e[3]&&(d.FramesData=e[3]),void 0!==e[1]&&(d.showRecordPage=e[1]),s=new je({props:d}),M.push((()=>ee(s,"FramesData",a))),M.push((()=>ee(s,"showRecordPage",u))),{c(){i&&i.c(),t=x(),te(n.$$.fragment),o=x(),te(s.$$.fragment)},m(e,r){i&&i.m(e,r),v(e,t,r),ne(n,e,r),v(e,o,r),ne(s,e,r),l=!0},p(e,n){e[0]?i?(i.p(e,n),1&n&&Q(i,1)):(i=tt(e),i.c(),Q(i,1),i.m(t.parentNode,t)):i&&(G(),X(i,1,1,(()=>{i=null})),J());const o={};!r&&8&n&&(r=!0,o.FramesData=e[3],z((()=>r=!1))),!c&&2&n&&(c=!0,o.showRecordPage=e[1],z((()=>c=!1))),s.$set(o)},i(e){l||(Q(i),Q(n.$$.fragment,e),Q(s.$$.fragment,e),l=!0)},o(e){X(i),X(n.$$.fragment,e),X(s.$$.fragment,e),l=!1},d(e){i&&i.d(e),e&&g(t),oe(n,e),e&&g(o),oe(s,e)}}}function tt(e){let t,n,o;function s(t){e[5](t)}let r={frameID:e[2]};return void 0!==e[0]&&(r.showFrameDetected=e[0]),t=new he({props:r}),M.push((()=>ee(t,"showFrameDetected",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};4&o&&(s.frameID=e[2]),!n&&1&o&&(n=!0,s.showFrameDetected=e[0],z((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function nt(e){let t,n,o,s;const r=[et,Ze],c=[];function l(e,t){return e[1]?1:0}return t=l(e),n=c[t]=r[t](e),{c(){n.c(),o=$("")},m(e,n){c[t].m(e,n),v(e,o,n),s=!0},p(e,[s]){let i=t;t=l(e),t===i?c[t].p(e,s):(G(),X(c[i],1,1,(()=>{c[i]=null})),J(),n=c[t],n?n.p(e,s):(n=c[t]=r[t](e),n.c()),Q(n,1),n.m(o.parentNode,o))},i(e){s||(Q(n),s=!0)},o(e){X(n),s=!1},d(e){c[t].d(e),e&&g(o)}}}function ot(e,t,n){let o,s=!0,r=!1,c=!1,l=[];const i=window.indexedDB.open("MyTestDatabase",1);let a;return i.onerror=e=>{console.error("Why didn't you allow my web app to use IndexedDB?!")},i.onsuccess=e=>{n(4,a=e.target.result);a.transaction(["frames"]).objectStore("frames").openCursor().onsuccess=e=>{const t=e.target.result;t?(l.push(t.value),n(3,l),t.continue()):(console.log(l),(e=>{if("OFFLINE"==e)return!1;if(l.forEach((t=>{e==t.id&&(s=!1)})),s){n(2,o=e);const t=a.transaction(["frames"],"readwrite");t.oncomplete=e=>{console.log("Added new frame!")},t.onerror=e=>{console.log("Error adding new frame")};const s=t.objectStore("frames");let c={id:e,videoFile:null};s.add(c).onsuccess=e=>{},n(0,r=!0),l.push(c),n(3,l)}})(FRAMEID))}},i.onupgradeneeded=e=>{n(4,a=e.target.result),a.createObjectStore("frames",{keyPath:"id"})},[r,c,o,l,a,function(e){r=e,n(0,r)},function(e){l=e,n(3,l)},function(e){c=e,n(1,c)},function(e){c=e,n(1,c)},function(e){a=e,n(4,a)}]}return new class extends ce{constructor(e){super(),re(this,e,ot,nt,c,{})}}({target:document.body})}();
+};
+</script>
+
+
+
 
 
 
@@ -258,13 +263,13 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
     </noscript>
 
     <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/service-worker.js").then((reg) => {
-            console.log("Service worker registered.", reg);
-          });
-        });
-      }
+      // if ("serviceWorker" in navigator) {
+      //   window.addEventListener("load", () => {
+      //     navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+      //       console.log("Service worker registered.", reg);
+      //     });
+      //   });
+      // }
     </script>
   </body>
 </html>

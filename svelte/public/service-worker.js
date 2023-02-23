@@ -5,21 +5,19 @@ const CACHE_NAME = 'static-cache-v2';
 
 // Add list of files to cache here.
 const FILES_TO_CACHE = [
-  '/index.html',
-  '/global.css',
+  '/offline.html',
   '/build/bundle.js',
-  '/build/bundle.css',
-  '/build/bundle.js.map',
 ];
 
 self.addEventListener('install', (evt) => {
   console.log('[ServiceWorker] Install');
 
   evt.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => {
-        console.log('[ServiceWorker] Pre-caching offline page');
-        return cache.addAll(FILES_TO_CACHE);
-      })
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      console.log("[Service Worker] Caching all: app shell and content");
+      await cache.addAll(FILES_TO_CACHE);
+    })()
   );
 
   self.skipWaiting();
@@ -50,8 +48,28 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
   evt.respondWith(
-    fetch(evt.request).catch(function() {
-          return caches.match(evt.request)
-      })
-  )
+    fetch(evt.request)
+        .catch(() => {
+          return caches.open(CACHE_NAME)
+              .then((cache) => {
+                console.log(evt.request);
+                return cache.match('offline.html');
+              });
+        })
+    );
+  evt.respondWith(
+    (async () => {
+      const r = await caches.match(evt.request);
+      console.log(`[Service Worker] Fetching resource: ${evt.request.url}`);
+      if (r) {
+        return r;
+      }
+      const response = await fetch(evt.request);
+      const cache = await caches.open(CACHE_NAME);
+      console.log(`[Service Worker] Caching new resource: ${evt.request.url}`);
+      cache.put(evt.request, response.clone());
+      return response;
+    })()
+  );
+
 });

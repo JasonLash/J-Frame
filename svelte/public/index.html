@@ -6,6 +6,10 @@
 
     <title>FRAME</title>
 
+    <script>
+      var FRAMEID = "002";
+    </script>
+
     <link rel="manifest" href="/manifest.json" />
     <meta name="description" content="Frame App" />
     <meta name="theme-color" content="#2F3BA2" />
@@ -14,9 +18,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Svelte PWA" />
     <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" />
-
-    <meta http-equiv="origin-trial" content="AgrLhNGM/MQUMTHtJgkK3Zm94Wf4Eq7eFLbwYpYgRk+FoJjOVyjM4mkmEIroenlNO2V8akU9LYzDoyUpWb1uqAUAAABgeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJmZWF0dXJlIjoiVW5yZXN0cmljdGVkU2hhcmVkQXJyYXlCdWZmZXIiLCJleHBpcnkiOjE2ODgwODMxOTl9">
-    
 
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="stylesheet" href="/global.css" />
@@ -45,8 +46,11 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
 
   </script>
 
+    <script src="index.js"></script>
 
     <script defer src="/build/bundle.js"></script>
+
+
   </head>
 
   <body>
@@ -55,13 +59,13 @@ return RecordRTC}),RecordRTC.getFromDisk=function(type,callback){if(!callback)th
     </noscript>
 
     <script>
-      // if ("serviceWorker" in navigator) {
-      //   window.addEventListener("load", () => {
-      //     navigator.serviceWorker.register("/service-worker.js").then((reg) => {
-      //       console.log("Service worker registered.", reg);
-      //     });
-      //   });
-      // }
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+            console.log("Service worker registered.", reg);
+          });
+        });
+      }
     </script>
   </body>
 </html>

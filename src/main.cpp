@@ -41,6 +41,8 @@ using namespace httpsserver;
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
+const String FRAMEID = "000";
+
 
 HTTPSServer * secureServer;
 HTTPServer * insecureServer;
@@ -50,6 +52,8 @@ void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
 void handleRedirect(HTTPRequest * req, HTTPResponse * res);
+
+void handleFrameID(HTTPRequest * req, HTTPResponse * res);
 
 
 void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
@@ -461,6 +465,14 @@ void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
   simpleRequest(req, res, "/uploadSpiffs.html", "text/html", false);
 }
 
+void handleFrameID(HTTPRequest * req, HTTPResponse * res){
+  res->setStatusCode(200);
+  res->setHeader("Content-Type", "text/plain");
+  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  res->println(FRAMEID.c_str());
+}
+
 void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
   req->discardRequestBody();
   res->setStatusCode(308);
@@ -571,6 +583,7 @@ void setupServer(){
 
   ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
   ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
+  ResourceNode * nodeFrameID = new ResourceNode("/getFrameID", "GET", &handleFrameID);
 
   ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
   secureServer->setDefaultNode(spiffsNode);
@@ -579,6 +592,7 @@ void setupServer(){
   secureServer->registerNode(nodeUpload);
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
+  secureServer->registerNode(nodeFrameID);
 
   insecureServer->setDefaultNode(nodeRedirect);
   insecureServer->registerNode(nodeRedirect404);

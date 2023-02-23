@@ -65,8 +65,8 @@
                 console.error(error);
             });
         }else{
-            //navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 }  }).then(function(camera) {
-            navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 240, height: 320 }  }).then(function(camera) {
+            navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 }  }).then(function(camera) {
+            //navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 240, height: 320 }  }).then(function(camera) {
                 callback(camera);
             }).catch(function(error) {
                 alert('Unable to capture your camera. Please check console logs.');

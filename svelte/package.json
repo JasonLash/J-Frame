@@ -22,6 +22,7 @@
     "@ffmpeg/ffmpeg": "^0.11.6",
     "browserify": "^17.0.0",
     "mp4-mjpeg": "^0.0.2",
+    "rollup-plugin-inline-code": "^1.2.7",
     "sirv-cli": "^2.0.0"
   }
 }

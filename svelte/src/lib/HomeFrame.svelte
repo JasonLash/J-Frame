@@ -11,9 +11,24 @@
 </script>
 
 <div class="frameObject" on:click={clickedFrame}>
-    <div class="big">
-        <div class="small"></div>
-    </div>    
+    {#if frameData.id == FRAMEID && frameData.videoFile == null}
+        <div class="big" style="outline: 4px solid #5D6AE8;">
+            <div class="small"></div>
+        </div> 
+    {:else if frameData.id == FRAMEID && frameData.videoFile != null}
+        <div class="big" style="outline: 4px solid #5D6AE8; background: #E9CA5D;">
+            <div class="small"></div>
+        </div>  
+    {:else if frameData.videoFile != null}
+        <div class="big" style="background: #E9CA5D;">
+            <div class="small"></div>
+        </div> 
+    {:else}
+        <div class="big">
+            <div class="small"></div>
+        </div> 
+
+    {/if}
     
     <h3>#{frameData.id}</h3>
 </div>
@@ -23,11 +38,13 @@
     .big{
         background: #BEBEBE;
         border: 10px solid #000000;
+        
         border-radius: 14px;
 
         width: 6em;
         height: 8em;
     }
+
 
     .small{
         border: 7px solid #000000;
@@ -46,6 +63,6 @@
         text-align: center;
         color:  #bbbbbb;
         letter-spacing: .05rem;
-        margin-top: 0.25em;
+        margin-top: 0.3em;
     }
 </style>
