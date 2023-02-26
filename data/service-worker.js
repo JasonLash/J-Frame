@@ -1,7 +1,7 @@
 'use strict';
 
 // Update cache names any time any of the cached files change.
-const CACHE_NAME = 'static-cache-v13';
+const CACHE_NAME = 'static-cache-v17';
 
 // Add list of files to cache here.
 const FILES_TO_CACHE = [
@@ -39,36 +39,56 @@ self.addEventListener('activate', (evt) => {
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (evt) => {
-  console.log('[ServiceWorker] Fetch', evt.request.url);
-  // Add fetch event handler here.
-  if (evt.request.mode !== 'navigate') {
-    // Not a page navigation, bail.
-    return;
-  }
-  evt.respondWith(
-    fetch(evt.request)
-        .catch(() => {
-          return caches.open(CACHE_NAME)
-              .then((cache) => {
-                console.log(evt.request);
-                return cache.match('index.html');
-              });
-        })
-    );
-  evt.respondWith(
-    (async () => {
-      const r = await caches.match(evt.request);
-      console.log(`[Service Worker] Fetching resource: ${evt.request.url}`);
-      if (r) {
-        return r;
-      }
-      const response = await fetch(evt.request);
-      const cache = await caches.open(CACHE_NAME);
-      console.log(`[Service Worker] Caching new resource: ${evt.request.url}`);
-      cache.put(evt.request, response.clone());
-      return response;
-    })()
-  );
+// self.addEventListener('fetch', (evt) => {
+//   console.log('[ServiceWorker] Fetch', evt.request.url);
+//   // Add fetch event handler here.
+//   if (evt.request.mode !== 'navigate') {
+//     // Not a page navigation, bail.
+//     return;
+//   }
+//   evt.respondWith(
+//     fetch(evt.request)
+//         .catch(() => {
+//           return caches.open(CACHE_NAME)
+//               .then((cache) => {
+//                 console.log(evt.request);
+//                 return cache.match('index.html');
+//               });
+//         })
+//     );
+//   // evt.respondWith(
+//   //   (async () => {
+//   //     const r = await caches.match(evt.request);
+//   //     console.log(`[Service Worker] Fetching resource: ${evt.request.url}`);
+//   //     if (r) {
+//   //       return r;
+//   //     }
+//   //     const response = await fetch(evt.request);
+//   //     const cache = await caches.open(CACHE_NAME);
+//   //     console.log(`[Service Worker] Caching new resource: ${evt.request.url}`);
+//   //     cache.put(evt.request, response.clone());
+//   //     return response;
+//   //   })()
+//   // );
 
+// });
+
+
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        cache.match(event.request)
+          .then( function(cacheResponse) {
+            if(cacheResponse)
+              return cacheResponse
+            else
+              return fetch(event.request)
+                .then(function(networkResponse) {
+                  cache.put(event.request, networkResponse.clone())
+                    return networkResponse
+                  })
+                })
+          })
+  )
 });

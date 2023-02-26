@@ -18,7 +18,7 @@
 #include <SSLCert.hpp>
 #include <HTTPRequest.hpp>
 #include <HTTPResponse.hpp>
-#include <esp32/sha.h>
+
 #include <HTTPSServer.hpp>
 #include <HTTPServer.hpp>
 #include <HTTPBodyParser.hpp>
@@ -43,7 +43,7 @@ using namespace httpsserver;
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
-const String FRAMEID = "000";
+const String FRAMEID = "001";
 
 
 HTTPSServer * secureServer;
@@ -421,8 +421,8 @@ void downloadBoilerplate(HTTPRequest * req, HTTPResponse * res, String saveType)
 }
 
 void simpleRequest(HTTPRequest * req, HTTPResponse * res, String fileName, String contentType, bool doSD){
-  Serial.printf("Requested: %s Content Type: %s", fileName, contentType);
-  Serial.println();
+  //Serial.printf("Requested: %s Content Type: %s", fileName, contentType);
+  //Serial.println();
   File file;
   if(doSD){
     file = SD.open(fileName, "r");
@@ -567,7 +567,7 @@ void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
 void setupServer(){
   SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
   secureServer = new HTTPSServer(&cert);
-  insecureServer = new HTTPServer();
+  //insecureServer = new HTTPServer();
 
   Serial.println("Setting up WiFi");
   WiFi.softAP(WIFI_SSID, WIFI_PSK);
@@ -596,8 +596,8 @@ void setupServer(){
   secureServer->registerNode(updateFirmware);
   secureServer->registerNode(nodeFrameID);
 
-  insecureServer->setDefaultNode(nodeRedirect);
-  insecureServer->registerNode(nodeRedirect404);
+  //insecureServer->setDefaultNode(nodeRedirect);
+  //insecureServer->registerNode(nodeRedirect404);
 
   //setting DNS
   dnsServer.start(DNS_PORT, webName, WiFi.softAPIP());

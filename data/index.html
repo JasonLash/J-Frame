@@ -6,54 +6,6 @@
 
     <title>FRAME</title>
 
-    <link rel="manifest" href='data:application/manifest+json,{
-      "name": "SVELTE-PWA",
-      "short_name": "SVELTE-PWA",
-      "icons": [
-        {
-          "src": "/images/icons/icon-128x128.png",
-          "sizes": "128x128",
-          "type": "image/png"
-        }, 
-        {
-          "src": "/images/icons/icon-144x144.png",
-          "sizes": "144x144",
-          "type": "image/png"
-        }, 
-        {
-          "src": "/images/icons/icon-152x152.png",
-          "sizes": "152x152",
-          "type": "image/png"
-        }, 
-        {
-          "src": "/images/icons/icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }, 
-        {
-          "src": "/images/icons/icon-256x256.png",
-          "sizes": "256x256",
-          "type": "image/png"
-        }, 
-        {
-          "src": "/images/icons/icon-512x512.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        },
-        {
-          "src": "/images/icons/maskable_icon.png",
-          "sizes": "640x640",
-          "type": "image/png",
-          "purpose": "any maskable"
-        }
-      ],
-      "start_url": "/index.html",
-      "display": "standalone",
-      "background_color": "#3E4EB8",
-      "theme_color": "#2F3BA2"
-    }
-    '/>
-
     <meta name="description" content="Frame App" />
     <meta name="theme-color" content="#2F3BA2" />
 
@@ -63,230 +15,53 @@
     <!-- <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" /> -->
 
     <style>
-      * {
-          padding: 0;
-          margin: 0;
-          -moz-box-sizing: border-box; 
-          -webkit-box-sizing: border-box; 
-          box-sizing: border-box; 
-          font-family: '-apple-system', 'Roboto', sans-serif;
-      }
-
-      html, body {
-          max-width: 100%;
-          overflow: hidden;
-          background: #323232;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-      }
-
-      h3{
-          color: #fff;
-          text-align: center;
-      }
-
-      h2{
-          color: #fff;
-          text-align: center;
-      }
-
-
-
-      button{
-          animation : none;
-          animation-delay : 0;
-          animation-direction : normal;
-          animation-duration : 0;
-          animation-fill-mode : none;
-          animation-iteration-count : 1;
-          animation-name : none;
-          animation-play-state : running;
-          animation-timing-function : ease;
-          backface-visibility : visible;
-          background : 0;
-          background-attachment : scroll;
-          background-clip : border-box;
-          background-color : transparent;
-          background-image : none;
-          background-origin : padding-box;
-          background-position : 0 0;
-          background-position-x : 0;
-          background-position-y : 0;
-          background-repeat : repeat;
-          background-size : auto auto;
-          border : 0;
-          border-style : none;
-          border-width : medium;
-          border-color : inherit;
-          border-bottom : 0;
-          border-bottom-color : inherit;
-          border-bottom-left-radius : 0;
-          border-bottom-right-radius : 0;
-          border-bottom-style : none;
-          border-bottom-width : medium;
-          border-collapse : separate;
-          border-image : none;
-          border-left : 0;
-          border-left-color : inherit;
-          border-left-style : none;
-          border-left-width : medium;
-          border-radius : 0;
-          border-right : 0;
-          border-right-color : inherit;
-          border-right-style : none;
-          border-right-width : medium;
-          border-spacing : 0;
-          border-top : 0;
-          border-top-color : inherit;
-          border-top-left-radius : 0;
-          border-top-right-radius : 0;
-          border-top-style : none;
-          border-top-width : medium;
-          bottom : auto;
-          box-shadow : none;
-          box-sizing : content-box;
-          caption-side : top;
-          clear : none;
-          clip : auto;
-          color : inherit;
-          columns : auto;
-          column-count : auto;
-          column-fill : balance;
-          column-gap : normal;
-          column-rule : medium none currentColor;
-          column-rule-color : currentColor;
-          column-rule-style : none;
-          column-rule-width : none;
-          column-span : 1;
-          column-width : auto;
-          content : normal;
-          counter-increment : none;
-          counter-reset : none;
-          cursor : auto;
-          direction : ltr;
-          display : inline;
-          empty-cells : show;
-          float : none;
-          font : normal;
-          font-family : inherit;
-          font-size : medium;
-          font-style : normal;
-          font-variant : normal;
-          font-weight : normal;
-          height : auto;
-          hyphens : none;
-          left : auto;
-          letter-spacing : normal;
-          line-height : normal;
-          list-style : none;
-          list-style-image : none;
-          list-style-position : outside;
-          list-style-type : disc;
-          margin : 0;
-          margin-bottom : 0;
-          margin-left : 0;
-          margin-right : 0;
-          margin-top : 0;
-          max-height : none;
-          max-width : none;
-          min-height : 0;
-          min-width : 0;
-          opacity : 1;
-          orphans : 0;
-          outline : 0;
-          outline-color : invert;
-          outline-style : none;
-          outline-width : medium;
-          overflow : visible;
-          overflow-x : visible;
-          overflow-y : visible;
-          padding : 0;
-          padding-bottom : 0;
-          padding-left : 0;
-          padding-right : 0;
-          padding-top : 0;
-          page-break-after : auto;
-          page-break-before : auto;
-          page-break-inside : auto;
-          perspective : none;
-          perspective-origin : 50% 50%;
-          position : static;
-          /* May need to alter quotes for different locales (e.g fr) */
-          quotes : '\201C' '\201D' '\2018' '\2019';
-          right : auto;
-          tab-size : 8;
-          table-layout : auto;
-          text-align : inherit;
-          text-align-last : auto;
-          text-decoration : none;
-          text-decoration-color : inherit;
-          text-decoration-line : none;
-          text-decoration-style : solid;
-          text-indent : 0;
-          text-shadow : none;
-          text-transform : none;
-          top : auto;
-          transform : none;
-          transform-style : flat;
-          transition : none;
-          transition-delay : 0s;
-          transition-duration : 0s;
-          transition-property : none;
-          transition-timing-function : ease;
-          unicode-bidi : normal;
-          vertical-align : baseline;
-          visibility : visible;
-          white-space : normal;
-          widows : 0;
-          width : auto;
-          word-spacing : normal;
-          z-index : auto;
-      }
-
-
-      button{
-          background: #939393;
-          color: #FFFFFF;
-          border: 4px solid #3C3C3C;
-          border-radius: 12px;
-          width: 90%;
-          text-align: center;
-          padding: .4em 0em;
-          font-size: 1.1em;
-          font-weight: 550;
-          margin: auto;
-      }
+ * {padding: 0;margin: 0;-moz-box-sizing: border-box;-webkit-box-sizing: border-box;box-sizing: border-box;font-family: '-apple-system', 'Roboto', sans-serif;}html, body {max-width: 100%;overflow: hidden;background: #323232;}body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;}h3{color: #fff;text-align: center;}h2{color: #fff;text-align: center;}button{background: #939393;color: #FFFFFF;border: 4px solid #3C3C3C;border-radius: 12px;width: 90%;text-align: center;padding: .4em 0em;font-size: 1.1em;font-weight: 550;margin: auto;}
     </style>
-
-    <style>.bg.svelte-1ebz6b2{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:50%;display:flex;flex-direction:column;justify-content:center}.blackout.svelte-1ebz6b2{position:absolute;background:#000000aa;width:100%;height:100%}h2.svelte-1ebz6b2{text-align:center;color:#fff;padding-top:0.5em}button.svelte-1ebz6b2{margin:1em auto}.vidHolder.svelte-1w1eso8{margin:auto;display:flex;justify-content:center}.recordBtn.svelte-1w1eso8{position:absolute;z-index:4;margin-top:25rem;width:80%;background:#97504B}.redBtn.svelte-1w1eso8{margin-top:2rem;background:#97504B}.saveBtn.svelte-1w1eso8{margin-top:2rem;background:#E9CA5D}.center.svelte-1w1eso8{display:flex;flex-direction:column;justify-content:center}h4.svelte-1w1eso8{color:#C7C7C7;text-align:center;margin:0.35rem auto}h3.svelte-1w1eso8{margin:0.25em auto}.backBtn.svelte-1w1eso8{width:30%}h3.svelte-1w1eso8{color:#fff;text-align:center}video.svelte-1w1eso8{width:22rem;height:30rem;margin:auto}h1.svelte-1u93ogr{text-align:center;color:#fff;padding-top:1rem}.center.svelte-1u93ogr{padding-top:1em;display:flex;justify-content:center}.frameCollection.svelte-p5k6wu{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-around}.big.svelte-ihoour{background:#BEBEBE;border:17px solid #000000;border-radius:28px;width:12em;height:16em}.small.svelte-ihoour{border:13px solid #000000;border-radius:15px;width:8em;height:10em;margin:0 auto;margin-top:1em}.center.svelte-ihoour{display:flex;justify-content:center;padding-top:1em
-    }.topAndBottom.svelte-8jmvgp{margin:1rem auto;display:flex;justify-content:center;flex-direction:column;width:90%}h4.svelte-8jmvgp{color:#C7C7C7;text-align:center;margin:0.35rem auto}.loadingBG.svelte-8jmvgp{width:100%;background:#757575;margin:1rem auto;border-radius:5px}.loadingMain.svelte-8jmvgp{height:30px;background:#E9CA5D;border-radius:5px}.bg.svelte-8jmvgp{margin:0;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);background:#222222;border:7px solid #757575;border-radius:23px;width:90%;min-height:10%;display:flex;flex-direction:column;justify-content:space-between;z-index:6}.blackout.svelte-8jmvgp{z-index:5;position:absolute;background:#000000aa;width:100vw;height:100vh}.btnObj.svelte-17zyqyg{background:#939393;border:4px solid #3C3C3C;width:45%}.btnCollection.svelte-17zyqyg{display:flex;flex-direction:row;justify-content:center}h3.svelte-17zyqyg{margin:0.25em auto}.big.svelte-gc3fbo{background:#BEBEBE;border:10px solid #000000;border-radius:14px;width:6em;height:8em}.small.svelte-gc3fbo{border:7px solid #000000;border-radius:9px;width:4em;height:5em;margin:0 auto;margin-top:0.5em}.frameObject.svelte-gc3fbo{margin:1em auto}h3.svelte-gc3fbo{text-align:center;color:#bbbbbb;letter-spacing:.05rem;margin-top:0.3em}.btnObj.svelte-1osvx2o{background:#939393;border:4px solid #3C3C3C;width:30%}.btnCollection.svelte-1osvx2o{display:flex;flex-direction:row;justify-content:center}h3.svelte-1osvx2o{margin:0.25em auto}</style>
-
-
-
-    <script>window.onload = function() {var app=function(){"use strict";function e(){}const t=e=>e;function n(e){return e()}function o(){return Object.create(null)}function s(e){e.forEach(n)}function r(e){return"function"==typeof e}function c(e,t){return e!=e?t==t:e!==t||e&&"object"==typeof e||"function"==typeof e}function l(t,n,o){t.$$.on_destroy.push(function(t,...n){if(null==t)return e;const o=t.subscribe(...n);return o.unsubscribe?()=>o.unsubscribe():o}(n,o))}const a="undefined"!=typeof window;let i=a?()=>window.performance.now():()=>Date.now(),u=a?e=>requestAnimationFrame(e):e;const d=new Set;function f(e){d.forEach((t=>{t.c(e)||(d.delete(t),t.f())})),0!==d.size&&u(f)}let p=!1;function h(e,t,n,o){for(;e<t;){const s=e+(t-e>>1);n(s)<=o?e=s+1:t=s}return e}function m(e,t){p?(!function(e){if(e.hydrate_init)return;e.hydrate_init=!0;const t=e.childNodes,n=new Int32Array(t.length+1),o=new Int32Array(t.length);n[0]=-1;let s=0;for(let e=0;e<t.length;e++){const r=h(1,s+1,(e=>t[n[e]].claim_order),t[e].claim_order)-1;o[e]=n[r]+1;const c=r+1;n[c]=e,s=Math.max(c,s)}const r=[],c=[];let l=t.length-1;for(let e=n[s]+1;0!=e;e=o[e-1]){for(r.push(t[e-1]);l>=e;l--)c.push(t[l]);l--}for(;l>=0;l--)c.push(t[l]);r.reverse(),c.sort(((e,t)=>e.claim_order-t.claim_order));for(let t=0,n=0;t<c.length;t++){for(;n<r.length&&c[t].claim_order>=r[n].claim_order;)n++;const o=n<r.length?r[n]:null;e.insertBefore(c[t],o)}}(e),(void 0===e.actual_end_child||null!==e.actual_end_child&&e.actual_end_child.parentElement!==e)&&(e.actual_end_child=e.firstChild),t!==e.actual_end_child?e.insertBefore(t,e.actual_end_child):e.actual_end_child=t.nextSibling):t.parentNode!==e&&e.appendChild(t)}function v(e,t,n){p&&!n?m(e,t):t.parentNode===e&&t.nextSibling==n||e.insertBefore(t,n||null)}function g(e){e.parentNode.removeChild(e)}function b(e){return document.createElement(e)}function $(e){return document.createTextNode(e)}function w(){return $(" ")}function x(e,t,n,o){return e.addEventListener(t,n,o),()=>e.removeEventListener(t,n,o)}function y(e,t,n){null==n?e.removeAttribute(t):e.getAttribute(t)!==n&&e.setAttribute(t,n)}function C(e,t){t=""+t,e.wholeText!==t&&(e.data=t)}function F(e,t,n,o){e.style.setProperty(t,n,o?"important":"")}const _=new Set;let T,k=0;function R(e,t,n,o,s,r,c,l=0){const a=16.666/o;let i="{\n";for(let e=0;e<=1;e+=a){const o=t+(n-t)*r(e);i+=100*e+`%{${c(o,1-o)}}\n`}const u=i+`100% {${c(n,1-n)}}\n}`,d=`__svelte_${function(e){let t=5381,n=e.length;for(;n--;)t=(t<<5)-t^e.charCodeAt(n);return t>>>0}(u)}_${l}`,f=e.ownerDocument;_.add(f);const p=f.__svelte_stylesheet||(f.__svelte_stylesheet=f.head.appendChild(b("style")).sheet),h=f.__svelte_rules||(f.__svelte_rules={});h[d]||(h[d]=!0,p.insertRule(`@keyframes ${d} ${u}`,p.cssRules.length));const m=e.style.animation||"";return e.style.animation=`${m?`${m}, `:""}${d} ${o}ms linear ${s}ms 1 both`,k+=1,d}function j(e,t){const n=(e.style.animation||"").split(", "),o=n.filter(t?e=>e.indexOf(t)<0:e=>-1===e.indexOf("__svelte")),s=n.length-o.length;s&&(e.style.animation=o.join(", "),k-=s,k||u((()=>{k||(_.forEach((e=>{const t=e.__svelte_stylesheet;let n=t.cssRules.length;for(;n--;)t.deleteRule(n);e.__svelte_rules={}})),_.clear())})))}function D(e){T=e}function O(e){(function(){if(!T)throw new Error("Function called outside component initialization");return T})().$$.on_mount.push(e)}const S=[],E=[],P=[],L=[],B=Promise.resolve();let M=!1;function U(e){P.push(e)}function A(e){L.push(e)}let H=!1;const N=new Set;function z(){if(!H){H=!0;do{for(let e=0;e<S.length;e+=1){const t=S[e];D(t),q(t.$$)}for(D(null),S.length=0;E.length;)E.pop()();for(let e=0;e<P.length;e+=1){const t=P[e];N.has(t)||(N.add(t),t())}P.length=0}while(S.length);for(;L.length;)L.pop()();M=!1,H=!1,N.clear()}}function q(e){if(null!==e.fragment){e.update(),s(e.before_update);const t=e.dirty;e.dirty=[-1],e.fragment&&e.fragment.p(e.ctx,t),e.after_update.forEach(U)}}let I;function V(e,t,n){e.dispatchEvent(function(e,t,n=!1){const o=document.createEvent("CustomEvent");return o.initCustomEvent(e,n,!1,t),o}(`${t?"intro":"outro"}${n}`))}const K=new Set;let W;function G(){W={r:0,c:[],p:W}}function J(){W.r||s(W.c),W=W.p}function Q(e,t){e&&e.i&&(K.delete(e),e.i(t))}function X(e,t,n,o){if(e&&e.o){if(K.has(e))return;K.add(e),W.c.push((()=>{K.delete(e),o&&(n&&e.d(1),o())})),e.o(t)}}const Y={duration:0};function Z(n,o,c,l){let a=o(n,c),p=l?0:1,h=null,m=null,v=null;function g(){v&&j(n,v)}function b(e,t){const n=e.b-p;return t*=Math.abs(n),{a:p,b:e.b,d:n,duration:t,start:e.start,end:e.start+t,group:e.group}}function $(o){const{delay:r=0,duration:c=300,easing:l=t,tick:$=e,css:w}=a||Y,x={start:i()+r,b:o};o||(x.group=W,W.r+=1),h||m?m=x:(w&&(g(),v=R(n,p,o,c,r,l,w)),o&&$(0,1),h=b(x,c),U((()=>V(n,o,"start"))),function(e){let t;0===d.size&&u(f),new Promise((n=>{d.add(t={c:e,f:n})}))}((e=>{if(m&&e>m.start&&(h=b(m,c),m=null,V(n,h.b,"start"),w&&(g(),v=R(n,p,h.b,h.duration,0,l,a.css))),h)if(e>=h.end)$(p=h.b,1-p),V(n,h.b,"end"),m||(h.b?g():--h.group.r||s(h.group.c)),h=null;else if(e>=h.start){const t=e-h.start;p=h.a+h.d*l(t/h.duration),$(p,1-p)}return!(!h&&!m)})))}return{run(e){r(a)?(I||(I=Promise.resolve(),I.then((()=>{I=null}))),I).then((()=>{a=a(),$(e)})):$(e)},end(){g(),h=m=null}}}function ee(e,t,n){const o=e.$$.props[t];void 0!==o&&(e.$$.bound[o]=n,n(e.$$.ctx[o]))}function te(e){e&&e.c()}function ne(e,t,o,c){const{fragment:l,on_mount:a,on_destroy:i,after_update:u}=e.$$;l&&l.m(t,o),c||U((()=>{const t=a.map(n).filter(r);i?i.push(...t):s(t),e.$$.on_mount=[]})),u.forEach(U)}function oe(e,t){const n=e.$$;null!==n.fragment&&(s(n.on_destroy),n.fragment&&n.fragment.d(t),n.on_destroy=n.fragment=null,n.ctx=[])}function se(e,t){-1===e.$$.dirty[0]&&(S.push(e),M||(M=!0,B.then(z)),e.$$.dirty.fill(0)),e.$$.dirty[t/31|0]|=1<<t%31}function re(t,n,r,c,l,a,i=[-1]){const u=T;D(t);const d=t.$$={fragment:null,ctx:null,props:a,update:e,not_equal:l,bound:o(),on_mount:[],on_destroy:[],on_disconnect:[],before_update:[],after_update:[],context:new Map(u?u.$$.context:n.context||[]),callbacks:o(),dirty:i,skip_bound:!1};let f=!1;if(d.ctx=r?r(t,n.props||{},((e,n,...o)=>{const s=o.length?o[0]:n;return d.ctx&&l(d.ctx[e],d.ctx[e]=s)&&(!d.skip_bound&&d.bound[e]&&d.bound[e](s),f&&se(t,e)),n})):[],d.update(),f=!0,s(d.before_update),d.fragment=!!c&&c(d.ctx),n.target){if(n.hydrate){p=!0;const e=function(e){return Array.from(e.childNodes)}(n.target);d.fragment&&d.fragment.l(e),e.forEach(g)}else d.fragment&&d.fragment.c();n.intro&&Q(t.$$.fragment),ne(t,n.target,n.anchor,n.customElement),p=!1,z()}D(u)}class ce{$destroy(){oe(this,1),this.$destroy=e}$on(e,t){const n=this.$$.callbacks[e]||(this.$$.callbacks[e]=[]);return n.push(t),()=>{const e=n.indexOf(t);-1!==e&&n.splice(e,1)}}$set(e){var t;this.$$set&&(t=e,0!==Object.keys(t).length)&&(this.$$.skip_bound=!0,this.$$set(e),this.$$.skip_bound=!1)}}function le(t){let n,o,s,r,c,l;return{c(){n=b("h1"),n.textContent="Frames",o=w(),s=b("div"),r=b("button"),r.textContent="Refresh",y(n,"class","svelte-1u93ogr"),y(s,"class","center svelte-1u93ogr")},m(e,a){v(e,n,a),v(e,o,a),v(e,s,a),m(s,r),c||(l=x(r,"click",t[0]),c=!0)},p:e,i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(s),c=!1,l()}}}function ae(e){return[()=>{window.location.href="/"}]}class ie extends ce{constructor(e){super(),re(this,e,ae,le,c,{})}}function ue(t){let n,o,s;return{c(){n=b("div"),o=b("div"),s=b("div"),y(s,"class","small svelte-1jpy78m"),y(o,"class","big svelte-1jpy78m"),F(o,"background",t[0]),y(n,"class","center svelte-1jpy78m")},m(e,t){v(e,n,t),m(n,o),m(o,s)},p(e,[t]){1&t&&F(o,"background",e[0])},i:e,o:e,d(e){e&&g(n)}}}function de(e,t,n){let{bgColor:o="#BEBEBE"}=t;return e.$$set=e=>{"bgColor"in e&&n(0,o=e.bgColor)},[o]}class fe extends ce{constructor(e){super(),re(this,e,de,ue,c,{bgColor:0})}}function pe(e,{delay:n=0,duration:o=400,easing:s=t}={}){const r=+getComputedStyle(e).opacity;return{delay:n,duration:o,easing:s,css:e=>"opacity: "+e*r}}const he=[];function me(t,n=e){let o;const s=[];function r(e){if(c(t,e)&&(t=e,o)){const e=!he.length;for(let e=0;e<s.length;e+=1){const n=s[e];n[1](),he.push(n,t)}if(e){for(let e=0;e<he.length;e+=2)he[e][0](he[e+1]);he.length=0}}}return{set:r,update:function(e){r(e(t))},subscribe:function(c,l=e){const a=[c,l];return s.push(a),1===s.length&&(o=n(r)||e),c(t),()=>{const e=s.indexOf(a);-1!==e&&s.splice(e,1),0===s.length&&(o(),o=null)}}}}const ve=me("001"),ge=me(void 0);function be(e){let t,n,o,s,r,c,l,a,i,u,d,f,p,h,_,T;return c=new fe({}),{c(){t=b("div"),n=w(),o=b("div"),s=b("h2"),s.textContent="New Frame Detected!",r=w(),te(c.$$.fragment),l=w(),a=b("h2"),i=$("#"),u=$(e[0]),d=w(),f=b("button"),f.textContent="Close",y(t,"class","blackout svelte-1ebz6b2"),y(s,"class","svelte-1ebz6b2"),F(a,"color","#BABABA"),y(a,"class","svelte-1ebz6b2"),y(f,"class","svelte-1ebz6b2"),y(o,"class","bg svelte-1ebz6b2")},m(p,g){v(p,t,g),v(p,n,g),v(p,o,g),m(o,s),m(o,r),ne(c,o,null),m(o,l),m(o,a),m(a,i),m(a,u),m(o,d),m(o,f),h=!0,_||(T=x(f,"click",e[1]),_=!0)},p(e,[t]){(!h||1&t)&&C(u,e[0])},i(e){h||(Q(c.$$.fragment,e),U((()=>{p||(p=Z(o,pe,{duration:200},!0)),p.run(1)})),h=!0)},o(e){X(c.$$.fragment,e),p||(p=Z(o,pe,{duration:200},!1)),p.run(0),h=!1},d(e){e&&g(t),e&&g(n),e&&g(o),oe(c),e&&p&&p.end(),_=!1,T()}}}function $e(e,t,n){let o;l(e,ge,(e=>n(0,o=e)));let{showFrameDetected:s}=t;return e.$$set=e=>{"showFrameDetected"in e&&n(2,s=e.showFrameDetected)},[o,()=>{n(2,s=!1)},s]}class we extends ce{constructor(e){super(),re(this,e,$e,be,c,{showFrameDetected:2})}}function xe(t){let n,o,s,r,c,l,a,i,u,d;return{c(){n=b("div"),o=w(),s=b("div"),r=b("h2"),r.textContent="Successfully Saved Video!",c=w(),l=b("button"),l.textContent="Close",y(n,"class","blackout svelte-ojdnk7"),y(r,"class","svelte-ojdnk7"),y(l,"class","svelte-ojdnk7"),y(s,"class","bg svelte-ojdnk7")},m(e,a){v(e,n,a),v(e,o,a),v(e,s,a),m(s,r),m(s,c),m(s,l),i=!0,u||(d=x(l,"click",t[0]),u=!0)},p:e,i(e){i||(U((()=>{a||(a=Z(s,pe,{duration:200},!0)),a.run(1)})),i=!0)},o(e){a||(a=Z(s,pe,{duration:200},!1)),a.run(0),i=!1},d(e){e&&g(n),e&&g(o),e&&g(s),e&&a&&a.end(),u=!1,d()}}}function ye(e,t,n){let{showFrameSaved:o}=t;return e.$$set=e=>{"showFrameSaved"in e&&n(1,o=e.showFrameSaved)},[()=>{n(1,o=!1)},o]}class Ce extends ce{constructor(e){super(),re(this,e,ye,xe,c,{showFrameSaved:1})}}function Fe(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',y(t,"class","big svelte-gc3fbo")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function _e(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',y(t,"class","big svelte-gc3fbo"),F(t,"background","#E9CA5D")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function Te(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',y(t,"class","big svelte-gc3fbo"),F(t,"outline","4px solid #5D6AE8"),F(t,"background","#E9CA5D")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function ke(e){let t;return{c(){t=b("div"),t.innerHTML='<div class="small svelte-gc3fbo"></div>',y(t,"class","big svelte-gc3fbo"),F(t,"outline","4px solid #5D6AE8")},m(e,n){v(e,t,n)},d(e){e&&g(t)}}}function Re(t){let n,o,s,r,c,l,a,i=t[0].id+"";function u(e,t){return e[0].id==e[1]&&null==e[0].videoFile?ke:e[0].id==e[1]&&null!=e[0].videoFile?Te:null!=e[0].videoFile?_e:Fe}let d=u(t),f=d(t);return{c(){n=b("div"),f.c(),o=w(),s=b("h3"),r=$("#"),c=$(i),y(s,"class","svelte-gc3fbo"),y(n,"class","frameObject svelte-gc3fbo")},m(e,i){v(e,n,i),f.m(n,null),m(n,o),m(n,s),m(s,r),m(s,c),l||(a=x(n,"click",t[2]),l=!0)},p(e,[t]){d!==(d=u(e))&&(f.d(1),f=d(e),f&&(f.c(),f.m(n,o))),1&t&&i!==(i=e[0].id+"")&&C(c,i)},i:e,o:e,d(e){e&&g(n),f.d(),l=!1,a()}}}function je(e,t,n){let o;l(e,ge,(e=>n(1,o=e)));let{frameData:s}=t,{showRecordPage:r}=t;return e.$$set=e=>{"frameData"in e&&n(0,s=e.frameData),"showRecordPage"in e&&n(3,r=e.showRecordPage)},[s,o,()=>{ve.set(s.id),n(3,r=!0),console.log(s)},r]}class De extends ce{constructor(e){super(),re(this,e,je,Re,c,{frameData:0,showRecordPage:3})}}function Oe(e,t,n){const o=e.slice();return o[3]=t[n],o}function Se(e){let t,n,o;function s(t){e[2](t)}let r={frameData:e[3]};return void 0!==e[0]&&(r.showRecordPage=e[0]),t=new De({props:r}),E.push((()=>ee(t,"showRecordPage",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};2&o&&(s.frameData=e[3]),!n&&1&o&&(n=!0,s.showRecordPage=e[0],A((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function Ee(e){let t,n,o=e[1],s=[];for(let t=0;t<o.length;t+=1)s[t]=Se(Oe(e,o,t));const r=e=>X(s[e],1,1,(()=>{s[e]=null}));return{c(){t=b("div");for(let e=0;e<s.length;e+=1)s[e].c();y(t,"class","frameCollection svelte-p5k6wu")},m(e,o){v(e,t,o);for(let e=0;e<s.length;e+=1)s[e].m(t,null);n=!0},p(e,[n]){if(3&n){let c;for(o=e[1],c=0;c<o.length;c+=1){const r=Oe(e,o,c);s[c]?(s[c].p(r,n),Q(s[c],1)):(s[c]=Se(r),s[c].c(),Q(s[c],1),s[c].m(t,null))}for(G(),c=o.length;c<s.length;c+=1)r(c);J()}},i(e){if(!n){for(let e=0;e<o.length;e+=1)Q(s[e]);n=!0}},o(e){s=s.filter(Boolean);for(let e=0;e<s.length;e+=1)X(s[e]);n=!1},d(e){e&&g(t),function(e,t){for(let n=0;n<e.length;n+=1)e[n]&&e[n].d(t)}(s,e)}}}function Pe(e,t,n){let{FramesData:o}=t,{showRecordPage:s}=t;return e.$$set=e=>{"FramesData"in e&&n(1,o=e.FramesData),"showRecordPage"in e&&n(0,s=e.showRecordPage)},[s,o,function(e){s=e,n(0,s)}]}class Le extends ce{constructor(e){super(),re(this,e,Pe,Ee,c,{FramesData:1,showRecordPage:0})}}function Be(t){let n,o,s,r,c;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-17zyqyg">Front</h3>',o=w(),s=b("div"),s.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-17zyqyg">Back</h3>',y(n,"class","btnObj svelte-17zyqyg"),F(n,"border-radius","12px 0px 0px 12px"),y(s,"class","btnObj svelte-17zyqyg"),F(s,"border-radius","0px 12px 12px 0px"),F(s,"background","#3C3C3C")},m(e,l){v(e,n,l),v(e,o,l),v(e,s,l),r||(c=x(n,"click",t[3]),r=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(s),r=!1,c()}}}function Me(t){let n,o,s,r,c;return{c(){n=b("div"),n.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-17zyqyg">Front</h3>',o=w(),s=b("div"),s.innerHTML='<h3 class="svelte-17zyqyg">Back</h3>',y(n,"class","btnObj svelte-17zyqyg"),F(n,"border-radius","12px 0px 0px 12px"),F(n,"background","#3C3C3C"),y(s,"class","btnObj svelte-17zyqyg"),F(s,"border-radius","0px 12px 12px 0px")},m(e,l){v(e,n,l),v(e,o,l),v(e,s,l),r||(c=x(s,"click",t[2]),r=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(s),r=!1,c()}}}function Ue(t){let n;function o(e,t){return"FRONT"==e[0]?Me:Be}let s=o(t),r=s(t);return{c(){n=b("div"),r.c(),y(n,"class","btnCollection svelte-17zyqyg")},m(e,t){v(e,n,t),r.m(n,null)},p(e,[t]){s===(s=o(e))&&r?r.p(e,t):(r.d(1),r=s(e),r&&(r.c(),r.m(n,null)))},i:e,o:e,d(e){e&&g(n),r.d()}}}function Ae(e,t,n){let{currentCameraType:o}=t;const s=e=>{n(0,o=e)};return e.$$set=e=>{"currentCameraType"in e&&n(0,o=e.currentCameraType)},[o,s,()=>s("BACK"),()=>s("FRONT")]}class He extends ce{constructor(e){super(),re(this,e,Ae,Ue,c,{currentCameraType:0})}}function Ne(t){let n,o,r,c,l,a,i;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-1osvx2o">5 s</h3>',o=w(),r=b("div"),r.innerHTML='<h3 class="svelte-1osvx2o">10 s</h3>',c=w(),l=b("div"),l.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">15 s</h3>',y(n,"class","btnObj svelte-1osvx2o"),F(n,"border-radius","12px 0px 0px 12px"),y(r,"class","btnObj svelte-1osvx2o"),y(l,"class","btnObj svelte-1osvx2o"),F(l,"border-radius","0px 12px 12px 0px"),F(l,"background","#3C3C3C")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),a||(i=[x(n,"click",t[6]),x(r,"click",t[7])],a=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),a=!1,s(i)}}}function ze(t){let n,o,r,c,l,a,i;return{c(){n=b("div"),n.innerHTML='<h3 class="svelte-1osvx2o">5 s</h3>',o=w(),r=b("div"),r.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">10 s</h3>',c=w(),l=b("div"),l.innerHTML='<h3 class="svelte-1osvx2o">15 s</h3>',y(n,"class","btnObj svelte-1osvx2o"),F(n,"border-radius","12px 0px 0px 12px"),y(r,"class","btnObj svelte-1osvx2o"),F(r,"background","#3C3C3C"),y(l,"class","btnObj svelte-1osvx2o"),F(l,"border-radius","0px 12px 12px 0px")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),a||(i=[x(n,"click",t[4]),x(l,"click",t[5])],a=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),a=!1,s(i)}}}function qe(t){let n,o,r,c,l,a,i;return{c(){n=b("div"),n.innerHTML='<h3 style="color:#C7C7C7;" class="svelte-1osvx2o">5 s</h3>',o=w(),r=b("div"),r.innerHTML='<h3 class="svelte-1osvx2o">10 s</h3>',c=w(),l=b("div"),l.innerHTML='<h3 class="svelte-1osvx2o">15 s</h3>',y(n,"class","btnObj sBtnObj svelte-1osvx2o"),F(n,"border-radius","12px 0px 0px 12px"),F(n,"background","#3C3C3C"),y(r,"class","btnObj sBtnObj svelte-1osvx2o"),y(l,"class","btnObj sBtnObj svelte-1osvx2o"),F(l,"border-radius","0px 12px 12px 0px")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),v(e,c,s),v(e,l,s),a||(i=[x(r,"click",t[2]),x(l,"click",t[3])],a=!0)},p:e,d(e){e&&g(n),e&&g(o),e&&g(r),e&&g(c),e&&g(l),a=!1,s(i)}}}function Ie(t){let n;function o(e,t){return 5==e[0]?qe:10==e[0]?ze:Ne}let s=o(t),r=s(t);return{c(){n=b("div"),r.c(),y(n,"class","btnCollection svelte-1osvx2o")},m(e,t){v(e,n,t),r.m(n,null)},p(e,[t]){s===(s=o(e))&&r?r.p(e,t):(r.d(1),r=s(e),r&&(r.c(),r.m(n,null)))},i:e,o:e,d(e){e&&g(n),r.d()}}}function Ve(e,t,n){let{currentTime:o}=t;const s=e=>{n(0,o=e)};return e.$$set=e=>{"currentTime"in e&&n(0,o=e.currentTime)},[o,s,()=>s(10),()=>s(15),()=>s(5),()=>s(15),()=>s(5),()=>s(10)]}class Ke extends ce{constructor(e){super(),re(this,e,Ve,Ie,c,{currentTime:0})}}function We(t){let n,o,s,r,c,l,a,i,u;return{c(){n=b("div"),o=w(),s=b("div"),r=b("div"),c=b("h2"),c.textContent="Saving Video",l=w(),a=b("h4"),a.textContent="This might take a bit",i=w(),u=b("video"),y(n,"class","blackout svelte-8jmvgp"),y(a,"class","svelte-8jmvgp"),y(r,"class","topAndBottom svelte-8jmvgp"),y(s,"class","bg svelte-8jmvgp")},m(e,d){v(e,n,d),v(e,o,d),v(e,s,d),m(s,r),m(r,c),m(r,l),m(r,a),m(r,i),m(r,u),t[5](u)},p:e,i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(s),t[5](null)}}}function Ge(e,t,n){let o;l(e,ve,(e=>n(7,o=e)));let s,{blob:r}=t,{db:c}=t,{showFrameSaved:a}=t,{showRecordPage:i}=t;O((async()=>{u(r)}));const u=e=>{let t,r=URL.createObjectURL(e),l=document.createElement("canvas"),u=l.getContext("2d"),d=0;l.width=240,l.height=320,n(0,s.src=r,s),n(0,s.autoplay=!0,s),n(0,s.playsInline=!0,s),n(0,s.muted=!0,s),n(0,s.controls=!1,s),s.load();let f=[],p=0;s.addEventListener("seeked",(e=>{d>t?(e=>{let t=new Blob(e,{type:"video/mjpeg"});URL.createObjectURL(t);const s=c.transaction(["frames"],"readwrite").objectStore("frames"),r=s.get(o);r.onerror=e=>{console.log("Error uploading video to indexedDB")},r.onsuccess=e=>{const o=e.target.result;o.videoFile=t;const r=s.put(o);r.onerror=e=>{n(1,a=!1),n(2,i=!1),alert("error saving video"),console.log("Data ERROR while loged")},r.onsuccess=e=>{n(1,a=!0),n(2,i=!1),console.log("Data loged")}}})(f):setTimeout((()=>{n(0,s.currentTime=d,s),p%3==0&&(u.drawImage(s,0,0,240,320),l.toBlob((function(e){f.push(e)}),"image/jpeg",.5)),p++,console.log(d),d+=.03333333333333333}),"100")})),s.addEventListener("loadeddata",(function(){t=s.duration,console.log(t),n(0,s.currentTime=d,s)})),s.addEventListener("durationchange",(function(){t=s.duration}))};return e.$$set=e=>{"blob"in e&&n(3,r=e.blob),"db"in e&&n(4,c=e.db),"showFrameSaved"in e&&n(1,a=e.showFrameSaved),"showRecordPage"in e&&n(2,i=e.showRecordPage)},[s,a,i,r,c,function(e){E[e?"unshift":"push"]((()=>{s=e,n(0,s)}))}]}class Je extends ce{constructor(e){super(),re(this,e,Ge,We,c,{blob:3,db:4,showFrameSaved:1,showRecordPage:2})}}function Qe(e){let t,n,o,s,r;function c(t){e[16](t)}function l(t){e[17](t)}function a(t){e[18](t)}let i={blob:e[9]};return void 0!==e[1]&&(i.db=e[1]),void 0!==e[2]&&(i.showFrameSaved=e[2]),void 0!==e[0]&&(i.showRecordPage=e[0]),t=new Je({props:i}),E.push((()=>ee(t,"db",c))),E.push((()=>ee(t,"showFrameSaved",l))),E.push((()=>ee(t,"showRecordPage",a))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),r=!0},p(e,r){const c={};512&r&&(c.blob=e[9]),!n&&2&r&&(n=!0,c.db=e[1],A((()=>n=!1))),!o&&4&r&&(o=!0,c.showFrameSaved=e[2],A((()=>o=!1))),!s&&1&r&&(s=!0,c.showRecordPage=e[0],A((()=>s=!1))),t.$set(c)},i(e){r||(Q(t.$$.fragment,e),r=!0)},o(e){X(t.$$.fragment,e),r=!1},d(e){oe(t,e)}}}function Xe(t){let n,o,s;return{c(){n=b("button"),n.innerHTML='<h3 class="svelte-1w1eso8">Record</h3>',y(n,"class","recordBtn svelte-1w1eso8")},m(e,r){v(e,n,r),o||(s=x(n,"click",t[19]),o=!0)},p:e,d(e){e&&g(n),o=!1,s()}}}function Ye(t){let n,o,r,c,l;return{c(){n=b("button"),n.innerHTML='<h3 class="svelte-1w1eso8">Save Video</h3>',o=w(),r=b("button"),r.innerHTML='<h3 class="svelte-1w1eso8">Delete Video</h3>',y(n,"class","saveBtn svelte-1w1eso8"),y(r,"class","redBtn svelte-1w1eso8")},m(e,s){v(e,n,s),v(e,o,s),v(e,r,s),c||(l=[x(n,"click",t[13]),x(r,"click",t[12])],c=!0)},p:e,i:e,o:e,d(e){e&&g(n),e&&g(o),e&&g(r),c=!1,s(l)}}}function Ze(t){let n;return{c(){n=b("h3"),n.textContent="Recording",y(n,"class","svelte-1w1eso8")},m(e,t){v(e,n,t)},p:e,i:e,o:e,d(e){e&&g(n)}}}function et(e){let t,n,o,s,r,c,l,a,i,u;function d(t){e[21](t)}let f={};function p(t){e[22](t)}void 0!==e[3]&&(f.currentCameraType=e[3]),o=new He({props:f}),E.push((()=>ee(o,"currentCameraType",d)));let h={};return void 0!==e[4]&&(h.currentTime=e[4]),a=new Ke({props:h}),E.push((()=>ee(a,"currentTime",p))),{c(){t=b("h4"),t.textContent="Camera type",n=w(),te(o.$$.fragment),r=w(),c=b("h4"),c.textContent="Record Time",l=w(),te(a.$$.fragment),y(t,"class","svelte-1w1eso8"),F(c,"margin-top","1rem"),y(c,"class","svelte-1w1eso8")},m(e,s){v(e,t,s),v(e,n,s),ne(o,e,s),v(e,r,s),v(e,c,s),v(e,l,s),ne(a,e,s),u=!0},p(e,t){const n={};!s&&8&t&&(s=!0,n.currentCameraType=e[3],A((()=>s=!1))),o.$set(n);const r={};!i&&16&t&&(i=!0,r.currentTime=e[4],A((()=>i=!1))),a.$set(r)},i(e){u||(Q(o.$$.fragment,e),Q(a.$$.fragment,e),u=!0)},o(e){X(o.$$.fragment,e),X(a.$$.fragment,e),u=!1},d(e){e&&g(t),e&&g(n),oe(o,e),e&&g(r),e&&g(c),e&&g(l),oe(a,e)}}}function tt(e){let t,n,o,s,r,c,l,a,i,u,d,f,p,h,F,_,T,k=e[8]&&Qe(e),R=!e[6]&&!e[7]&&e[10]&&Xe(e);const j=[et,Ze,Ye],D=[];function O(e,t){return e[6]||e[7]?e[6]?1:e[7]?2:-1:0}return~(p=O(e))&&(h=D[p]=j[p](e)),{c(){k&&k.c(),t=w(),n=b("button"),n.textContent="Back",o=w(),s=b("div"),r=b("h3"),c=$("Frame #"),l=$(e[11]),a=w(),i=b("div"),R&&R.c(),u=w(),d=b("video"),f=w(),h&&h.c(),y(n,"class","backBtn svelte-1w1eso8"),y(r,"class","svelte-1w1eso8"),d.muted=!0,d.autoplay=!0,d.playsInline=!0,d.loop=!0,y(d,"class","svelte-1w1eso8"),y(i,"class","vidHolder svelte-1w1eso8"),y(s,"class","center svelte-1w1eso8")},m(h,g){k&&k.m(h,g),v(h,t,g),v(h,n,g),v(h,o,g),v(h,s,g),m(s,r),m(r,c),m(r,l),m(s,a),m(s,i),R&&R.m(i,null),m(i,u),m(i,d),e[20](d),m(s,f),~p&&D[p].m(s,null),F=!0,_||(T=x(n,"click",e[14]),_=!0)},p(e,[n]){e[8]?k?(k.p(e,n),256&n&&Q(k,1)):(k=Qe(e),k.c(),Q(k,1),k.m(t.parentNode,t)):k&&(G(),X(k,1,1,(()=>{k=null})),J()),(!F||2048&n)&&C(l,e[11]),e[6]||e[7]||!e[10]?R&&(R.d(1),R=null):R?R.p(e,n):(R=Xe(e),R.c(),R.m(i,u));let o=p;p=O(e),p===o?~p&&D[p].p(e,n):(h&&(G(),X(D[o],1,1,(()=>{D[o]=null})),J()),~p?(h=D[p],h?h.p(e,n):(h=D[p]=j[p](e),h.c()),Q(h,1),h.m(s,null)):h=null)},i(e){F||(Q(k),Q(h),F=!0)},o(e){X(k),X(h),F=!1},d(r){k&&k.d(r),r&&g(t),r&&g(n),r&&g(o),r&&g(s),R&&R.d(),e[20](null),~p&&D[p].d(),_=!1,T()}}}function nt(e,t,n){let o;l(e,ve,(e=>n(11,o=e)));let s,r,{showRecordPage:c}=t,{db:a}=t,{showFrameSaved:i}=t,u="FRONT",d=5,f=!1,p=!1,h=!1,m=!1;O((async()=>{n(10,m=!1),$().then((e=>{n(10,m=!0)})).catch((function(e){alert("Unable to capture your camera. Please check console logs."),console.error(e)}))}));let v=null,g=null,b=[];async function $(){v="FRONT"==u?await navigator.mediaDevices.getUserMedia({audio:!0,video:{width:320,height:240}}):await navigator.mediaDevices.getUserMedia({audio:!0,video:{width:320,height:240,facingMode:{exact:"environment"}}}),g=new MediaRecorder(v),n(5,s.muted=!0,s),n(5,s.volume=0,s),n(5,s.srcObject=v,s)}const w=e=>{n(7,p=!1),n(6,f=!0),g.addEventListener("dataavailable",(function(e){b.push(e.data)})),g.start(100),setTimeout((function(){x()}),1e3*e)},x=()=>{n(7,p=!0),n(6,f=!1),g.stop(),v.getTracks().forEach((e=>e.stop())),n(9,r=new Blob(b,{type:g.mimeType}));let e=URL.createObjectURL(r);n(5,s.src=e,s),console.log(b),console.log(r)};return e.$$set=e=>{"showRecordPage"in e&&n(0,c=e.showRecordPage),"db"in e&&n(1,a=e.db),"showFrameSaved"in e&&n(2,i=e.showFrameSaved)},e.$$.update=()=>{8&e.$$.dirty&&("FRONT"!=u&&"BACK"!=u||$())},[c,a,i,u,d,s,f,p,h,r,m,o,()=>{n(7,p=!1),n(6,f=!1),$()},()=>{n(8,h=!0)},()=>{n(0,c=!1)},w,function(e){a=e,n(1,a)},function(e){i=e,n(2,i)},function(e){c=e,n(0,c)},()=>w(d),function(e){E[e?"unshift":"push"]((()=>{s=e,n(5,s)}))},function(e){u=e,n(3,u)},function(e){d=e,n(4,d)}]}class ot extends ce{constructor(e){super(),re(this,e,nt,tt,c,{showRecordPage:0,db:1,showFrameSaved:2})}}function st(e){let t,n,o,r,c,l,a,i,u,d,f,p,h,_,T,k,R,j;return l=new fe({props:{bgColor:"#E9CA5D"}}),{c(){t=b("div"),n=w(),o=b("div"),r=b("h2"),r.textContent="Upload To Frame",c=w(),te(l.$$.fragment),a=w(),i=b("h2"),u=$("#"),d=$(e[0]),f=w(),p=b("button"),p.textContent="Upload",h=w(),_=b("button"),_.textContent="Cancel",y(t,"class","blackout svelte-1jgwags"),y(r,"class","svelte-1jgwags"),F(i,"color","#BABABA"),y(i,"class","svelte-1jgwags"),y(p,"class","uploadBTN svelte-1jgwags"),y(_,"class","svelte-1jgwags"),y(o,"class","bg svelte-1jgwags")},m(s,g){v(s,t,g),v(s,n,g),v(s,o,g),m(o,r),m(o,c),ne(l,o,null),m(o,a),m(o,i),m(i,u),m(i,d),m(o,f),m(o,p),m(o,h),m(o,_),k=!0,R||(j=[x(p,"click",e[2]),x(_,"click",e[1])],R=!0)},p(e,[t]){(!k||1&t)&&C(d,e[0])},i(e){k||(Q(l.$$.fragment,e),U((()=>{T||(T=Z(o,pe,{duration:200},!0)),T.run(1)})),k=!0)},o(e){X(l.$$.fragment,e),T||(T=Z(o,pe,{duration:200},!1)),T.run(0),k=!1},d(e){e&&g(t),e&&g(n),e&&g(o),oe(l),e&&T&&T.end(),R=!1,s(j)}}}function rt(e,t,n){let o;l(e,ge,(e=>n(0,o=e)));let{showUpload:s}=t,{videoFileToUpload:r}=t;return e.$$set=e=>{"showUpload"in e&&n(3,s=e.showUpload),"videoFileToUpload"in e&&n(4,r=e.videoFileToUpload)},[o,()=>{n(3,s=!1)},()=>{let e=new FormData,t=new File([r],"pleaseworkvideo.mjpeg");e.append("data",t),fetch("/upload",{method:"POST",body:e})},s,r]}class ct extends ce{constructor(e){super(),re(this,e,rt,st,c,{showUpload:3,videoFileToUpload:4})}}function lt(e){let t,n,o,s,r;function c(t){e[15](t)}function l(t){e[16](t)}function a(t){e[17](t)}let i={};return void 0!==e[1]&&(i.showRecordPage=e[1]),void 0!==e[6]&&(i.db=e[6]),void 0!==e[0]&&(i.showFrameSaved=e[0]),t=new ot({props:i}),E.push((()=>ee(t,"showRecordPage",c))),E.push((()=>ee(t,"db",l))),E.push((()=>ee(t,"showFrameSaved",a))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),r=!0},p(e,r){const c={};!n&&2&r&&(n=!0,c.showRecordPage=e[1],A((()=>n=!1))),!o&&64&r&&(o=!0,c.db=e[6],A((()=>o=!1))),!s&&1&r&&(s=!0,c.showFrameSaved=e[0],A((()=>s=!1))),t.$set(c)},i(e){r||(Q(t.$$.fragment,e),r=!0)},o(e){X(t.$$.fragment,e),r=!1},d(e){oe(t,e)}}}function at(e){let t,n,o,s,r,c,l,a,i;const u=[dt,ut,it],d=[];function f(e,t){return e[2]?0:e[0]?1:e[3]?2:-1}function p(t){e[13](t)}function h(t){e[14](t)}~(t=f(e))&&(n=d[t]=u[t](e)),s=new ie({});let m={};return void 0!==e[4]&&(m.FramesData=e[4]),void 0!==e[1]&&(m.showRecordPage=e[1]),c=new Le({props:m}),E.push((()=>ee(c,"FramesData",p))),E.push((()=>ee(c,"showRecordPage",h))),{c(){n&&n.c(),o=w(),te(s.$$.fragment),r=w(),te(c.$$.fragment)},m(e,n){~t&&d[t].m(e,n),v(e,o,n),ne(s,e,n),v(e,r,n),ne(c,e,n),i=!0},p(e,s){let r=t;t=f(e),t===r?~t&&d[t].p(e,s):(n&&(G(),X(d[r],1,1,(()=>{d[r]=null})),J()),~t?(n=d[t],n?n.p(e,s):(n=d[t]=u[t](e),n.c()),Q(n,1),n.m(o.parentNode,o)):n=null);const i={};!l&&16&s&&(l=!0,i.FramesData=e[4],A((()=>l=!1))),!a&&2&s&&(a=!0,i.showRecordPage=e[1],A((()=>a=!1))),c.$set(i)},i(e){i||(Q(n),Q(s.$$.fragment,e),Q(c.$$.fragment,e),i=!0)},o(e){X(n),X(s.$$.fragment,e),X(c.$$.fragment,e),i=!1},d(e){~t&&d[t].d(e),e&&g(o),oe(s,e),e&&g(r),oe(c,e)}}}function it(e){let t,n,o,s;function r(t){e[11](t)}function c(t){e[12](t)}let l={};return void 0!==e[3]&&(l.showUpload=e[3]),void 0!==e[5]&&(l.videoFileToUpload=e[5]),t=new ct({props:l}),E.push((()=>ee(t,"showUpload",r))),E.push((()=>ee(t,"videoFileToUpload",c))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),s=!0},p(e,s){const r={};!n&&8&s&&(n=!0,r.showUpload=e[3],A((()=>n=!1))),!o&&32&s&&(o=!0,r.videoFileToUpload=e[5],A((()=>o=!1))),t.$set(r)},i(e){s||(Q(t.$$.fragment,e),s=!0)},o(e){X(t.$$.fragment,e),s=!1},d(e){oe(t,e)}}}function ut(e){let t,n,o;function s(t){e[10](t)}let r={};return void 0!==e[0]&&(r.showFrameSaved=e[0]),t=new Ce({props:r}),E.push((()=>ee(t,"showFrameSaved",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};!n&&1&o&&(n=!0,s.showFrameSaved=e[0],A((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function dt(e){let t,n,o;function s(t){e[9](t)}let r={};return void 0!==e[2]&&(r.showFrameDetected=e[2]),t=new we({props:r}),E.push((()=>ee(t,"showFrameDetected",s))),{c(){te(t.$$.fragment)},m(e,n){ne(t,e,n),o=!0},p(e,o){const s={};!n&&4&o&&(n=!0,s.showFrameDetected=e[2],A((()=>n=!1))),t.$set(s)},i(e){o||(Q(t.$$.fragment,e),o=!0)},o(e){X(t.$$.fragment,e),o=!1},d(e){oe(t,e)}}}function ft(e){let t,n,o,s;const r=[at,lt],c=[];function l(e,t){return e[1]?1:0}return t=l(e),n=c[t]=r[t](e),{c(){n.c(),o=$("")},m(e,n){c[t].m(e,n),v(e,o,n),s=!0},p(e,[s]){let a=t;t=l(e),t===a?c[t].p(e,s):(G(),X(c[a],1,1,(()=>{c[a]=null})),J(),n=c[t],n?n.p(e,s):(n=c[t]=r[t](e),n.c()),Q(n,1),n.m(o.parentNode,o))},i(e){s||(Q(n),s=!0)},o(e){X(n),s=!1},d(e){c[t].d(e),e&&g(o)}}}function pt(e,t,n){let o;l(e,ge,(e=>n(21,o=e)));let s,r=!0,c=!1,a=!1,i=!1,u=!1,d=!1,f=[],p=!1,h=!1;const m=e=>{if(console.log(e),"OFFLINE"==e)return!1;if(f.forEach((t=>{e==t.id&&(r=!1)})),r){const t=g.transaction(["frames"],"readwrite");t.oncomplete=e=>{console.log("Added new frame!")},t.onerror=e=>{console.log("Error adding new frame")};const o=t.objectStore("frames");let s={id:e,videoFile:null};o.add(s).onsuccess=e=>{},n(2,c=!0),f.push(s),n(4,f)}else f.every((t=>t.id!=e||(console.log(t.id==e),null!=t.videoFile&&(n(7,d=!0),n(5,s=t.videoFile)),!1)))},v=window.indexedDB.open("MyTestDatabase",1);let g;function b(){n(4,f=[]);g.transaction(["frames"]).objectStore("frames").openCursor().onsuccess=e=>{const t=e.target.result;t?(f.push(t.value),n(4,f),t.continue()):(n(8,h=!0),console.log(f),1==p&&(console.log("checking frame in indexdb"),m(o)))}}return v.onerror=e=>{console.error("Why didn't you allow my web app to use IndexedDB?!")},v.onsuccess=e=>{n(6,g=e.target.result),b()},v.onupgradeneeded=e=>{n(6,g=e.target.result),g.createObjectStore("frames",{keyPath:"id"})},e.$$.update=()=>{258&e.$$.dirty&&0==i&&(fetch("getFrameID").then((e=>e.json())).then((e=>{console.log(e),ge.set(e.frameID),p=!0,1==h&&m(o)})).catch((e=>{console.log("Could not connect to frame"),ge.set("OFFLINE"),console.log(o)})),1==h&&b()),129&e.$$.dirty&&0==a&&d&&n(3,u=!0)},[a,i,c,u,f,s,g,d,h,function(e){c=e,n(2,c)},function(e){a=e,n(0,a)},function(e){u=e,n(3,u),n(0,a),n(7,d)},function(e){s=e,n(5,s)},function(e){f=e,n(4,f)},function(e){i=e,n(1,i)},function(e){i=e,n(1,i)},function(e){g=e,n(6,g)},function(e){a=e,n(0,a)}]}return new class extends ce{constructor(e){super(),re(this,e,pt,ft,c,{})}}({target:document.body})}();
-};</script>
-
-
-
-
-
-
-
 
   </head>
 
-  <body>
+  
+  <script>
+    let FramesData = [];
+    const request = window.indexedDB.open("MyTestDatabase", 1);
+    let db;
 
-    <script>
-      // if ("serviceWorker" in navigator) {
-      //   window.addEventListener("load", () => {
-      //     navigator.serviceWorker.register("/service-worker.js").then((reg) => {
-      //       console.log("Service worker registered.", reg);
-      //     });
-      //   });
-      // }
-    </script>
+
+    request.onerror = (event) => {
+      console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      checkDB();
+    };
+
+
+    
+    function checkDB(){
+      FramesData = [];
+      const transaction = db.transaction(["frames"]);
+      const objectStore = transaction.objectStore("frames");
+      objectStore.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          //console.log(`Frame ID: ${cursor.key}`);
+          FramesData.push(cursor.value);
+          cursor.continue();
+        }else{
+          console.log(FramesData);
+        }
+      };
+    }
+
+
+      request.onupgradeneeded = (event) => {
+        db = event.target.result;
+        db.createObjectStore("frames", { keyPath: "id" });
+      };
+  </script>
+  <body>
+    <h1>TEST</h1>
+
   </body>
 </html>

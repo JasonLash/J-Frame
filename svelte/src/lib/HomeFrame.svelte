@@ -12,13 +12,18 @@
 
 <div class="frameObject" on:click={clickedFrame}>
     {#if frameData.id == $FRAMEID && frameData.videoFile == null}
-        <div class="big" style="outline: 4px solid #5D6AE8;">
-            <div class="small"></div>
-        </div> 
+        <div class="outline">
+            <div class="big">
+                <div class="small"></div>
+            </div> 
+        </div>
+
     {:else if frameData.id == $FRAMEID && frameData.videoFile != null}
-        <div class="big" style="outline: 4px solid #5D6AE8; background: #E9CA5D;">
-            <div class="small"></div>
-        </div>  
+        <div class="outline">
+            <div class="big" style="background: #E9CA5D;">
+                <div class="small"></div>
+            </div>  
+        </div>
     {:else if frameData.videoFile != null}
         <div class="big" style="background: #E9CA5D;">
             <div class="small"></div>
@@ -35,7 +40,21 @@
 
 
 <style>
+
+    .outline{
+        background: #5D6AE8;
+        
+        border-radius: 14px;
+
+        width: 6.5em;
+        height: 8.5em;
+        display: flex;
+        justify-content: center;
+    }
+
+
     .big{
+        margin: auto;
         background: #BEBEBE;
         border: 10px solid #000000;
         

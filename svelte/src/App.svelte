@@ -24,10 +24,11 @@
 
 	function getFrameData(){
 		//Get frame ID
+		console.log("Getting Frame ID")
 		fetch('getFrameID')
 		.then((response) => response.json())
 		.then((data) => {
-			console.log(data)
+			console.log("Frame ID: " + data.frameID)
 			FRAMEID.set(data.frameID);
 			gotFrameID = true;
 			if(initializedDB == true){
@@ -50,7 +51,7 @@
 
 	//getFrameData();
 
-	$: if(showRecordPage == false){
+	$: if(showRecordPage == false || showUpload == false){
 		getFrameData();
 		if(initializedDB == true){
 			checkDB();
@@ -171,7 +172,7 @@
 	{:else if showFrameSaved}
 		<FrameSaved  bind:showFrameSaved={showFrameSaved}/>
 	{:else if showUpload}
-		<FrameUpload  bind:showUpload={showUpload} bind:videoFileToUpload={videoFileToUpload}/>
+		<FrameUpload  bind:showUpload={showUpload} bind:videoFileToUpload={videoFileToUpload} bind:db={db}/>
 	{/if}
 
 	<Refresh />

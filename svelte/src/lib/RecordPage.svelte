@@ -95,11 +95,11 @@
 
         recorder.stop(); 
         camStream.getTracks().forEach(track => track.stop());
-
+        videoElement.src = videoElement.srcObject = null;
 
         blob = new Blob(blobs_recorded, { type: recorder.mimeType });
         let videoLink = URL.createObjectURL(blob);
-        //alert(blob.size)
+        //alert(videoLink)
         videoElement.src = videoLink;
         downloadLink = videoLink;
 
@@ -123,7 +123,10 @@
         {#if !isRecording && !recorededVideo && cameraAccess}
             <button on:click={() => startRecording(currentTime)} class="recordBtn"><h3>Record</h3></button>
         {/if}
-        <video bind:this={videoElement} muted autoplay playsinline loop></video>
+        <div class="videoMask">
+            <video bind:this={videoElement} muted autoplay playsinline loop></video>
+        </div>
+        
     </div>
     
 
@@ -193,9 +196,14 @@
         text-align: center;
     }
 
+    .videoMask{
+        border-radius: 10px;
+    }
+
     video{
         width: 22rem;
         height: 30rem;
         margin: auto;
+        
     }
 </style>
