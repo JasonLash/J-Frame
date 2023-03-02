@@ -55,10 +55,25 @@
     }
 
 
-      request.onupgradeneeded = (event) => {
-        db = event.target.result;
-        db.createObjectStore("frames", { keyPath: "id" });
-      };
+    request.onupgradeneeded = (event) => {
+      db = event.target.result;
+      db.createObjectStore("frames", { keyPath: "id" });
+    };
+
+    function getFrameData(){
+      //Get frame ID
+      console.log("Getting Frame ID")
+      fetch('getFrameID')
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Frame ID: " + data.id)
+      })
+      .catch((error) => {
+        console.log("Could not connect to frame")
+      });;
+    }
+
+    getFrameData();
   </script>
   <body>
     <h1>TEST</h1>
