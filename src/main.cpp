@@ -307,6 +307,11 @@ void setupServer(){
     request->send(response);
   });
 
+  server.on("/disconnect", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "OK");
+    WiFi.softAPdisconnect(true);
+  });
+
   server.begin();
 }
 
