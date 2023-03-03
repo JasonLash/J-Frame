@@ -103,7 +103,7 @@
               </div>    
           </div>
     
-          <button onclick="() => location.reload();">Add Frame +</button>
+          <button onclick="refreshPage()">Add Frame +</button>
         </div>
       </div>
     </div>
@@ -119,7 +119,7 @@
               </div>    
           </div>
     
-          <button onclick="() => location.reload();">Close</button>
+          <button onclick="refreshPage()">Close</button>
         </div>
       </div>
     </div>
@@ -135,7 +135,7 @@
               </div>    
           </div>
     
-          <button>Upload</button>
+          <button onclick="uploadVideo()">Upload</button>
         </div>
       </div>
     </div>
@@ -145,6 +145,7 @@
 </html>
 <script>
   let FramesData = [];
+  let currentFrameData;
   const request = window.indexedDB.open("MyTestDatabase", 1);
   let db;
 
@@ -194,90 +195,189 @@
     db.createObjectStore("frames", { keyPath: "id" });
   };
 
+  let tempFrameID = "T00"
+
   function getFrameData(){
     //Get frame ID
     console.log("Getting Frame ID")
-    fetch('getFrameID')
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Frame ID: " + data.id)
-      let isNewFrame = true;
-      FramesData.forEach((f) =>{
-        if(f.id == data.id){
-          isNewFrame = false;
+    // fetch('getFrameID')
+    // .then((response) => response.json())
+    // .then((data) => {
+    //   console.log(tempFrameID)
+
+    //   let isNewFrame = true;
+    //   FramesData.forEach((f) =>{
+    //     if(f.id == tempFrameID){
+    //       isNewFrame = false;
+    //     }
+    //   });
+    //   console.log(isNewFrame)
+    //   if(isNewFrame){
+    //     const transaction = db.transaction(["frames"], "readwrite");
+    //     transaction.oncomplete = (event) => {
+    //       //console.log("!");
+    //     };
+
+    //     transaction.onerror = (event) => {
+    //       // Don't forget to handle errors!
+    //       console.log("Error adding new frame")
+    //     };
+
+    //     const objectStore = transaction.objectStore("frames");
+
+    //     let frameDataScheme = {
+    //       id: tempFrameID,
+    //       videoFile : null
+    //     }
+
+    //     const request = objectStore.add(frameDataScheme);
+    //     request.onsuccess = (event) => {
+    //       console.log("Success adding frame")
+    //     };
+
+    //     FramesData.push(frameDataScheme);
+    //     newFrameUI.style.display = 'inline';
+    //     console.log(newFrameUI.style.display)
+    //     disconnectFrame();
+    //   }else{
+        
+    //     let savedVideo = false;
+
+    //     FramesData.forEach(f => {
+    //       console.log(f)
+    //       if(f.id == tempFrameID){
+    //         if(f.videoFile != null){
+    //           savedVideo = true;
+    //         }
+    //         currentFrameData = f;
+    //       }
+    //     })
+    //     console.log(savedVideo)
+
+    //     if(savedVideo){
+    //       uploadFrameUI.style.display = 'inline';
+    //       console.log(uploadFrameUI.style.display );
+          
+    //     }else{
+          
+    //       normalFrameUI.style.display = 'inline';
+    //       console.log(normalFrameUI.style.display );
+    //       disconnectFrame();
+    //     }
+    //   }
+    // })
+    // .catch((error) => {
+    //   console.log("Could not connect to frame")
+    // });;
+    console.log(tempFrameID)
+
+    let isNewFrame = true;
+    FramesData.forEach((f) =>{
+      if(f.id == tempFrameID){
+        isNewFrame = false;
+      }
+    });
+    console.log(isNewFrame)
+    if(isNewFrame){
+      const transaction = db.transaction(["frames"], "readwrite");
+      transaction.oncomplete = (event) => {
+        //console.log("!");
+      };
+
+      transaction.onerror = (event) => {
+        // Don't forget to handle errors!
+        console.log("Error adding new frame")
+      };
+
+      const objectStore = transaction.objectStore("frames");
+
+      let frameDataScheme = {
+        id: tempFrameID,
+        videoFile : null
+      }
+
+      const request = objectStore.add(frameDataScheme);
+      request.onsuccess = (event) => {
+        console.log("Success adding frame")
+      };
+
+      FramesData.push(frameDataScheme);
+      newFrameUI.style.display = 'inline';
+      console.log(newFrameUI.style.display)
+      disconnectFrame();
+    }else{
+      
+      let savedVideo = false;
+
+      FramesData.forEach(f => {
+        console.log(f)
+        if(f.id == tempFrameID){
+          if(f.videoFile != null){
+            savedVideo = true;
+          }
+          currentFrameData = f;
         }
-      });
-      console.log(isNewFrame)
-      if(isNewFrame){
-        const transaction = db.transaction(["frames"], "readwrite");
-        transaction.oncomplete = (event) => {
-          //console.log("!");
-        };
+      })
+      console.log(savedVideo)
 
-        transaction.onerror = (event) => {
-          // Don't forget to handle errors!
-          console.log("Error adding new frame")
-        };
-
-        const objectStore = transaction.objectStore("frames");
-
-        let frameDataScheme = {
-          id: data.id,
-          videoFile : null
-        }
-
-        const request = objectStore.add(frameDataScheme);
-        request.onsuccess = (event) => {
-          console.log("Success adding frame")
-        };
-
-        FramesData.push(frameDataScheme);
-        newFrameUI.style.display = 'inline';
-        console.log(newFrameUI.style.display)
-        disconnectFrame();
+      if(savedVideo){
+        uploadFrameUI.style.display = 'inline';
+        console.log(uploadFrameUI.style.display );
+        
       }else{
         
-        let savedVideo = false;
-
-        FramesData.forEach(f => {
-          console.log(f)
-          if(f.id == data.id){
-            if(f.videoFile != null){
-              savedVideo = true;
-            }
-          }
-        })
-        console.log(savedVideo)
-
-        if(savedVideo){
-          uploadFrameUI.style.display = 'inline';
-          console.log(uploadFrameUI.style.display );
-        }else{
-          
-          normalFrameUI.style.display = 'inline';
-          console.log(normalFrameUI.style.display );
-          disconnectFrame();
-        }
+        normalFrameUI.style.display = 'inline';
+        console.log(normalFrameUI.style.display );
+        disconnectFrame();
       }
-    })
-    .catch((error) => {
-      console.log("Could not connect to frame")
-    });;
-  }
-
-
-  function uploadVideo(){
+    }
 
   }
 
   function disconnectFrame(){
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", "/disconnect", true); 
+    xhr.open("GET", "/resetDevice", true); 
     xhr.send();
   }
 
-  function refreshPage(){
-    location.reload();
+  const refreshPage = () =>{
+    window.location.href = '/';
   }
+
+
+  const uploadVideo  = async () => {
+
+        let formData = new FormData();
+        let newFile = new File([currentFrameData.videoFile], "pleaseworkvideo.mjpeg")
+        formData.append("data", newFile);
+        // fetch('/upload', {method: "POST", body: formData})
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/upload", true);
+
+        xhr.upload.addEventListener("progress", (event) => {
+            console.log(event);
+            if (event.lengthComputable) {
+                console.log("upload progress:", ((event.loaded / event.total) * 100));
+                //uploadLoadingBar.style.width = ((event.loaded / event.total) * 100) + "%";
+            }
+        });
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) 
+            {
+                console.log(xhr.statusText);
+                const request = db.transaction(["frames"], "readwrite").objectStore("frames").delete(currentFrameData.id);
+                request.onsuccess = (event) => {
+                // It's gone!
+                };
+                disconnectFrame();
+            }
+        }
+
+        //xhr.setRequestHeader("Content-Type", "application/octet-stream");
+        xhr.send(formData);
+
+    }
   
 </script>

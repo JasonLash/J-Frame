@@ -1,3 +1,6 @@
+#define MJPEG_FILENAME "/pleaseworkvideo.mjpeg"
+#define FPS 10
+#define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
 #include <U8g2lib.h>
 #include <Arduino.h>
 #include <WiFi.h>
@@ -11,25 +14,82 @@
 #include <Adafruit_I2CDevice.h>
 #include <XPT2046_Touchscreen.h>
 #include <Update.h>
+
+#include <SSLCert.hpp>
+#include <HTTPRequest.hpp>
+#include <HTTPResponse.hpp>
+
+#include <HTTPSServer.hpp>
+#include <HTTPServer.hpp>
+#include <HTTPBodyParser.hpp>
+#include <HTTPMultipartBodyParser.hpp>
+#include <HTTPURLEncodedBodyParser.hpp>
 #include "MjpegClass.h"
+
+#include "cert.h"
+#include "private_key.h"
+
 #include <DNSServer.h>
+
 #include <ArduinoJson.h>
-#include "AsyncJson.h"
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
 
-const String FRAMEID = "T00";
+#include "FS.h"
+#include "FFat.h"
 
 
-AsyncWebServer server(80);
+using namespace httpsserver;
 
 //#define WIFI_SSID "J and L"
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
 
-const String webName = "jframe.cam";
-DNSServer dnsServer;
-const byte DNS_PORT = 53;
+const String FRAMEID = "001";
+
+
+HTTPSServer * secureServer;
+HTTPServer * insecureServer;
+
+void handleRoot(HTTPRequest * req, HTTPResponse * res);
+void handle404(HTTPRequest * req, HTTPResponse * res);
+void uploadFile(HTTPRequest * req, HTTPResponse * res);
+void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
+void handleRedirect(HTTPRequest * req, HTTPResponse * res);
+
+void handleFrameID(HTTPRequest * req, HTTPResponse * res);
+
+void handleResetDevice(HTTPRequest * req, HTTPResponse * res);
+
+
+void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
+
+//spiifs test
+void handleSPIFFS(HTTPRequest * req, HTTPResponse * res);
+// We need to specify some content-type mapping, so the resources get delivered with the
+// right content type and are displayed correctly in the browser
+char contentTypes[][2][32] = {
+  {".html", "text/html"},
+  {".css",  "text/css"},
+  {".js",   "application/javascript"},
+  {".json", "application/json"},
+  {".png",  "image/png"},
+  {".jpg",  "image/jpg"},
+  {"", ""}
+};
+
+
+
+//<<Pin Hookup>>//
+//19  ::  MISO    
+//23  ::  MOSI
+//18  ::  SCK
+
+//15  ::  SD_CS
+
+//27  ::  LCD_DC
+//33  ::  LCD_RESET
+//5   ::  LCD_CS
+//22  ::  LCD_Backlight
+
 
 #define SCK 18
 #define MOSI 23
@@ -44,14 +104,14 @@ const byte DNS_PORT = 53;
 #define SD_CS 21
 
 #define TOUCH_CS  15
-XPT2046_Touchscreen ts(TOUCH_CS);
 
-#define MJPEG_FILENAME "/frameVideo.mjpeg"
-#define FPS 10
-#define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
+const byte DNS_PORT = 53;
+
+XPT2046_Touchscreen ts(TOUCH_CS);
 
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
+
 static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
 
@@ -73,10 +133,16 @@ class ButtonData {
 };
 
 ButtonData resetFrameButton;
+ButtonData sleepButton;
+
+DNSServer dnsServer;
+const String webName = "jframe.cam";
 
 int startTime;
 int endTime;
 String timeDiff;
+
+bool touchedSleepBTN = false;
 
 //////////Setup
 void setupLCD(){
@@ -96,7 +162,7 @@ void setupLCD(){
     exit(1);
   }
 
-  gfx->setFont(u8g2_font_profont15_mf);
+  gfx->setFont(u8g2_font_HelvetiPixelOutline_tr);
 
   Serial.println(("Done setting up LCD"));
 }
@@ -133,6 +199,14 @@ void drawPauseMenu(){
   gfx->println("Reset Frame");
 }
 
+void drawSleepButton(){
+  gfx->fillRoundRect(sleepButton.x, sleepButton.y, sleepButton.width , sleepButton.height, 10, 0x7BEF);
+  gfx->setCursor(54, 264);
+  gfx->setTextSize(2);
+  gfx->setTextColor(BLACK);
+  gfx->println("Sleep");
+}
+
 bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int clickY){
   if(clickX > recX &&  clickX < recX + recW){
     if(clickY > recY &&  clickY < recY + recH){
@@ -141,6 +215,24 @@ bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int click
   }
 
   return false;
+}
+
+void checkTouch(){
+  if (ts.touched()) {
+    TS_Point p = ts.getPoint();
+    int touchWH = 3900;
+    int mapedX = map(p.x, 250, touchWH, 240, 0);
+    int mapedY = map(p.y, 250, touchWH, 320, 0);
+    if(checkIfInRect(sleepButton.x, sleepButton.y, sleepButton.width, sleepButton.height, mapedX, mapedY)){
+      touchedSleepBTN = true;
+    }
+  }else{
+    if(touchedSleepBTN){
+      Serial.println("Going to sleep...");
+      delay(400);
+      esp_deep_sleep_start();
+    }
+  }
 }
 
 void drawQRCode(String inputString, String stepString){
@@ -178,6 +270,8 @@ void drawQRCode(String inputString, String stepString){
   gfx->setTextSize(3);
   gfx->setTextColor(BLACK);
   gfx->println("SCAN");
+
+  drawSleepButton();
 }
 
 
@@ -186,6 +280,11 @@ void setupButtons(){
   resetFrameButton.y = 140;
   resetFrameButton.width = 180;
   resetFrameButton.height = 38;
+
+  sleepButton.x = 30;
+  sleepButton.y = 260;
+  sleepButton.width = 180;
+  sleepButton.height = 38;
 }
 
 void videoLoop(){
@@ -283,7 +382,237 @@ void videoLoop(){
 
 //////////WEB Logic
 
+void downloadBoilerplate(HTTPRequest * req, HTTPResponse * res, String saveType){
+  Serial.printf("trying file upload");
+  res->setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res->setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+
+  HTTPBodyParser *parser;
+  std::string contentType = req->getHeader("Content-Type");
+
+  size_t semicolonPos = contentType.find(";");
+  if (semicolonPos != std::string::npos) {
+    contentType = contentType.substr(0, semicolonPos);
+  }
+
+  if (contentType == "multipart/form-data") {
+    parser = new HTTPMultipartBodyParser(req);
+  } else {
+    Serial.printf("Unknown POST Content-Type: %s\n", contentType.c_str());
+    return;
+  }
+
+  bool didwrite = false;
+
+  while(parser->nextField()) {
+    std::string name = parser->getFieldName();
+    std::string filename = parser->getFieldFilename();
+    std::string mimeType = parser->getFieldMimeType();
+    //Serial.printf("handleFormUpload: field name='%s', filename='%s', mimetype='%s'\n", name.c_str(), filename.c_str(), mimeType.c_str());
+    
+    std::string pathname = "/" + filename;
+    File file;
+    if(saveType == "SD"){
+      file = SD.open(pathname.c_str(), FILE_WRITE);
+    }else if(saveType == "SPIFFS"){
+      file = SPIFFS.open(pathname.c_str(), FILE_WRITE);
+    }else{
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+        Update.printError(Serial);
+      }
+    }
+    
+    size_t fileLength = 0;
+    didwrite = true;
+
+    while (!parser->endOfField()) {
+      byte buf[512];
+      size_t readLength = parser->read(buf, 512);
+      if(saveType == "UPDATE"){
+        Update.write(buf, readLength);
+      }else{
+        file.write(buf, readLength);
+        fileLength += readLength;
+      }
+
+    }
+    file.close();
+    Serial.printf("Saved %d bytes to %s", (int)fileLength, pathname.c_str());
+  }
+
+  if(saveType == "UPDATE"){
+     if (Update.end(true)) {
+      Serial.printf("Update Success... Rebooting...");
+      ESP.restart();
+    } else {
+      Update.printError(Serial);
+    }
+
+  }
+  if (!didwrite) {
+    Serial.printf("Did not write any file");
+  }else if(saveType == "SD"){
+    playVideo = true;
+  }
+
+  delete parser;
+}
+
+void simpleRequest(HTTPRequest * req, HTTPResponse * res, String fileName, String contentType, bool doSD){
+  //Serial.printf("Requested: %s Content Type: %s", fileName, contentType);
+  //Serial.println();
+  File file;
+  if(doSD){
+    file = SD.open(fileName, "r");
+  }else{
+    file = SPIFFS.open(fileName, "r");
+  }
+  
+    
+  uint8_t buffer[256];
+  size_t length = 0;
+
+  unsigned int fileSize = file.size();
+  res->setHeader("Content-Length", String(fileSize).c_str());
+  res->setHeader("Content-Type", contentType.c_str());
+  res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+
+   Serial.println(String(fileSize).c_str());
+
+  do {
+      length = file.read(buffer, 256);
+      res->write(buffer, length);
+  } while (length > 0);
+
+  file.close();
+}
+
+//File uploads
+void handleVideoUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "SD");
+}
+
+void handleSpiffsUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "SPIFFS");
+}
+
+void handleFirmwareUpload(HTTPRequest * req, HTTPResponse * res) {
+  downloadBoilerplate(req, res, "UPDATE");
+}
+
+void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
+  simpleRequest(req, res, "/uploadSpiffs.html", "text/html", false);
+}
+
+void handleResetDevice(HTTPRequest * req, HTTPResponse * res) {
+  WiFi.softAPdisconnect(true);
+  esp_deep_sleep_start();
+}
+
+
+void handleFrameID(HTTPRequest * req, HTTPResponse * res){
+  StaticJsonBuffer<JSON_OBJECT_SIZE(1)> jsonBuffer;
+  JsonObject& obj = jsonBuffer.createObject();
+  obj["frameID"] = FRAMEID.c_str();
+  res->setHeader("Content-Type", "application/json");
+  obj.printTo(*res);
+}
+
+void handleRedirect(HTTPRequest * req, HTTPResponse * res) {
+  req->discardRequestBody();
+  res->setStatusCode(308);
+  res->setStatusText("Redirect");
+  res->setHeader("Content-Type", "text/html");
+  res->println("<!DOCTYPE html>");
+  res->println("<HEAD>");
+  res->println("<meta http-equiv=\"refresh\" content=\"0;url=https://jframe.cam/\">");
+  res->println("</head>");
+}
+
+
+//this isn't used anymore
+void handle404(HTTPRequest * req, HTTPResponse * res) {
+  req->discardRequestBody();
+  res->setStatusCode(404);
+  res->setStatusText("Not Found");
+  res->setHeader("Content-Type", "text/html");
+  res->println("<!DOCTYPE html>");
+  res->println("<html>");
+  res->println("<head><title>Not Found</title></head>");
+  res->println("<body><h1>404 Not Found</h1><p>The requested resource was not found on this server.</p></body>");
+  res->println("</html>");
+}
+
+void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
+  // We only handle GET here
+  if (req->getMethod() == "GET") {
+    // Redirect / to /index.html
+    std::string reqFile = req->getRequestString()=="/" ? "/index.html" : req->getRequestString();
+
+    // Try to open the file
+    std::string filename = reqFile;
+
+    // Check if the file exists
+    if (!SPIFFS.exists(filename.c_str())) {
+      // Send "404 Not Found" as response, as the file doesn't seem to exist
+      res->setStatusCode(404);
+      res->setStatusText("Not found");
+      res->println("404 Not Found");
+      return;
+    }
+
+    startTime = millis();
+    File file = SPIFFS.open(filename.c_str());
+
+    res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res->setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+
+    // Set length
+    res->setHeader("Content-Length", httpsserver::intToString(file.size()));
+
+    // Content-Type is guessed using the definition of the contentTypes-table defined above
+    int cTypeIdx = 0;
+    do {
+      if(reqFile.rfind(contentTypes[cTypeIdx][0])!=std::string::npos) {
+        res->setHeader("Content-Type", contentTypes[cTypeIdx][1]);
+        break;
+      }
+      cTypeIdx+=1;
+    } while(strlen(contentTypes[cTypeIdx][0])>0);
+
+    // Read the file and write it to the response
+    uint8_t buffer[256];
+    size_t length = 0;
+    do {
+      length = file.read(buffer, 256);
+      res->write(buffer, length);
+    } while (length > 0);
+
+    file.close();
+
+    endTime = millis() - startTime;
+    timeDiff = String(endTime);
+    Serial.printf("time to send File %s was %s: ", filename.c_str(), timeDiff.c_str());
+    Serial.println();
+  } else {
+    // If there's any body, discard it
+    req->discardRequestBody();
+    // Send "405 Method not allowed" as response
+    res->setStatusCode(405);
+    res->setStatusText("Method not allowed");
+    res->println("405 Method not allowed");
+  }
+}
+
+
+
+
 void setupServer(){
+  SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
+  secureServer = new HTTPSServer(&cert);
+  //insecureServer = new HTTPServer();
+
   Serial.println("Setting up WiFi");
   WiFi.softAP(WIFI_SSID, WIFI_PSK);
   Serial.print("Connected. IP=");
@@ -291,28 +620,45 @@ void setupServer(){
   wifiQR = "";
   wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
 
+
+  ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
+  
+  ResourceNode * nodeUpload = new ResourceNode("/upload", "POST", &handleVideoUpload);
+  ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
+  ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
+
+  // ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
+  // ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
+  ResourceNode * nodeFrameID = new ResourceNode("/getFrameID", "GET", &handleFrameID);
+
+  ResourceNode * nodeDeviceReset = new ResourceNode("/resetDevice", "GET", &handleResetDevice);
+
+  ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
+  secureServer->setDefaultNode(spiffsNode);
+
+  secureServer->registerNode(nodeUploadPage);
+  secureServer->registerNode(nodeUpload);
+  secureServer->registerNode(updateSpiffs);
+  secureServer->registerNode(updateFirmware);
+  secureServer->registerNode(nodeFrameID);
+  secureServer->registerNode(nodeDeviceReset);
+
+  //insecureServer->setDefaultNode(nodeRedirect);
+  //insecureServer->registerNode(nodeRedirect404);
+
   //setting DNS
   dnsServer.start(DNS_PORT, webName, WiFi.softAPIP());
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/index.html", String(), false);
-  });
 
-  server.on("/getFrameID", HTTP_GET, [](AsyncWebServerRequest *request){
-    AsyncResponseStream *response = request->beginResponseStream("application/json");
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &root = jsonBuffer.createObject();
-    root["id"] = FRAMEID;
-    root.printTo(*response);
-    request->send(response);
-  });
+  Serial.println("Starting server...");
+  secureServer->start();
+  //insecureServer->start();
+  //if (secureServer->isRunning() && insecureServer->isRunning()) {
+  if (secureServer->isRunning() ) {
+    Serial.println("Server ready.");
+  }
 
-  server.on("/disconnect", HTTP_GET, [] (AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", "OK");
-    WiFi.softAPdisconnect(true);
-  });
 
-  server.begin();
 }
 
 void drawWifiQR(){
@@ -358,6 +704,9 @@ void loop()
   dnsServer.processNextRequest();
 
   if(!videoFileFound){
+    //insecureServer->loop();
+    secureServer->loop();
+    checkTouch();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
       drawQRCode(wifiQR ,"Step 2");
       printedSecondQR = true;
@@ -368,4 +717,5 @@ void loop()
     videoLoop();
   }
 
+  delay(100);
 }
