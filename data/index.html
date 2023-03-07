@@ -15,53 +15,17 @@
     <!-- <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" /> -->
 
     <style>
- * {padding: 0;margin: 0;-moz-box-sizing: border-box;-webkit-box-sizing: border-box;box-sizing: border-box;font-family: '-apple-system', 'Roboto', sans-serif;}html, body {max-width: 100%;overflow: hidden;background: #323232;}body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;}h3{color: #fff;text-align: center;}h2{color: #fff;text-align: center;}button{background: #939393;color: #FFFFFF;border: 4px solid #3C3C3C;border-radius: 12px;width: 90%;text-align: center;padding: .4em 0em;font-size: 1.1em;font-weight: 550;margin: auto;}
     </style>
 
   </head>
 
-  
   <script>
-    let FramesData = [];
-    const request = window.indexedDB.open("MyTestDatabase", 1);
-    let db;
-
-
-    request.onerror = (event) => {
-      console.error("Why didn't you allow my web app to use IndexedDB?!");
-    };
-
-    request.onsuccess = (event) => {
-      db = event.target.result;
-      checkDB();
-    };
-
-
-    
-    function checkDB(){
-      FramesData = [];
-      const transaction = db.transaction(["frames"]);
-      const objectStore = transaction.objectStore("frames");
-      objectStore.openCursor().onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          //console.log(`Frame ID: ${cursor.key}`);
-          FramesData.push(cursor.value);
-          cursor.continue();
-        }else{
-          console.log(FramesData);
-        }
-      };
-    }
-
-
-      request.onupgradeneeded = (event) => {
-        db = event.target.result;
-        db.createObjectStore("frames", { keyPath: "id" });
-      };
   </script>
+
+
   <body>
-    <h1>TEST</h1>
 
   </body>
+
+  
 </html>
