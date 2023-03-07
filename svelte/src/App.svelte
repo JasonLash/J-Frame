@@ -38,7 +38,7 @@
 		.catch((error) => {
 			console.log("Could not connect to frame")
 			FRAMEID.set("OFFLINE");
-			// FRAMEID.set("001");
+			//FRAMEID.set("001");
 			// gotFrameID = true;
 			// if(initializedDB == true){
 			// 	checkFrame($FRAMEID);

@@ -9,305 +9,59 @@
     <meta name="description" content="Frame App" />
     <meta name="theme-color" content="#2F3BA2" />
 
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Svelte PWA" />
+    <!-- <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" /> -->
+
     <style>
-      * {
-        padding: 0;
-        margin: 0;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        font-family: '-apple-system', 'Roboto', sans-serif;
-      }
-      html,body {
-        max-width: 100%;
-        overflow: hidden;
-        background: #323232;
-      }
-
-      h3{
-        color: #fff;
-        text-align: center;
-      }h2{
-        color: #fff;
-        text-align: center;
-      }button{
-        background: #939393;
-        color: #FFFFFF;
-        border: 4px solid #3C3C3C;
-        border-radius: 12px;
-        width: 90%;
-        text-align: center;
-        padding: .4em 0em;
-        font-size: 1.1em;
-        font-weight: 550;
-        margin: auto;
-      }
-
-      .mainHolder{
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-
-      }
-      .holder{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: auto;
-        min-width: 100vw;
-        row-gap: 3rem;
-        margin-top: 8rem;
-      }
-
-      .big{
-          border: 17px solid #000000;
-          border-radius: 28px;
-
-          width: 12em;
-          height: 16em;
-      }
-
-      .small{
-          border: 13px solid #000000;
-          border-radius: 15px;
-          width: 8em;
-          height: 10em;
-          margin: 0 auto;
-          margin-top: 1em;
-      }
-      .center{
-          display: flex;
-          justify-content: center;
-          padding-top: 1em
-      }
-
+ * {padding: 0;margin: 0;-moz-box-sizing: border-box;-webkit-box-sizing: border-box;box-sizing: border-box;font-family: '-apple-system', 'Roboto', sans-serif;}html, body {max-width: 100%;overflow: hidden;background: #323232;}body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;}h3{color: #fff;text-align: center;}h2{color: #fff;text-align: center;}button{background: #939393;color: #FFFFFF;border: 4px solid #3C3C3C;border-radius: 12px;width: 90%;text-align: center;padding: .4em 0em;font-size: 1.1em;font-weight: 550;margin: auto;}
     </style>
 
   </head>
 
+  
+  <script>
+    let FramesData = [];
+    const request = window.indexedDB.open("MyTestDatabase", 1);
+    let db;
+
+
+    request.onerror = (event) => {
+      console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      checkDB();
+    };
+
+
+    
+    function checkDB(){
+      FramesData = [];
+      const transaction = db.transaction(["frames"]);
+      const objectStore = transaction.objectStore("frames");
+      objectStore.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          //console.log(`Frame ID: ${cursor.key}`);
+          FramesData.push(cursor.value);
+          cursor.continue();
+        }else{
+          console.log(FramesData);
+        }
+      };
+    }
+
+
+      request.onupgradeneeded = (event) => {
+        db = event.target.result;
+        db.createObjectStore("frames", { keyPath: "id" });
+      };
+  </script>
   <body>
-
-    <div id="newFrame">
-      <div class="mainHolder">
-        <div class="holder">
-          <h3>New Frame Detected!</h3>
-    
-          <div class="center">
-              <div class="big" style="background: #BEBEBE;">
-                  <div class="small"></div>
-              </div>    
-          </div>
-    
-          <button onclick="refreshPage()">Add Frame +</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="normalFrame">
-      <div class="mainHolder">
-        <div class="holder">
-          <h3>Frame Detected!</h3>
-    
-          <div class="center">
-              <div class="big" style="background: #BEBEBE;">
-                  <div class="small"></div>
-              </div>    
-          </div>
-    
-          <button onclick="refreshPage()">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="uploadFrame">
-      <div class="mainHolder">
-        <div class="holder">
-          <h3>Frame Detected!</h3>
-    
-          <div class="center">
-              <div class="big" style="background: #E9CA5D;">
-                  <div class="small"></div>
-              </div>    
-          </div>
-    
-          <button onclick="uploadVideo()">Upload</button>
-        </div>
-      </div>
-    </div>
-
+    <h1>TEST</h1>
 
   </body>
 </html>
-
-
-
-<script>
-  const FRAMEID = "000"
-  let FramesData = [];
-  let currentFrameData;
-  const request = window.indexedDB.open("MyTestDatabase", 1);
-  let db;
-
-  let newFrameUI = document.getElementById("newFrame");
-  let normalFrameUI = document.getElementById("normalFrame");
-  let uploadFrameUI = document.getElementById("uploadFrame");
-
-  document.addEventListener("DOMContentLoaded", () =>{
-    newFrameUI.style.display = 'none';
-    normalFrameUI.style.display = 'none';
-    uploadFrameUI.style.display = 'none';
-  });
-
-
-  request.onerror = (event) => {
-    console.error("Why didn't you allow my web app to use IndexedDB?!");
-  };
-
-  request.onsuccess = (event) => {
-    db = event.target.result;
-    checkDB();
-    
-  };
-
-
-  
-  function checkDB(){
-    FramesData = [];
-    const transaction = db.transaction(["frames"]);
-    const objectStore = transaction.objectStore("frames");
-    objectStore.openCursor().onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (cursor) {
-        //console.log(`Frame ID: ${cursor.key}`);
-        FramesData.push(cursor.value);
-        cursor.continue();
-      }else{
-        console.log(FramesData);
-        getFrameData();
-      }
-    };
-  }
-
-
-  request.onupgradeneeded = (event) => {
-    db = event.target.result;
-    db.createObjectStore("frames", { keyPath: "id" });
-  };
-
-  
-
-  function getFrameData(){
-    //Get frame ID
-    console.log("Getting Frame ID")
-    console.log(FRAMEID)
-
-    let isNewFrame = true;
-    FramesData.forEach((f) =>{
-      if(f.id == FRAMEID){
-        isNewFrame = false;
-      }
-    });
-    console.log(isNewFrame)
-    if(isNewFrame){
-      const transaction = db.transaction(["frames"], "readwrite");
-      transaction.oncomplete = (event) => {
-        //console.log("!");
-      };
-
-      transaction.onerror = (event) => {
-        // Don't forget to handle errors!
-        console.log("Error adding new frame")
-      };
-
-      const objectStore = transaction.objectStore("frames");
-
-      let frameDataScheme = {
-        id: FRAMEID,
-        videoFile : null
-      }
-
-      const request = objectStore.add(frameDataScheme);
-      request.onsuccess = (event) => {
-        console.log("Success adding frame")
-      };
-
-      FramesData.push(frameDataScheme);
-      newFrameUI.style.display = 'inline';
-      console.log(newFrameUI.style.display)
-      disconnectFrame();
-    }else{
-      
-      let savedVideo = false;
-
-      FramesData.forEach(f => {
-        console.log(f)
-        if(f.id == FRAMEID){
-          if(f.videoFile != null){
-            savedVideo = true;
-          }
-          currentFrameData = f;
-        }
-      })
-      console.log(savedVideo)
-
-      if(savedVideo){
-        uploadFrameUI.style.display = 'inline';
-        console.log(uploadFrameUI.style.display );
-        
-      }else{
-        
-        normalFrameUI.style.display = 'inline';
-        console.log(normalFrameUI.style.display );
-        disconnectFrame();
-      }
-    }
-
-  }
-
-  function disconnectFrame(){
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", "/resetDevice", true); 
-    xhr.send();
-  }
-
-  const refreshPage = () =>{
-    window.location.href = '/';
-  }
-
-
-  const uploadVideo  = async () => {
-
-        let formData = new FormData();
-        let newFile = new File([currentFrameData.videoFile], "pleaseworkvideo.mjpeg")
-        formData.append("data", newFile);
-        // fetch('/upload', {method: "POST", body: formData})
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/upload", true);
-
-        xhr.upload.addEventListener("progress", (event) => {
-            console.log(event);
-            if (event.lengthComputable) {
-                console.log("upload progress:", ((event.loaded / event.total) * 100));
-                //uploadLoadingBar.style.width = ((event.loaded / event.total) * 100) + "%";
-            }
-        });
-        
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4 && xhr.status == 200) 
-            {
-                console.log(xhr.statusText);
-                const request = db.transaction(["frames"], "readwrite").objectStore("frames").delete(currentFrameData.id);
-                request.onsuccess = (event) => {
-                // It's gone!
-                };
-                disconnectFrame();
-            }
-        }
-
-        //xhr.setRequestHeader("Content-Type", "application/octet-stream");
-        xhr.send(formData);
-
-    }
-  
-</script>

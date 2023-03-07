@@ -42,9 +42,8 @@ using namespace httpsserver;
 //#define WIFI_SSID "J and L"
 #define WIFI_SSID "FRAME"
 #define WIFI_PSK  "thankyoufortheinternet"
-String wifiPASS;
 
-const String FRAMEID = "000";
+const String FRAMEID = "001";
 
 
 HTTPSServer * secureServer;
@@ -57,8 +56,6 @@ void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
 void handleRedirect(HTTPRequest * req, HTTPResponse * res);
 
 void handleFrameID(HTTPRequest * req, HTTPResponse * res);
-
-void handleResetDevice(HTTPRequest * req, HTTPResponse * res);
 
 
 void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
@@ -134,7 +131,6 @@ class ButtonData {
 };
 
 ButtonData resetFrameButton;
-ButtonData sleepButton;
 
 DNSServer dnsServer;
 const String webName = "jframe.cam";
@@ -142,8 +138,6 @@ const String webName = "jframe.cam";
 int startTime;
 int endTime;
 String timeDiff;
-
-bool touchedSleepBTN = false;
 
 //////////Setup
 void setupLCD(){
@@ -163,7 +157,7 @@ void setupLCD(){
     exit(1);
   }
 
-  gfx->setFont(u8g2_font_luRS12_tf);
+  gfx->setFont(u8g2_font_profont15_mf);
 
   Serial.println(("Done setting up LCD"));
 }
@@ -181,21 +175,6 @@ void setupSD(){
 }
 
 
-////////////////assist 
-
-#define MAX_UID 8 /* Change to whatever length you need */
-
-const char * generateUID(){
-  /* Change to allowable characters */
-  const char possible[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  static char uid[MAX_UID + 1];
-  for(int p = 0, i = 0; i < MAX_UID; i++){
-    int r = random(0, strlen(possible));
-    uid[p++] = possible[r];
-  }
-  uid[MAX_UID] = '\0';
-  return uid;
-}
 
 
 ////////////////Draw Logic
@@ -208,21 +187,11 @@ static int drawMCU(JPEGDRAW *pDraw)
 }
 
 void drawPauseMenu(){
-  gfx->fillRoundRect(resetFrameButton.x - 5, resetFrameButton.y - 5, resetFrameButton.width + 10 , resetFrameButton.height + 10, 15, gfx->color565(60, 60, 60));
   gfx->fillRoundRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width , resetFrameButton.height, 10, 0x7BEF);
-  gfx->setCursor(75, 172);
+  gfx->setCursor(45, 165);
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
-  gfx->println("Reset");
-}
-
-void drawSleepButton(){
-  gfx->fillRoundRect(sleepButton.x - 5, sleepButton.y - 5, sleepButton.width + 10, sleepButton.height + 10, 15, gfx->color565(60, 60, 60));
-  gfx->fillRoundRect(sleepButton.x, sleepButton.y, sleepButton.width , sleepButton.height, 10, 0x7BEF);
-  gfx->setCursor(75, 290);
-  gfx->setTextSize(2);
-  gfx->setTextColor(BLACK);
-  gfx->println("Sleep");
+  gfx->println("Reset Frame");
 }
 
 bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int clickY){
@@ -235,25 +204,7 @@ bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int click
   return false;
 }
 
-void checkTouch(){
-  if (ts.touched()) {
-    TS_Point p = ts.getPoint();
-    int touchWH = 3900;
-    int mapedX = map(p.x, 250, touchWH, 240, 0);
-    int mapedY = map(p.y, 250, touchWH, 320, 0);
-    if(checkIfInRect(sleepButton.x, sleepButton.y, sleepButton.width, sleepButton.height, mapedX, mapedY)){
-      touchedSleepBTN = true;
-    }
-  }else{
-    if(touchedSleepBTN){
-      Serial.println("Going to sleep...");
-      delay(400);
-      esp_deep_sleep_start();
-    }
-  }
-}
-
-void drawQRCode(String inputString, int stepNumber){
+void drawQRCode(String inputString, String stepString){
   gfx->fillScreen(WHITE);
   QRCode qrcode;
   uint8_t qrcodeData[qrcode_getBufferSize(3)];
@@ -264,7 +215,7 @@ void drawQRCode(String inputString, int stepNumber){
   
 
   int QRxBegin = 60;
-  int QRyBegin = 80;
+  int QRyBegin = 100;
   int QRmoduleSize = 4;
 
 
@@ -278,68 +229,16 @@ void drawQRCode(String inputString, int stepNumber){
     }
   }
 
-  // gfx->setCursor(75, 28);
-  // gfx->setTextSize(2);
-  // gfx->setTextColor(BLACK);
-  // gfx->println(stepString);
-
-  gfx->setCursor(15, 28);
+  gfx->setCursor(80, 20);
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
-  gfx->print("FRAME #");
-  gfx->print(FRAMEID);
+  gfx->println(stepString);
 
-  gfx->setCursor(65, 50);
-  gfx->setTextSize(1);
+
+  gfx->setCursor(80, 43);
+  gfx->setTextSize(3);
   gfx->setTextColor(BLACK);
-  gfx->println("Scan QR Code");
-
-  if(stepNumber == 1){
-    gfx->setCursor(40, 65);
-    gfx->setTextSize(1);
-    gfx->setTextColor(BLACK);
-    gfx->println("or connect manually");
-
-    gfx->setCursor(50, 222);
-    gfx->setTextSize(1);
-    gfx->setTextColor(BLACK);
-    gfx->print("SSID: FRAME");
-    gfx->print(FRAMEID);
-
-    
-    gfx->setCursor(50, 242);
-    gfx->setTextSize(1);
-    gfx->setTextColor(BLACK);
-    gfx->print("PASS: ");
-    gfx->print(wifiPASS);
-
-  }else if(stepNumber == 2){
-    gfx->setCursor(38, 65);
-    gfx->setTextSize(1);
-    gfx->setTextColor(BLACK);
-    gfx->println("or the vist site below");
-
-    gfx->setCursor(40, 222);
-    gfx->setTextSize(1);
-    gfx->setTextColor(BLACK);
-    gfx->println("https://jframe.cam");
-  }
-
-
-
-
-
-
-
-
-
-
-  // gfx->setCursor(30, 230);
-  // gfx->setTextSize(1);
-  // gfx->setTextColor(BLACK);
-  // gfx->println("https://jframe.cam");
-
-  drawSleepButton();
+  gfx->println("SCAN");
 }
 
 
@@ -348,11 +247,6 @@ void setupButtons(){
   resetFrameButton.y = 140;
   resetFrameButton.width = 180;
   resetFrameButton.height = 38;
-
-  sleepButton.x = 30;
-  sleepButton.y = 260;
-  sleepButton.width = 180;
-  sleepButton.height = 38;
 }
 
 void videoLoop(){
@@ -573,12 +467,6 @@ void handleUpdatePage(HTTPRequest * req, HTTPResponse * res) {
   simpleRequest(req, res, "/uploadSpiffs.html", "text/html", false);
 }
 
-void handleResetDevice(HTTPRequest * req, HTTPResponse * res) {
-  WiFi.softAPdisconnect(true);
-  esp_deep_sleep_start();
-}
-
-
 void handleFrameID(HTTPRequest * req, HTTPResponse * res){
   StaticJsonBuffer<JSON_OBJECT_SIZE(1)> jsonBuffer;
   JsonObject& obj = jsonBuffer.createObject();
@@ -680,18 +568,13 @@ void setupServer(){
   SSLCert cert = SSLCert(example_crt_DER, example_crt_DER_len, example_key_DER, example_key_DER_len);
   secureServer = new HTTPSServer(&cert);
   //insecureServer = new HTTPServer();
-  const char * randomPass = generateUID();
-  wifiPASS = randomPass;
-
-  Serial.println(randomPass);
 
   Serial.println("Setting up WiFi");
-  String wifiName = "FRAME" + FRAMEID;
-  WiFi.softAP(wifiName.c_str(), randomPass);
+  WiFi.softAP(WIFI_SSID, WIFI_PSK);
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
   wifiQR = "";
-  wifiQR = wifiQR + "https://" + webName.c_str() + "/";
+  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
 
 
   ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
@@ -700,11 +583,9 @@ void setupServer(){
   ResourceNode * updateSpiffs = new ResourceNode("/updateSpiffs", "POST", &handleSpiffsUpload);
   ResourceNode * updateFirmware = new ResourceNode("/updateFirmware", "POST", &handleFirmwareUpload);
 
-  // ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
-  // ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
+  ResourceNode * nodeRedirect = new ResourceNode("/", "GET", &handleRedirect);
+  ResourceNode * nodeRedirect404 = new ResourceNode("", "GET", &handleRedirect);
   ResourceNode * nodeFrameID = new ResourceNode("/getFrameID", "GET", &handleFrameID);
-
-  ResourceNode * nodeDeviceReset = new ResourceNode("/resetDevice", "GET", &handleResetDevice);
 
   ResourceNode * spiffsNode = new ResourceNode("", "", &handleSPIFFS);
   secureServer->setDefaultNode(spiffsNode);
@@ -714,7 +595,6 @@ void setupServer(){
   secureServer->registerNode(updateSpiffs);
   secureServer->registerNode(updateFirmware);
   secureServer->registerNode(nodeFrameID);
-  secureServer->registerNode(nodeDeviceReset);
 
   //insecureServer->setDefaultNode(nodeRedirect);
   //insecureServer->registerNode(nodeRedirect404);
@@ -738,8 +618,8 @@ void drawWifiQR(){
   setupServer();
   gfx->fillScreen(WHITE);
   String wifiQR = "";
-  wifiQR = wifiQR + "WIFI:S:" + "FRAME" + FRAMEID.c_str() + ";T:WPA;P:" + wifiPASS + ";;";
-  drawQRCode(wifiQR, 1);
+  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
+  drawQRCode(wifiQR, "Step 1");
   playVideo = false;
 }
 
@@ -774,14 +654,12 @@ void setup()
 
 void loop()
 {
-  dnsServer.processNextRequest();
-
   if(!videoFileFound){
     //insecureServer->loop();
     secureServer->loop();
-    checkTouch();
+    dnsServer.processNextRequest();
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
-      drawQRCode(wifiQR , 2);
+      drawQRCode(wifiQR ,"Step 2");
       printedSecondQR = true;
     }
   }
@@ -790,5 +668,5 @@ void loop()
     videoLoop();
   }
 
-  delay(100);
+  delay(1);
 }

@@ -5,13 +5,12 @@
     import CameraTypeButtons from "./CameraTypeButtons.svelte";
     import RecordTimeButtons from "./RecordTimeButtons.svelte";
     import ConvertUI from "./ConvertUI.svelte";
-    import FlipIcon from "./FlipIcon.svelte";
 
     export let showRecordPage;
     export let db;
     export let showFrameSaved;
 
-    let isFrontCamera = true;
+    let currentCameraType = "FRONT";
     let currentTime = 5;
     let videoElement;
     let isRecording = false;
@@ -32,7 +31,7 @@
         });;
 	});
 
-    $: if (isFrontCamera == true || isFrontCamera == false){
+    $: if (currentCameraType == "FRONT" || currentCameraType == "BACK"){
         askForCameraPermission();
     }
 
@@ -57,7 +56,7 @@
     let blobs_recorded = [];
 
     async function askForCameraPermission(){
-        if(isFrontCamera == true){
+        if(currentCameraType == "FRONT"){
             camStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 }});
         }else{
             camStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240, facingMode: { exact: "environment" }}});
@@ -71,15 +70,22 @@
         videoElement.srcObject = camStream;
     }
 
-    const startRecording = () => {
+    const startRecording = (time) => {
         recorededVideo = false;
         isRecording = true;
+
+        
 
         recorder.addEventListener('dataavailable', function(e) {
             blobs_recorded.push(e.data);
         });
 
         recorder.start(100);
+
+        setTimeout(function() {
+            stopRecording();
+        }, time * 1000);
+
     }
 
 
@@ -101,10 +107,6 @@
         console.log(blob);
     }
 
-    const changeCamType = () =>{
-        isFrontCamera = !isFrontCamera
-    }
-
 </script>
 
 {#if showConvert}
@@ -118,50 +120,32 @@
 
     <h3>Frame #{$currentFrameID}</h3>
     <div class="vidHolder">
-
-        {#if !recorededVideo}
-            <button class="recordBtn"
-                on:mousedown={startRecording} 
-                on:mouseup={stopRecording} 
-                on:touchstart={startRecording} 
-                on:touchend={stopRecording} 
-                on:touchcancel={stopRecording} >
-                <div class="recordCenter"></div>
-            </button>
+        {#if !isRecording && !recorededVideo && cameraAccess}
+            <button on:click={() => startRecording(currentTime)} class="recordBtn"><h3>Record</h3></button>
         {/if}
-
-
-
-        {#if !isRecording && !recorededVideo}
-        <button class="flipBtn" on:click={changeCamType}>
-            <FlipIcon />
-        </button>
-        {/if}
-
         <div class="videoMask">
             <video bind:this={videoElement} muted autoplay playsinline loop></video>
         </div>
         
     </div>
     
-    {#if recorededVideo}
-        <div class="bottomBtns">
-            <button on:click={deleteVideo} class="redBtn"><h3>Retake</h3></button>
-            <button on:click={convertVideo} class="saveBtn"><h3 style="color: #484848;">Save</h3></button>
-        </div>
 
+    {#if !isRecording && !recorededVideo}
+        <h4>Camera type</h4>
+        <CameraTypeButtons bind:currentCameraType={currentCameraType}/>
+        <h4 style="margin-top: 1rem;">Record Time</h4>
+        <RecordTimeButtons bind:currentTime={currentTime}/>
+        
+    {:else if isRecording}
+        <h3>Recording</h3>
+    {:else if recorededVideo}
+        <button on:click={convertVideo} class="saveBtn"><h3>Save Video</h3></button>
+        <button on:click={deleteVideo} class="redBtn"><h3>Delete Video</h3></button>
     {/if}
 </div>
 
 
 <style>
-
-    .bottomBtns{
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    }
 
     .vidHolder{
         margin: auto;
@@ -169,52 +153,22 @@
         justify-content: center;
     }
 
-    .recordCenter{
-        background: #fff;
-        width: 4.5rem;
-        min-height: 4.5rem;
-        border-radius: 100%;
-    }
-
     .recordBtn{
         position: absolute;
         z-index: 4;
-        margin-top: 23rem;
-        width: 5rem;
-        height: 4rem;
-        border: 3px solid #ffffff;
-        background: none;
-        border-radius: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .flipBtn{
-        position: absolute;
-        z-index: 4;
-        margin-top: 24rem;
-        margin-left: 15rem;
-        width: 3.5rem;
-        height: 2.5rem;
-        background: #242424a4;
-        border: 0px;
-        border-radius: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        margin-top: 25rem;
+        width: 80%;
+        background: #97504B;
     }
 
     .redBtn{
-        background: #939393;
-        width: 40%;
+        margin-top: 2rem;
+        background: #97504B;
     }
 
     .saveBtn{
+        margin-top: 2rem;
         background: #E9CA5D;
-        width: 40%;
     }
 
     .center{
@@ -234,8 +188,6 @@
     }
 
     .backBtn{
-        margin-top:1rem;
-        margin-left:1rem;
         width: 30%;
     }
 
@@ -252,7 +204,6 @@
         width: 22rem;
         height: 30rem;
         margin: auto;
-        background: red;
-        border-radius: 15px;
+        
     }
 </style>
