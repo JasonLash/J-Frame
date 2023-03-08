@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import inlineCode from 'rollup-plugin-inline-code'
+const bundleInject = require("rollup-plugin-bundle-inject");
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -56,6 +57,12 @@ export default [
 				dedupe: ['svelte']
 			}),
 			commonjs(),
+
+			bundleInject({
+				// specify the template
+				target: "template.html",
+				rename: "index.html"
+			}),
 
 			// In dev mode, call `npm run start` once
 			// the bundle has been generated
