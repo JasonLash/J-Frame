@@ -1,6 +1,3 @@
-#define MJPEG_FILENAME "/pleaseworkvideo.mjpeg"
-#define FPS 10
-#define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
 #include <U8g2lib.h>
 #include <Arduino.h>
 #include <WiFi.h>
@@ -9,61 +6,46 @@
 #include "SPIFFS.h"
 #include <SPI.h>
 #include "FS.h"
+#include "MjpegClass.h"
 #include <JPEGDEC.h>
 #include <Arduino_GFX_Library.h>
 #include <Adafruit_I2CDevice.h>
 #include <XPT2046_Touchscreen.h>
 #include <Update.h>
-
+#include <DNSServer.h>
 #include <SSLCert.hpp>
 #include <HTTPRequest.hpp>
 #include <HTTPResponse.hpp>
-
 #include <HTTPSServer.hpp>
 #include <HTTPServer.hpp>
 #include <HTTPBodyParser.hpp>
 #include <HTTPMultipartBodyParser.hpp>
 #include <HTTPURLEncodedBodyParser.hpp>
-#include "MjpegClass.h"
+#include <ArduinoJson.h>
+#include "FFat.h"
 
 #include "cert.h"
 #include "private_key.h"
 
-#include <DNSServer.h>
-
-#include <ArduinoJson.h>
-
-#include "FS.h"
-#include "FFat.h"
-
+const String FRAMEID = "001";
+const String webName = "jframe.cam";
 
 using namespace httpsserver;
 
-//#define WIFI_SSID "J and L"
-#define WIFI_SSID "FRAME"
-#define WIFI_PSK  "thankyoufortheinternet"
-
-const String FRAMEID = "001";
-
-
 HTTPSServer * secureServer;
 HTTPServer * insecureServer;
+
+#define WIFI_SSID "FRAME"
+#define WIFI_PSK  "framepass"
 
 void handleRoot(HTTPRequest * req, HTTPResponse * res);
 void handle404(HTTPRequest * req, HTTPResponse * res);
 void uploadFile(HTTPRequest * req, HTTPResponse * res);
 void uploadSpiffs(HTTPRequest * req, HTTPResponse * res);
 void handleRedirect(HTTPRequest * req, HTTPResponse * res);
-
 void handleFrameID(HTTPRequest * req, HTTPResponse * res);
-
-
-void getFFmpegWASM(HTTPRequest * req, HTTPResponse * res);
-
-//spiifs test
 void handleSPIFFS(HTTPRequest * req, HTTPResponse * res);
-// We need to specify some content-type mapping, so the resources get delivered with the
-// right content type and are displayed correctly in the browser
+
 char contentTypes[][2][32] = {
   {".html", "text/html"},
   {".css",  "text/css"},
@@ -74,19 +56,8 @@ char contentTypes[][2][32] = {
   {"", ""}
 };
 
-
-
-//<<Pin Hookup>>//
-//19  ::  MISO    
-//23  ::  MOSI
-//18  ::  SCK
-
-//15  ::  SD_CS
-
-//27  ::  LCD_DC
-//33  ::  LCD_RESET
-//5   ::  LCD_CS
-//22  ::  LCD_Backlight
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
 
 
 #define SCK 18
@@ -103,15 +74,17 @@ char contentTypes[][2][32] = {
 
 #define TOUCH_CS  15
 
-const byte DNS_PORT = 53;
-
 XPT2046_Touchscreen ts(TOUCH_CS);
-
-Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, SCK, MOSI, MISO);
-Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
 static MjpegClass mjpeg;
 uint8_t *mjpeg_buf;
+
+#define MJPEG_FILENAME "/frameVideo.mjpeg"
+#define FPS 10
+#define MJPEG_BUFFER_SIZE (320 * 240 * 2 / 4)
+
+Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, SCK, MOSI, MISO);
+Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
 static unsigned long start_ms, curr_ms, next_frame_ms, touch_start_ms, touch_current_ms;
 static int next_frame;
@@ -131,13 +104,13 @@ class ButtonData {
 };
 
 ButtonData resetFrameButton;
-
-DNSServer dnsServer;
-const String webName = "jframe.cam";
+ButtonData sleepButton;
 
 int startTime;
 int endTime;
 String timeDiff;
+
+bool touchedSleepBTN = false;
 
 //////////Setup
 void setupLCD(){
@@ -157,7 +130,7 @@ void setupLCD(){
     exit(1);
   }
 
-  gfx->setFont(u8g2_font_profont15_mf);
+  gfx->setFont(u8g2_font_luRS12_tf);
 
   Serial.println(("Done setting up LCD"));
 }
@@ -174,9 +147,6 @@ void setupSD(){
   Serial.println(("Done setting up SD card"));
 }
 
-
-
-
 ////////////////Draw Logic
 
 static int drawMCU(JPEGDRAW *pDraw)
@@ -187,11 +157,21 @@ static int drawMCU(JPEGDRAW *pDraw)
 }
 
 void drawPauseMenu(){
+  gfx->fillRoundRect(resetFrameButton.x - 5, resetFrameButton.y - 5, resetFrameButton.width + 10 , resetFrameButton.height + 10, 15, gfx->color565(60, 60, 60));
   gfx->fillRoundRect(resetFrameButton.x, resetFrameButton.y, resetFrameButton.width , resetFrameButton.height, 10, 0x7BEF);
-  gfx->setCursor(45, 165);
+  gfx->setCursor(75, 172);
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
-  gfx->println("Reset Frame");
+  gfx->println("Reset");
+}
+
+void drawSleepButton(){
+  gfx->fillRoundRect(sleepButton.x - 5, sleepButton.y - 5, sleepButton.width + 10, sleepButton.height + 10, 15, gfx->color565(60, 60, 60));
+  gfx->fillRoundRect(sleepButton.x, sleepButton.y, sleepButton.width , sleepButton.height, 10, 0x7BEF);
+  gfx->setCursor(75, 290);
+  gfx->setTextSize(2);
+  gfx->setTextColor(BLACK);
+  gfx->println("Sleep");
 }
 
 bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int clickY){
@@ -204,7 +184,26 @@ bool checkIfInRect(int recX, int recY, int recW, int recH, int clickX, int click
   return false;
 }
 
-void drawQRCode(String inputString, String stepString){
+void checkTouch(){
+  if (ts.touched()) {
+    TS_Point p = ts.getPoint();
+    int touchWH = 3900;
+    int mapedX = map(p.x, 250, touchWH, 240, 0);
+    int mapedY = map(p.y, 250, touchWH, 320, 0);
+    if(checkIfInRect(sleepButton.x, sleepButton.y, sleepButton.width, sleepButton.height, mapedX, mapedY)){
+      touchedSleepBTN = true;
+    }
+  }else{
+    if(touchedSleepBTN){
+      Serial.println("Going to sleep...");
+      delay(400);
+      esp_deep_sleep_start();
+    }
+  }
+}
+
+
+void drawQRCode(String inputString, int stepNumber){
   gfx->fillScreen(WHITE);
   QRCode qrcode;
   uint8_t qrcodeData[qrcode_getBufferSize(3)];
@@ -215,7 +214,7 @@ void drawQRCode(String inputString, String stepString){
   
 
   int QRxBegin = 60;
-  int QRyBegin = 100;
+  int QRyBegin = 80;
   int QRmoduleSize = 4;
 
 
@@ -229,16 +228,49 @@ void drawQRCode(String inputString, String stepString){
     }
   }
 
-  gfx->setCursor(80, 20);
+  gfx->setCursor(15, 28);
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
-  gfx->println(stepString);
+  gfx->print("FRAME #");
+  gfx->print(FRAMEID);
 
-
-  gfx->setCursor(80, 43);
-  gfx->setTextSize(3);
+  gfx->setCursor(65, 50);
+  gfx->setTextSize(1);
   gfx->setTextColor(BLACK);
-  gfx->println("SCAN");
+  gfx->println("Scan QR Code");
+
+  if(stepNumber == 1){
+    gfx->setCursor(40, 65);
+    gfx->setTextSize(1);
+    gfx->setTextColor(BLACK);
+    gfx->println("or connect manually");
+
+    gfx->setCursor(50, 222);
+    gfx->setTextSize(1);
+    gfx->setTextColor(BLACK);
+    gfx->print("SSID: FRAME");
+    gfx->print(FRAMEID);
+
+    
+    gfx->setCursor(50, 242);
+    gfx->setTextSize(1);
+    gfx->setTextColor(BLACK);
+    gfx->print("PASS: ");
+    gfx->print(WIFI_PSK);
+
+  }else if(stepNumber == 2){
+    gfx->setCursor(38, 65);
+    gfx->setTextSize(1);
+    gfx->setTextColor(BLACK);
+    gfx->println("or the vist site below");
+
+    gfx->setCursor(40, 222);
+    gfx->setTextSize(1);
+    gfx->setTextColor(BLACK);
+    gfx->println("https://jframe.cam");
+  }
+
+  drawSleepButton();
 }
 
 
@@ -247,6 +279,11 @@ void setupButtons(){
   resetFrameButton.y = 140;
   resetFrameButton.width = 180;
   resetFrameButton.height = 38;
+
+  sleepButton.x = 30;
+  sleepButton.y = 260;
+  sleepButton.width = 180;
+  sleepButton.height = 38;
 }
 
 void videoLoop(){
@@ -570,7 +607,8 @@ void setupServer(){
   //insecureServer = new HTTPServer();
 
   Serial.println("Setting up WiFi");
-  WiFi.softAP(WIFI_SSID, WIFI_PSK);
+  String wifiName = "FRAME" + FRAMEID;
+  WiFi.softAP(wifiName.c_str(), WIFI_PSK);
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
   wifiQR = "";
@@ -618,8 +656,9 @@ void drawWifiQR(){
   setupServer();
   gfx->fillScreen(WHITE);
   String wifiQR = "";
-  wifiQR = wifiQR + "WIFI:S:" + WIFI_SSID + ";T:WPA;P:" + WIFI_PSK + ";;";
-  drawQRCode(wifiQR, "Step 1");
+  String wifiName = "FRAME" + FRAMEID;
+  wifiQR = wifiQR + "WIFI:S:" + wifiName.c_str() + ";T:WPA;P:" + WIFI_PSK + ";;";
+  drawQRCode(wifiQR, 1);
   playVideo = false;
 }
 
@@ -658,8 +697,10 @@ void loop()
     //insecureServer->loop();
     secureServer->loop();
     dnsServer.processNextRequest();
+    checkTouch();
+
     if(WiFi.softAPgetStationNum() > 0 && !printedSecondQR){
-      drawQRCode(wifiQR ,"Step 2");
+      drawQRCode(wifiQR , 2);
       printedSecondQR = true;
     }
   }
@@ -668,5 +709,5 @@ void loop()
     videoLoop();
   }
 
-  delay(1);
+  delay(100);
 }

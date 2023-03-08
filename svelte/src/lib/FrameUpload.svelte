@@ -17,7 +17,7 @@
     const uploadToFrame  = async () => {
         showUploading = true;
         let formData = new FormData();
-        let newFile = new File([videoFileToUpload], "pleaseworkvideo.mjpeg")
+        let newFile = new File([videoFileToUpload], "frameVideo.mjpeg")
         formData.append("data", newFile);
         // fetch('/upload', {method: "POST", body: formData})
 
