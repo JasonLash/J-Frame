@@ -3,6 +3,14 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+.vscode/extensions.json
 .vscode
+.vscode/
 /.vscode/
 /.vscode
+
+/svelte/node_modules/
+/svelte/public/build/
+
+/svelte/.DS_Store
+

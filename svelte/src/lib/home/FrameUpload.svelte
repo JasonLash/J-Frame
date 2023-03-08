@@ -1,7 +1,7 @@
 <script>
-    import FrameIcon from "./FrameIcon.svelte";
+    import FrameIcon from "../icons/FrameIcon.svelte";
     import { fade } from 'svelte/transition';
-    import { FRAMEID } from '../stores';
+    import { FRAMEID } from '../../stores';
 
     export let showUpload;
     export let videoFileToUpload;

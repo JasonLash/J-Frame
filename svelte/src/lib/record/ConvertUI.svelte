@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { currentFrameID } from '../stores';
+    import { currentFrameID } from '../../stores';
 
     export let blob;
     export let db;

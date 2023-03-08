@@ -1,10 +1,10 @@
 <script>
-	import Refresh from "./lib/Refresh.svelte";
-	import FrameDetected from "./lib/FrameDetected.svelte";
-	import FrameSaved from "./lib/FrameSaved.svelte";
-	import FrameCollection from "./lib/FrameCollection.svelte";
-    import RecordPage from "./lib/RecordPage.svelte";
-	import FrameUpload from "./lib/FrameUpload.svelte";
+	import Refresh from "./lib/home/Refresh.svelte";
+	import FrameDetected from "./lib/home/FrameDetected.svelte";
+	import FrameSaved from "./lib/home/FrameSaved.svelte";
+	import FrameCollection from "./lib/home/FrameCollection.svelte";
+    import RecordPage from "./lib/record/RecordPage.svelte";
+	import FrameUpload from "./lib/home/FrameUpload.svelte";
 	
 	import { FRAMEID } from './stores';
 

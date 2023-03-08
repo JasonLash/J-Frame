@@ -1,11 +1,9 @@
 <script>
-    import { currentFrameID } from '../stores';
+    import { currentFrameID } from '../../stores';
     import { onMount } from 'svelte';
     
-    import CameraTypeButtons from "./CameraTypeButtons.svelte";
-    import RecordTimeButtons from "./RecordTimeButtons.svelte";
     import ConvertUI from "./ConvertUI.svelte";
-    import FlipIcon from "./FlipIcon.svelte";
+    import FlipIcon from "../icons/FlipIcon.svelte";
     export let showRecordPage;
     export let db;
     export let showFrameSaved;

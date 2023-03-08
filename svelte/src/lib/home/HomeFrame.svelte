@@ -1,5 +1,5 @@
 <script>
-    import { currentFrameID, FRAMEID } from '../stores';
+    import { currentFrameID, FRAMEID } from '../../stores';
     export let frameData;
     export let showRecordPage;
     
