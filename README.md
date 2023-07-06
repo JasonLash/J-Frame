@@ -9,7 +9,7 @@ J-Frame is a compact, internet-connected video polaroid. Scan the QR code, recor
 
 # Web App
 
-## Introduction
+### Introduction
 The J-Frame acts as an access point and hosts a HTTPS web server. Visiting the web app you can register frames, record videos and upload them to the frame. Utilizing local storage you can register a frame, disconnect, record a video, save it and then later on upload it to the J-Frame.
 
 <p align="center">
@@ -21,10 +21,10 @@ The J-Frame acts as an access point and hosts a HTTPS web server. Visiting the w
 </p>
 
 
-## Dependencies
+### Dependencies
 * Node.js
 
-## Installation
+### Installation
 ```JavaScript
 // Initial Setup
 cd svelte
@@ -51,13 +51,13 @@ if(initializedDB == true){
 ```
 
 # Firmware
-## Introduction
+### Introduction
 The J-Frame firmware handles everything from creating a access point, hosting a HTTPS web server and file uploading. You can upload data to SPIFFS or SD card and update the firmware all OTA. 
 
-## Dependencies
+### Dependencies
 * PlatformIO
 
-## Installation
+### Installation
 
 ###  *Recommended Method*
 Download the PlatformIO extensions for VSCode. You can follow the steps at: https://platformio.org/install/ide?install=vscode
@@ -74,13 +74,13 @@ pio run
 pio run --target upload
 ```
 
-## HTTPS Cert
+### HTTPS Cert
 You need to generate a cert.h and private_key.h and place it in the src directory. You can follow the guide at: https://github.com/fhessel/esp32_https_server/tree/master/extras
 
 # Hardware
 
 
-## Introduction
+### Introduction
 The hardware is comprised of power/battery management, ESP32, micro SD, display and touch. You can find everything from the PCB gerber, Altium Designer files and the case models in the hardware directory.
 
 
@@ -100,7 +100,7 @@ The hardware is comprised of power/battery management, ESP32, micro SD, display 
 
 </p>
 
-## PCB Layout
+### PCB Layout
 
 <p align="center">
   <img src="extras/frontPCB.png" />
@@ -112,13 +112,13 @@ The hardware is comprised of power/battery management, ESP32, micro SD, display 
 
 
 
-## Schematic
+### Schematic
 
 <p align="center">
   <img src="extras/schematic.png" />
 </p>
 
-## Case Design
+### Case Design
 
 <p align="center">
   <img src="extras/caseVid.gif" />
@@ -142,13 +142,13 @@ The recommended development setup only requires two major components, a ESP32 de
 <img src="extras/realLifeProto.png" />
 </p>
 
-## Wiring Diagram
+### Wiring Diagram
 
 <p align="center">
 <img src="extras/wireDiagram.png" />
 </p>
 
-## Bill of Materials
+### Bill of Materials
 
 * [ESP32 DOIT DEV V1 module](https://www.amazon.com/HiLetgo-ESP-WROOM-32-Development-Microcontroller-Integrated/dp/B0718T232Z)
 * [3.2 LCD with touch and SD reader](https://www.amazon.com/Hosyond-Display-320x240-Compatible-Development/dp/B0B1M9S9V6/ref=sr_1_5?crid=2I867KAKCLUFA&keywords=3.2%22+touch+sd+ILI9341&qid=1687163597&sprefix=3.2+touch+sd+ili9341+%2Caps%2C135&sr=8-5)
@@ -158,7 +158,7 @@ The recommended development setup only requires two major components, a ESP32 de
 
 # Web App Design 
 
-## Figma Design Files
+### Figma Design Files
 
 You can find the Figma Design files [HERE](https://www.figma.com/file/g87cJnwRhYjOAekX3l7p9G/FRAME?type=design&node-id=93%3A3&mode=design&t=1dGgJ0la6TGdN4g0-1) including the readme design. 
 
@@ -166,7 +166,7 @@ You can find the Figma Design files [HERE](https://www.figma.com/file/g87cJnwRhY
     <img src="extras/figma.png" />
 </p>
 
-## User Flow
+### User Flow
 
 Once connected to the frame’s access point you’ll be able to go to jframe.cam website. The website initiates a request to the frame's webserver in order to retrieve its unique ID. The app compares this ID with all the frames stored locally, resulting in three possible outcomes:
 
