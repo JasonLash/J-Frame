@@ -212,9 +212,9 @@
     }
     video{
         width: 22rem;
-        height: 30rem;
+        height: 29rem;
         margin: auto;
-        background: red;
+        background: #242424;
         border-radius: 15px;
     }
 </style>

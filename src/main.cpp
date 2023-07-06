@@ -27,7 +27,23 @@
 #include "cert.h"
 #include "private_key.h"
 
-const String FRAMEID = "001";
+#define SCK 18
+#define MOSI 23
+#define MISO 19
+
+#define LCD_BRIGHTNESS 200
+#define LCD_BL 22
+#define LCD_DC 27
+#define LCD_CS 5
+#define LCD_RESET 33
+
+#define SD_CS 21
+
+#define TOUCH_CS  15
+
+#define BAT_PIN A13
+
+const String FRAMEID = "002";
 const String webName = "jframe.cam";
 
 using namespace httpsserver;
@@ -59,21 +75,6 @@ char contentTypes[][2][32] = {
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 
-
-#define SCK 18
-#define MOSI 23
-#define MISO 19
-
-#define LCD_BRIGHTNESS 200
-#define LCD_BL 22
-#define LCD_DC 27
-#define LCD_CS 5
-#define LCD_RESET 33
-
-#define SD_CS 21
-
-#define TOUCH_CS  15
-
 XPT2046_Touchscreen ts(TOUCH_CS);
 
 static MjpegClass mjpeg;
@@ -86,14 +87,11 @@ uint8_t *mjpeg_buf;
 Arduino_DataBus *bus = new Arduino_HWSPI(LCD_DC, LCD_CS, SCK, MOSI, MISO);
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, LCD_RESET, 0 /* rotation */, false /* IPS */);
 
-static unsigned long start_ms, curr_ms, next_frame_ms, touch_start_ms, touch_current_ms;
-static int next_frame;
-bool playVideo = false;
+static unsigned long startTime, currentTime, nextFrameTime, touchStartTime, touchCurrentTime;
+static int nextFrame;
+bool playVideo, printedSecondQR, videoFileFound, pauseVideo, drewPause;
+
 String wifiQR;
-bool printedSecondQR = false;
-bool videoFileFound = false;
-bool pauseVideo = false;
-bool drewPause = false;
 
 class ButtonData {
   public:
@@ -106,11 +104,13 @@ class ButtonData {
 ButtonData resetFrameButton;
 ButtonData sleepButton;
 
-int startTime;
-int endTime;
+int spiffsStartTime;
+int spiffsendTime;
 String timeDiff;
 
 bool touchedSleepBTN = false;
+
+float batteryVoltage;
 
 //////////Setup
 void setupLCD(){
@@ -147,10 +147,17 @@ void setupSD(){
   Serial.println(("Done setting up SD card"));
 }
 
+////////////////Support
+void getBatteryLevel(){
+  batteryVoltage = analogReadMilliVolts(BAT_PIN);
+  //batteryVoltage = 1;
+  batteryVoltage *= 2;    // we divided by 2, so multiply back
+  batteryVoltage /= 1000; // convert to volts!
+}
+
 ////////////////Draw Logic
 
-static int drawMCU(JPEGDRAW *pDraw)
-{
+static int drawMCU(JPEGDRAW *pDraw){
   unsigned long start = millis();
   gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth, pDraw->iHeight);
   return 1;
@@ -163,6 +170,14 @@ void drawPauseMenu(){
   gfx->setTextSize(2);
   gfx->setTextColor(BLACK);
   gfx->println("Reset");
+
+  // getBatteryLevel();
+  // String batlvl = String(batteryVoltage);
+  // gfx->setCursor(75, 190);
+  // gfx->setTextSize(2);
+  // gfx->setTextColor(RED);
+  // gfx->println("bat:");
+  // gfx->println(batlvl);
 }
 
 void drawSleepButton(){
@@ -211,12 +226,9 @@ void drawQRCode(String inputString, int stepNumber){
   inputString.toCharArray(Buf, inputString.length());
   qrcode_initText(&qrcode, qrcodeData, 3, 0, Buf);
 
-  
-
   int QRxBegin = 60;
   int QRyBegin = 80;
   int QRmoduleSize = 4;
-
 
   // Draw QR code
   for (uint8_t y = 0; y < qrcode.size; y++) {
@@ -300,10 +312,10 @@ void videoLoop(){
   // init Video
   mjpeg.setup(&vFile, mjpeg_buf, drawMCU, false, true);
 
-  next_frame = 0;
-  start_ms = millis();
-  curr_ms = start_ms;
-  next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
+  nextFrame = 0;
+  startTime = millis();
+  currentTime = startTime;
+  nextFrameTime = startTime + (++nextFrame * 1000 / FPS);
 
   pauseVideo = false;
   drewPause = false;
@@ -333,41 +345,41 @@ void videoLoop(){
         }
       }
     }
-    curr_ms = millis();
+    currentTime = millis();
 
     //check if touched and for how long
     if (ts.touched()) {
-      if(millis() - touch_current_ms < 200){
-        touch_current_ms = millis();
+      if(millis() - touchCurrentTime < 200){
+        touchCurrentTime = millis();
       } else {
-        touch_start_ms = millis();
+        touchStartTime = millis();
       }
 
-      if(millis() - touch_start_ms > 1000){
-        touch_current_ms = millis();
-        touch_start_ms = millis();
+      if(millis() - touchStartTime > 1000){
+        touchCurrentTime = millis();
+        touchStartTime = millis();
         pauseVideo = true;
       }
 
-      if(millis() - touch_current_ms > 2000){
-        touch_current_ms = millis();
-        touch_start_ms = millis();
+      if(millis() - touchCurrentTime > 2000){
+        touchCurrentTime = millis();
+        touchStartTime = millis();
       }
     }
 
-    if (millis() < next_frame_ms)
+    if (millis() < nextFrameTime)
     {
       mjpeg.drawJpg();
     }
-    curr_ms = millis();
+    currentTime = millis();
 
-    while (millis() < next_frame_ms)
+    while (millis() < nextFrameTime)
     {
       vTaskDelay(1);
     }
 
-    curr_ms = millis();
-    next_frame_ms = start_ms + (++next_frame * 1000 / FPS);
+    currentTime = millis();
+    nextFrameTime = startTime + (++nextFrame * 1000 / FPS);
   }
   Serial.println(F("Video end"));
   vFile.close();
@@ -555,7 +567,7 @@ void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
       return;
     }
 
-    startTime = millis();
+    spiffsStartTime = millis();
     File file = SPIFFS.open(filename.c_str());
 
     res->setHeader("Cross-Origin-Opener-Policy", "same-origin");
@@ -584,8 +596,8 @@ void handleSPIFFS(HTTPRequest * req, HTTPResponse * res) {
 
     file.close();
 
-    endTime = millis() - startTime;
-    timeDiff = String(endTime);
+    spiffsendTime = millis() - spiffsStartTime;
+    timeDiff = String(spiffsendTime);
     Serial.printf("time to send File %s was %s: ", filename.c_str(), timeDiff.c_str());
     Serial.println();
   } else {
@@ -612,7 +624,8 @@ void setupServer(){
   Serial.print("Connected. IP=");
   Serial.println(WiFi.softAPIP());
   wifiQR = "";
-  wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
+  wifiQR = wifiQR + "https://" + webName.c_str() + "/";
+  //wifiQR = wifiQR + "https://" + WiFi.softAPIP().toString().c_str() + "/";
 
 
   ResourceNode * nodeUploadPage    = new ResourceNode("/updatePage", "GET", &handleUpdatePage);
