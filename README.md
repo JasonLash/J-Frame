@@ -12,13 +12,13 @@ J-Frame is a compact, internet-connected video polaroid. Scan the QR code, recor
 ### Introduction
 The J-Frame acts as an access point and hosts a HTTPS web server. Visiting the web app you can register frames, record videos and upload them to the frame. Utilizing local storage you can register a frame, disconnect, record a video, save it and then later on upload it to the J-Frame.
 
-<p align="center">
+<center>
 
 | Connecting and Adding frame | Recording | Converting and Uploading |
 | :----:  | :----:  | :----:  | 
 | ![connect](extras/connectingFrame.gif)     | ![record](extras/recordingFrame.gif)       | ![upload](extras/uploadFrame.gif)       |
 
-</p>
+</center>
 
 
 ### Dependencies
@@ -92,13 +92,13 @@ The hardware is comprised of power/battery management, ESP32, micro SD, display 
 
 
 
-<p align="center">
+<center>
 
 | Front | Back | 
 | ----------- | ----------- |
 | ![Front](extras/frontHardware.png)     | ![Back](extras/backHardware.png)       |
 
-</p>
+</center>
 
 ### PCB Layout
 
@@ -126,13 +126,13 @@ The hardware is comprised of power/battery management, ESP32, micro SD, display 
 
 The case is comprised of two parts. The rectangle outline on the bottom case is for a magnet. Designed in Fusion 360.
 
-<p align="center">
+<center>
 
 | Top | Bottom | 
 | ----------- | ----------- |
 | ![Top](extras/topCase.png)     | ![Bottom](extras/bottomCase.png)       |
 
-</p>
+</center>
 
 # Prototype Hardware Setup
 
