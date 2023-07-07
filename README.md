@@ -1,6 +1,6 @@
 <h1 align="center"> <img src="extras/logo.png" /></h1>
 
-<p align="center"> <img src="extras/dieUP2.gif" /></p>
+<p align="center"> <img src="extras/dieUp.gif" /></p>
 
 
 # About
@@ -16,7 +16,7 @@ The J-Frame acts as an access point and hosts a HTTPS web server. Visiting the w
 
 | Connecting and Adding frame | Recording | Converting and Uploading |
 | :----:  | :----:  | :----:  | 
-| ![connect](extras/connectingFrame.gif)     | ![record](extras/recordingFrame.gif)       | ![upload](extras/uploadFrame.gif)       |
+| ![connect](extras/connectingFrameOP.gif)     | ![record](extras/recordFrameOP.gif)       | ![upload](extras/convertFrameOP.gif)       |
 
 </center>
 
