@@ -8,9 +8,14 @@
 .vscode/
 /.vscode/
 /.vscode
+/.vscode/extensions.json
+extensions.json
+.vscode/extensions.json
 
 /svelte/node_modules/
 /svelte/public/build/
 
 /svelte/.DS_Store
 
+src/cert.h
+src/private_key.h
