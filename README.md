@@ -16,7 +16,7 @@ The J-Frame acts as an access point and hosts a HTTPS web server. Visiting the w
 
 | Connecting and Adding frame | Recording | Converting and Uploading |
 | :----:  | :----:  | :----:  | 
-| ![connect](extras/connectingFrameOP.gif)     | ![record](extras/recordFrameOP.gif)       | ![upload](extras/convertFrameOP.gif)       |
+| ![connect](extras/connectingFrameOp.gif)     | ![record](extras/recordFrameOP.gif)       | ![upload](extras/convertFrameOP.gif)       |
 
 </center>
 
